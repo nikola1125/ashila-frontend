@@ -1,13 +1,22 @@
 [build]
-  base = "frontend"
+  base = "."
   command = "npm run build"
-  publish = "frontend/dist"
+  publish = "dist"
 
 [build.environment]
   NODE_VERSION = "18"
+  # Set any build-time environment variables here
+
+[context.production.environment]
+  VITE_API_URL = "http://localhost:5000"
+  VITE_FIREBASE_API_KEY = "AIzaSyARrK3KdAy3r0kLTR_-0cSvHrNXyORIx9w"
+  VITE_FIREBASE_AUTH_DOMAIN = "pharma-7ef8b.firebaseapp.com"
+  VITE_FIREBASE_PROJECT_ID = "pharma-7ef8b"
+  VITE_FIREBASE_STORAGE_BUCKET = "pharma-7ef8b.firebasestorage.app"
+  VITE_FIREBASE_MESSAGING_SENDER_ID = "33881840992"
+  VITE_FIREBASE_APP_ID = "1:133881840992:web:582a4076b343ebcfd7ca05"
 
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
-
