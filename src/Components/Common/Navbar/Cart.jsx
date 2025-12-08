@@ -1,22 +1,24 @@
 import React, { useContext } from 'react';
 import { CartContext } from '../../../Context/Cart/CartContext';
 
-const Cart = ({ isScrolled = true, onCartClick }) => {
+const Cart = ({ isScrolled = true, onCartClick, iconSize = 20 }) => {
   const { totalQuantity } = useContext(CartContext);
 
   return (
     <button
       onClick={onCartClick}
-      className="relative p-2 hover:opacity-80 transition-opacity"
+      className="relative p-1.5 hover:opacity-80 transition-opacity"
       aria-label="Open cart"
     >
       <div className="relative">
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          className={`h-5 w-5 ${isScrolled ? 'text-[#946259]' : 'text-white'}`}
+          className={`${isScrolled ? 'text-[#A67856]' : 'text-gray-900'}`}
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
+          width={iconSize}
+          height={iconSize}
         >
           <path
             strokeLinecap="round"

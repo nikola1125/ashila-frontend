@@ -3,7 +3,7 @@ import logo from '../../assets/logo.png';
 
 const Footer = () => {
   return (
-    <footer className="bg-[#faf9f6] border-t border-[#d4d4c4]">
+    <footer className="bg-[#EBD8C8] border-t border-[#D9BFA9]">
       <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           {/* Logo and Mission */}
@@ -11,30 +11,30 @@ const Footer = () => {
             <div className="mb-4">
               <img src={logo} alt="Ashila Pharmacy Logo" className="h-20 md:h-24 w-auto object-contain" />
             </div>
-            <h3 className="text-sm font-semibold text-[#946259] mb-2 uppercase tracking-wide">Misioni</h3>
-            <p className="text-sm text-[#2c2c2c] leading-relaxed">
-              Synoj te ndërtoj një komunitet të informuar dhe të vetëdijshëm, duke i mundësuar të përzgjedhin produktet jo në bazë të popullaritetit, por sipas efikasitetit të bazuar në shkencë dhe objektivitet.
+            <h3 className="text-sm font-semibold text-[#A67856] mb-2 uppercase tracking-wide">Misioni</h3>
+            <p className="text-sm text-[#4A3628] leading-relaxed">
+              Misioni ynë është të sjellim këshillim të besueshëm dhe produkte të kuruara, që secili të gjejë zgjidhjen e duhur pa kompromis në cilësi. Ne u shërbejmë klientëve me transparencë, kujdes dhe evidencë shkencore.
             </p>
           </div>
 
           {/* Contact */}
           <div>
-            <h3 className="text-sm font-semibold text-[#946259] mb-4 uppercase tracking-wide">Kontakt</h3>
+            <h3 className="text-sm font-semibold text-[#A67856] mb-4 uppercase tracking-wide">Kontakt</h3>
             <div className="space-y-2">
-              <a href="mailto:info@medimart.com" className="block text-sm text-[#946259] hover:text-[#946259] transition-colors">
-                info@medimart.com
+              <a href="mailto:hello.care@ashila.co" className="block text-sm text-[#A67856] hover:text-[#A67856] transition-colors">
+                hello.care@ashila.co
               </a>
-              <a href="tel:+355676911044" className="block text-sm text-[#946259] hover:text-[#946259] transition-colors">
-                +355 67 691 1044
+              <a href="tel:+355689124587" className="block text-sm text-[#A67856] hover:text-[#A67856] transition-colors">
+                +355 68 912 4587
               </a>
             </div>
           </div>
 
           {/* Social Links */}
           <div>
-            <h3 className="text-sm font-semibold text-[#946259] mb-4 uppercase tracking-wide">Rrjetet Sociale</h3>
+            <h3 className="text-sm font-semibold text-[#A67856] mb-4 uppercase tracking-wide">Rrjetet Sociale</h3>
             <div className="flex gap-4">
-              <a href="https://web.facebook.com" target="_blank" rel="noopener noreferrer" className="text-[#946259] hover:text-[#946259] transition-colors">
+              <a href="https://web.facebook.com" target="_blank" rel="noopener noreferrer" className="text-[#A67856] hover:text-[#A67856] transition-colors">
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"></path>
                 </svg>

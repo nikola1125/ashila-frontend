@@ -1,37 +1,145 @@
-import React from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import papulesImage from '../../assets/papules.png';
+import pustulesImage from '../../assets/pustules.png';
+import blackHeadsImage from '../../assets/blackHeads.jpg';
+import cystImage from '../../assets/cyst.png';
+import backAcneImage from '../../assets/backAcne.png';
 
 const items = [
-  { key: 'wrinkles', title: 'Rrudha', icon: '🌊' },
-  { key: 'hyperpigmentation', title: 'Hiperpigmentim', icon: '🌙' },
-  { key: 'oily-pores', title: 'Balancim yndyre', icon: '💧' },
-  { key: 'dehydration', title: 'Dehidratim', icon: '🏜️' },
-  { key: 'redness', title: 'Skuqje', icon: '🔴' },
-  { key: 'rosacea', title: 'Rosacea', icon: '🌸' }
+  { key: 'papules', title: 'Papules', image: papulesImage },
+  { key: 'cyst', title: 'Cyst', image: cystImage },
+  { key: 'pustules', title: 'Pustules', image: pustulesImage },
+  { key: 'blackhead', title: 'Blackhead', image: blackHeadsImage },
+  { key: 'back-acne', title: 'Back Acne', image: backAcneImage }
 ];
 
 const AcneCategories = () => {
   const navigate = useNavigate();
+  const sliderRef = useRef(null);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const chunkedItems = useMemo(() => {
+    const chunks = [];
+    for (let i = 0; i < items.length; i += 2) {
+      chunks.push(items.slice(i, i + 2));
+    }
+    return chunks;
+  }, []);
+
+  useEffect(() => {
+    const slider = sliderRef.current;
+    if (!slider) return;
+
+    const handleScroll = () => {
+      const width = slider.clientWidth || 1;
+      const pageIndex = Math.round(slider.scrollLeft / width);
+      setCurrentPage(Math.min(chunkedItems.length, pageIndex + 1));
+    };
+
+    handleScroll();
+    slider.addEventListener('scroll', handleScroll);
+    return () => slider.removeEventListener('scroll', handleScroll);
+  }, [chunkedItems.length]);
 
   return (
-    <section className="py-16 bg-white">
-      <div className="max-w-6xl mx-auto px-4 text-center">
-        <h2 className="text-3xl font-bold mb-12">Bli sipas problematikës së lëkurës</h2>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-6">
-          {items.map((item) => (
+    <section className="py-8 md:py-16 bg-white">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
+        {/* Centered Title */}
+        <div className="text-center mb-12">
+          <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-[#4A3628] mb-4">
+            Bli sipas llojit të akneve
+          </h2>
+          <div className="w-16 h-0.5 bg-[#A67856] mx-auto"></div>
+        </div>
+
+        {/* Grid Layout - 5 items, responsive */}
+        <div className="hidden md:grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6 lg:gap-8">
+          {items.map((item, index) => (
             <button
               key={item.key}
               onClick={() => navigate(`/shop?category=${item.key}`)}
-              className="flex flex-col items-center gap-3 p-4 hover:bg-[#faf9f6] transition-all border-2 border-[#d4d4c4] bg-white shadow-sm hover:shadow-lg"
+              className="group relative w-full aspect-square overflow-hidden bg-white border-2 border-[#D9BFA9] hover:border-[#A67856] shadow-sm hover:shadow-md transition-all duration-300"
+              style={{ 
+                transitionDelay: `${index * 50}ms` 
+              }}
             >
-              <div className="w-24 h-24 md:w-28 md:h-28 bg-[#946259] flex items-center justify-center text-4xl border-2 border-[#946259]">
-                {item.icon}
+              <div className="relative w-full h-full overflow-hidden bg-white">
+                <img
+                  src={item.image}
+                  alt={item.title}
+                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  onError={(e) => {
+                    e.target.src = `https://via.placeholder.com/400x400/EFEEED/999999?text=${encodeURIComponent(item.title)}`;
+                  }}
+                />
+                
+                {/* Animated Overlay (desktop grid - reveal on hover) */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4 md:p-6">
+                  <h3 className="text-white font-semibold text-sm md:text-base lg:text-lg mb-2 drop-shadow-lg transform translate-y-4 md:group-hover:translate-y-0 transition-transform duration-300">
+                    {item.title}
+                  </h3>
+                  <div className="w-12 h-0.5 bg-[#A67856] mb-3 transform translate-y-4 md:group-hover:translate-y-0 transition-transform duration-300 delay-75"></div>
+                  <span className="text-white text-xs md:text-sm bg-white/20 backdrop-blur-sm px-4 py-2 inline-block border border-white/30 transform translate-y-4 md:group-hover:translate-y-0 transition-transform duration-300 delay-100">
+                    Shiko produktet
+                  </span>
+                </div>
               </div>
-              <p className="text-sm font-semibold text-[#946259] text-center leading-tight uppercase tracking-wide">
-                {item.title}
-              </p>
+
+              {/* Title below image - visible always on mobile */}
+              <div className="absolute -bottom-8 left-0 right-0 md:hidden">
+                <h3 className="text-[#4A3628] font-semibold text-xs text-center">
+                  {item.title}
+                </h3>
+              </div>
             </button>
           ))}
+        </div>
+
+        {/* Mobile slider - 3 items per page with counter */}
+        <div className="block md:hidden">
+          <div
+            ref={sliderRef}
+            className="flex overflow-x-auto snap-x snap-mandatory scroll-smooth [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          >
+            {chunkedItems.map((group, pageIndex) => (
+              <div key={`page-${pageIndex}`} className="min-w-full snap-start px-4">
+                <div className="grid grid-cols-2 gap-4">
+                  {group.map((item) => (
+                    <button
+                      key={item.key}
+                      onClick={() => navigate(`/shop?category=${item.key}`)}
+                      className="group relative w-full aspect-[4/5] overflow-hidden bg-white border border-[#D9BFA9] hover:border-[#A67856] shadow-sm transition-all duration-300"
+                    >
+                      <div className="relative w-full h-full overflow-hidden bg-white">
+                        <img
+                          src={item.image}
+                          alt={item.title}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.target.src = `https://via.placeholder.com/400x400/EFEEED/999999?text=${encodeURIComponent(item.title)}`;
+                          }}
+                        />
+                      </div>
+                      {/* Static overlay for mobile */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/45 to-transparent opacity-100 flex flex-col justify-end p-2">
+                        <h3 className="text-white font-semibold text-[12px] text-center mb-1">
+                          {item.title}
+                        </h3>
+                        <div className="w-10 h-0.5 bg-[#A67856] mx-auto mb-2"></div>
+                        <span className="text-white text-[11px] bg-white/25 backdrop-blur-sm px-2 py-1 inline-block border border-white/30 text-center">
+                          Shiko produktet
+                        </span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-6 text-center text-sm text-[#4A3628] font-semibold">
+            {currentPage} / {chunkedItems.length}
+          </div>
         </div>
       </div>
     </section>

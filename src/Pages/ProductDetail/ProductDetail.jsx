@@ -14,6 +14,7 @@ const ProductDetail = () => {
   const { publicApi } = useAxiosSecure();
   const { addItem } = useContext(CartContext);
   const [quantity, setQuantity] = useState(1);
+  const [selectedSize, setSelectedSize] = useState('90GR'); // Default size
 
   // Scroll to top when component mounts or product ID changes
   useEffect(() => {
@@ -50,9 +51,16 @@ const ProductDetail = () => {
         genericName: product.genericName,
         discount: product.discount || 0,
         seller: product.seller,
+        size: selectedSize,
       });
     }
-  }, [product, quantity, addItem]);
+  }, [product, quantity, selectedSize, addItem]);
+
+  const handleBuyNow = useCallback(() => {
+    if (!product) return;
+    handleAddToCart();
+    navigate('/cart');
+  }, [product, handleAddToCart, navigate]);
 
   if (isLoading) return <DataLoading label="Product" />;
   if (error) return <LoadingError label="Product" />;
@@ -70,18 +78,7 @@ const ProductDetail = () => {
         <title>{product.itemName} - Product Details</title>
       </Helmet>
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Breadcrumbs */}
-        <nav className="mb-6">
-          <div className="flex items-center gap-2 text-sm text-gray-500">
-            <Link to="/" className="hover:text-gray-900 transition-colors">
-              Home
-            </Link>
-            <span>/</span>
-            <span className="text-gray-900">{product.itemName}</span>
-          </div>
-        </nav>
-
+      <div className="max-w-7xl mx-auto px-4 pt-32 md:pt-40 pb-8">
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
           {/* Left Column - Product Image */}
@@ -102,42 +99,45 @@ const ProductDetail = () => {
           {/* Right Column - Product Details */}
           <div className="flex flex-col">
             {/* Shop Name */}
-            <p className="text-sm text-gray-500 mb-2">Ashila</p>
+            <p className="text-sm text-gray-500 mb-2 font-light">Ashila</p>
 
             {/* Product Title */}
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">{product.itemName}</h1>
-            <div className="w-16 h-0.5 bg-gray-900 mb-6"></div>
+            <h1 className="text-2xl md:text-3xl font-bold text-[#4A3628] mb-2">{product.itemName}</h1>
+            <div className="w-16 h-0.5 bg-[#A67856] mb-4"></div>
 
             {/* Price */}
             <div className="mb-6">
-              {product.discount > 0 ? (
-                <div className="flex items-baseline gap-3">
-                  <span className="text-2xl font-bold text-gray-900">
-                    {discountedPrice.toLocaleString()} ALL
-                  </span>
-                  <span className="text-lg text-gray-500 line-through">
-                    {Number(product.price).toLocaleString()} ALL
-                  </span>
-                </div>
-              ) : (
-                <span className="text-2xl font-bold text-gray-900">
-                  {Number(product.price).toLocaleString()} ALL
-                </span>
-              )}
+              <span className="text-xl md:text-2xl font-semibold text-[#4A3628]">
+                {discountedPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ALL
+              </span>
             </div>
 
-            {/* Quantity Selector */}
+            <div className="border-t border-[#D9BFA9] pt-6 mb-6"></div>
+
+            {/* SIZE Selector */}
             <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-xs font-semibold text-[#4A3628] uppercase tracking-wide mb-2">
+                SIZE
+              </label>
+              <div className="w-auto inline-block">
+                <div className="px-3 py-2 border border-[#4A3628] bg-white text-[#4A3628] font-medium text-sm">
+                  {selectedSize}
+                </div>
+              </div>
+            </div>
+
+            {/* QUANTITY Selector */}
+            <div className="mb-6">
+              <label className="block text-xs font-semibold text-[#4A3628] uppercase tracking-wide mb-2">
                 QUANTITY
               </label>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
                 <button
                   onClick={() => handleQuantityChange(-1)}
                   disabled={quantity <= 1}
-                  className="w-10 h-10 flex items-center justify-center border-2 border-[#946259] hover:bg-[#faf9f6] disabled:opacity-50 disabled:cursor-not-allowed transition-all bg-white"
+                  className="w-10 h-10 flex items-center justify-center border border-[#4A3628] hover:bg-[#EBD8C8] disabled:opacity-50 disabled:cursor-not-allowed transition-all bg-white"
                 >
-                  <Minus size={16} />
+                  <Minus size={16} className="text-[#4A3628]" />
                 </button>
                 <input
                   type="number"
@@ -146,33 +146,40 @@ const ProductDetail = () => {
                     const val = parseInt(e.target.value) || 1;
                     setQuantity(Math.max(1, val));
                   }}
-                  className="w-16 h-10 text-center border-2 border-[#946259] focus:outline-none focus:ring-2 focus:ring-[#946259] bg-white"
+                  className="w-16 h-10 text-center border border-[#4A3628] focus:outline-none bg-white text-[#4A3628] font-medium"
                   min="1"
                 />
                 <button
                   onClick={() => handleQuantityChange(1)}
                   disabled={!isInStock}
-                  className="w-10 h-10 flex items-center justify-center border-2 border-[#946259] hover:bg-[#faf9f6] disabled:opacity-50 disabled:cursor-not-allowed transition-all bg-white"
+                  className="w-10 h-10 flex items-center justify-center border border-[#4A3628] hover:bg-[#EBD8C8] disabled:opacity-50 disabled:cursor-not-allowed transition-all bg-white"
                 >
-                  <Plus size={16} />
+                  <Plus size={16} className="text-[#4A3628]" />
                 </button>
               </div>
             </div>
 
-            {/* Status Button */}
-            <div className="mb-6">
+            {/* Action Buttons */}
+            <div className="space-y-3 mb-6">
               {isInStock ? (
-                <button
-                  onClick={handleAddToCart}
-                  className="w-full bg-[#946259] hover:bg-[#7a4f47] text-white px-6 py-3 font-bold transition-all duration-200 flex items-center justify-center gap-2 border-2 border-[#946259] uppercase tracking-wide"
-                >
-                  <ShoppingBag className="w-5 h-5" />
-                  Add to Cart
-                </button>
+                <>
+                  <button
+                    onClick={handleAddToCart}
+                    className="w-full bg-white hover:bg-[#EBD8C8] text-[#4A3628] px-6 py-3 font-semibold transition-all duration-200 border border-[#4A3628] uppercase tracking-wide"
+                  >
+                    Add to cart
+                  </button>
+                  <button
+                    onClick={handleBuyNow}
+                    className="w-full bg-[#A67856] hover:bg-[#8B6345] text-white px-6 py-3 font-semibold transition-all duration-200 uppercase tracking-wide"
+                  >
+                    Buy it now
+                  </button>
+                </>
               ) : (
                 <button
                   disabled
-                  className="w-full bg-gray-200 text-gray-500 px-6 py-3 rounded-sm font-medium cursor-not-allowed"
+                  className="w-full bg-gray-200 text-gray-500 px-6 py-3 font-medium cursor-not-allowed"
                 >
                   Sold out
                 </button>
@@ -181,13 +188,12 @@ const ProductDetail = () => {
 
             {/* Social Sharing */}
             <div className="flex items-center gap-4">
-              <span className="text-sm text-gray-600">Share:</span>
               <div className="flex items-center gap-3">
                 <a
                   href={`https://www.facebook.com/sharer/sharer.php?u=${window.location.href}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-gray-900 transition-colors"
+                  className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-[#4A3628] transition-colors"
                 >
                   <Facebook size={18} />
                 </a>
@@ -195,13 +201,23 @@ const ProductDetail = () => {
                   href={`https://twitter.com/intent/tweet?url=${window.location.href}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-gray-900 transition-colors"
+                  className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-[#4A3628] transition-colors"
                 >
                   <Twitter size={18} />
                 </a>
                 <a
+                  href={`https://pinterest.com/pin/create/button/?url=${window.location.href}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-[#4A3628] transition-colors"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 19c-.721 0-1.418-.109-2.076-.312.286-.465.713-1.227.95-1.878.098-.35.595-2.394.595-2.394s.152.304.465.496c.435.287.936.46 1.526.46 2.01 0 3.38-1.843 3.38-4.31 0-1.87-1.577-3.174-3.832-3.174-2.602 0-4.198 1.928-4.198 3.922 0 1.152.44 2.17 1.561 2.553.174.071.334.041.384-.107.036-.137.124-.48.163-.656.053-.204.033-.275-.115-.455-.323-.38-.53-.873-.53-1.57 0-2.03 1.54-3.894 4.01-3.894 2.105 0 3.636 1.503 3.636 3.505 0 2.33-1.464 4.296-3.64 4.296-.712 0-1.387-.37-1.617-.863 0 0-.352 1.34-.436 1.67-.158.609-.586 1.37-.872 1.833A11.98 11.98 0 0 0 12 19z"/>
+                  </svg>
+                </a>
+                <a
                   href={`mailto:?subject=${encodeURIComponent(product.itemName)}&body=${encodeURIComponent(window.location.href)}`}
-                  className="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-gray-900 transition-colors"
+                  className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-[#4A3628] transition-colors"
                 >
                   <Mail size={18} />
                 </a>
@@ -211,9 +227,9 @@ const ProductDetail = () => {
         </div>
 
         {/* Product Description */}
-        <div className="border-t border-gray-200 pt-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Description</h2>
-          <div className="prose max-w-none text-gray-700 leading-relaxed">
+        <div className="border-t border-[#D9BFA9] pt-8">
+          <h2 className="text-xl font-semibold text-[#4A3628] mb-4">Description</h2>
+          <div className="prose max-w-none text-[#4A3628] leading-relaxed">
             {product.description ? (
               <p>{product.description}</p>
             ) : (
@@ -240,6 +256,7 @@ const ProductDetail = () => {
           </div>
         </div>
       </div>
+
     </div>
   );
 };

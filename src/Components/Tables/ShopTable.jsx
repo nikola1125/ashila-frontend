@@ -193,14 +193,6 @@ const ShopTable = ({
             )}
           </div>
 
-          {/* Next Button */}
-          <button
-            className="btn btn-sm text-xs sm:text-sm px-2 sm:px-3 py-2"
-            onClick={() => goToPage(currentPage + 1)}
-            disabled={currentPage === totalPages}
-          >
-            Next
-          </button>
 
           {/* Items Per Page Selector */}
           <div className="flex items-center gap-2">

@@ -1,4 +1,4 @@
-import React, { useReducer } from 'react';
+import React, { useReducer, useEffect, useMemo } from 'react';
 import { CartContext } from './CartContext';
 
 const CART_KEY = 'medimart_cart';
@@ -139,16 +139,37 @@ const cartReducer = (state, action) => {
 // Cart Provider component
 export const CartProvider = ({ children }) => {
   const [state, dispatch] = useReducer(cartReducer, initialState, (initial) => {
-    const savedCart = localStorage.getItem(CART_KEY);
-    return savedCart ? JSON.parse(savedCart) : initial;
+    try {
+      const savedCart = localStorage.getItem(CART_KEY);
+      if (savedCart) {
+        const parsed = JSON.parse(savedCart);
+        // Ensure items is always an array
+        if (parsed && parsed.items && Array.isArray(parsed.items)) {
+          return parsed;
+        }
+      }
+    } catch (error) {
+      console.error('Error loading cart from localStorage:', error);
+      // Clear corrupted cart data
+      localStorage.removeItem(CART_KEY);
+    }
+    return initial;
   });
 
   // Save cart to localStorage
-  React.useEffect(() => {
-    localStorage.setItem(CART_KEY, JSON.stringify(state));
+  useEffect(() => {
+    try {
+      localStorage.setItem(CART_KEY, JSON.stringify(state));
+    } catch (error) {
+      console.error('Error saving cart to localStorage:', error);
+    }
   }, [state]);
 
   const addItem = (item) => {
+    if (!item || !item.id) {
+      console.error('Invalid item added to cart:', item);
+      return;
+    }
     dispatch({ type: 'ADD_ITEM', payload: item });
   };
 
@@ -157,6 +178,10 @@ export const CartProvider = ({ children }) => {
   };
 
   const updateQuantity = (id, quantity) => {
+    if (quantity < 1) {
+      removeItem(id);
+      return;
+    }
     dispatch({ type: 'UPDATE_QUANTITY', payload: { id, quantity } });
   };
 
@@ -164,17 +189,22 @@ export const CartProvider = ({ children }) => {
     dispatch({ type: 'CLEAR_CART' });
   };
 
+  // Ensure items is always an array
+  const cartItems = useMemo(() => {
+    if (!state.items) return [];
+    return Array.isArray(state.items) ? state.items : [];
+  }, [state.items]);
+
   const value = {
-    items: state.items,
-    totalQuantity: state.totalQuantity,
-    totalPrice: state.totalPrice,
-    discountedTotal: state.discountedTotal,
+    items: cartItems,
+    totalQuantity: state.totalQuantity || 0,
+    totalPrice: state.totalPrice || 0,
+    discountedTotal: state.discountedTotal || 0,
     addItem,
     removeItem,
     updateQuantity,
     clearCart,
   };
-
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 };

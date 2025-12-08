@@ -1,11 +1,21 @@
 import React from 'react';
 import logo from '../../../assets/logo.png';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 
 const Logo = ({ isScrolled = true }) => {
+  const location = useLocation();
+  
   return (
     <>
-      <NavLink to='/' className="flex items-center">
+      <NavLink 
+        to='/' 
+        onClick={() => {
+          if (location.pathname === '/') {
+            window.scrollTo({ top: 0, behavior: 'instant' });
+          }
+        }}
+        className="flex items-center"
+      >
         <img 
           src={logo} 
           alt="Ashila Pharmacy Logo" 

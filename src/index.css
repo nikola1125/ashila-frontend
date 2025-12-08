@@ -15,11 +15,13 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #faf9f6;
-  color: #2c2c2c;
+  background-color: #EBD8C8;  /* Soft Almond Beige */
+  color: #4A3628;              /* Rich Coffee Brown */
   letter-spacing: 0.01em;
   font-weight: 300;
   line-height: 1.7;
+  margin: 0;
+  padding: 0;
 }
 
 /* Elegant headings with serif font */
@@ -42,7 +44,7 @@ table {
   border-collapse: collapse;
   font-weight: 300;
   letter-spacing: 0.01em;
-  border: 1px solid #d4d4c4;
+  border: 1px solid #D9BFA9;  /* Warm Beige */
 }
 
 table th {
@@ -51,14 +53,14 @@ table th {
   letter-spacing: 0.05em;
   text-transform: uppercase;
   font-size: 0.75rem;
-  border: 1px solid #d4d4c4;
+  border: 1px solid #D9BFA9;  /* Warm Beige */
   padding: 0.75rem 1rem;
 }
 
 table td {
   font-weight: 300;
   letter-spacing: 0.01em;
-  border: 1px solid #d4d4c4;
+  border: 1px solid #D9BFA9;  /* Warm Beige */
   padding: 0.75rem 1rem;
 }
 
@@ -90,31 +92,40 @@ input, textarea, select {
 }
 
 ::-webkit-scrollbar-track {
-  background: #f5f5f0;
+  background: #F5EDE4;  /* Light background variant */
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #946259;
+  background: #A67856;  /* Caramel Brown */
   border-radius: 0;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #7a4f47;
+  background: #8B6345;  /* Darker Caramel Brown */
 }
 
 /* Brand color palette */
 :root {
-  --brand-primary: #946259;
-  --brand-dark: #7a4f47;
-  --brand-light: #b07a6f;
-  --brand-accent: #a66d62;
-  --brand-bg: #faf9f6;
-  --brand-text: #2c2c2c;
-  --brand-border: #d4d4c4;
+  --brand-primary: #A67856;        /* Caramel Brown - Accent color (label stripe, cap, borders) */
+  --brand-dark: #8B6345;            /* Darker shade for hover states */
+  --brand-light: #B8906F;           /* Lighter shade for subtle accents */
+  --brand-accent: #F4A640;          /* Golden Orange - Brand highlight (small icons or logo detail) */
+  --brand-bg: #EBD8C8;              /* Soft Almond Beige - Base colour (elegant, warm, clean) */
+  --brand-text: #4A3628;            /* Rich Coffee Brown - Text color */
+  --brand-border: #D9BFA9;          /* Warm Beige - Shadows / depth */
 }
 
 /* Exception: Cart badge should be round */
 .cart-badge {
   border-radius: 9999px !important;
+}
+
+/* Fix navbar on mobile - prevent disappearing on scroll */
+header {
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  will-change: transform;
 }
 

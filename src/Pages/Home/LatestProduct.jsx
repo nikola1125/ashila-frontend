@@ -94,7 +94,7 @@ const LatestProduct = () => {
           {latestProducts?.map((product) => (
             <div
               key={product._id}
-              className="bg-white shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden border-2 border-[#d4d4c4]"
+              className="bg-white shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden border-2 border-[#D9BFA9]"
             >
               <div className="aspect-square overflow-hidden">
                 <img
@@ -120,7 +120,7 @@ const LatestProduct = () => {
                   </span>
                   <button 
                     onClick={() => handleAddToCart(product)}
-                    className="bg-[#946259] hover:bg-[#7a4f47] text-white px-2 py-1 text-xs font-semibold transition-all duration-150 flex items-center justify-center gap-1 flex-shrink-0 border-2 border-[#946259]"
+                    className="bg-[#A67856] hover:bg-[#8B6345] text-white px-2 py-1 text-xs font-semibold transition-all duration-150 flex items-center justify-center gap-1 flex-shrink-0 border-2 border-[#A67856]"
                   >
                     <ShoppingBag size={12} />
                     <span className="hidden sm:inline">Add</span>
@@ -134,7 +134,7 @@ const LatestProduct = () => {
         <div className="text-center mt-8">
           <button 
             onClick={handleShopNow}
-            className="bg-[#946259] text-white px-8 py-3 font-bold hover:bg-[#7a4f47] transition-all duration-200 shadow-md hover:shadow-lg border-2 border-[#946259] uppercase tracking-wider"
+            className="bg-[#A67856] text-white px-8 py-3 font-bold hover:bg-[#8B6345] transition-all duration-200 shadow-md hover:shadow-lg border-2 border-[#A67856] uppercase tracking-wider"
           >
             Shop Now
           </button>

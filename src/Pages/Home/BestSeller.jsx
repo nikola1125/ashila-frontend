@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo, useContext, useCallback, useEffect } from 'react';
+import React, { useRef, useContext, useCallback, useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import useAxiosSecure from '../../hooks/useAxiosSecure';
@@ -7,24 +7,18 @@ import { ChevronLeft, ChevronRight, ShoppingBag } from 'lucide-react';
 import { CartContext } from '../../Context/Cart/CartContext';
 
 const BestSeller = () => {
-  const sectionRef = useRef(null);
   const { publicApi } = useAxiosSecure();
   const { addItem } = useContext(CartContext);
   const navigate = useNavigate();
-  const [activeCategory, setActiveCategory] = useState('skincare');
   const scrollContainerRef = useRef(null);
-
-  const categories = useMemo(() => [
-    { id: 'skincare', label: 'Skincare bestsellers' },
-    { id: 'hair', label: 'Kujdesi për flokët' },
-    { id: 'body', label: 'Kujdesi për trupin' }
-  ], []);
+  const [showLeftArrow, setShowLeftArrow] = useState(false);
+  const [showRightArrow, setShowRightArrow] = useState(false);
 
   const { data: products = [], isLoading: loading, error } = useQuery({
-    queryKey: ['bestsellers', activeCategory],
+    queryKey: ['bestsellers', 'skincare'],
     queryFn: async () => {
       try {
-        const res = await publicApi.get(`/medicines/bestsellers/${activeCategory}`);
+        const res = await publicApi.get(`/medicines/bestsellers/skincare`);
         const list = Array.isArray(res) ? res : (res?.result || res || []);
         return Array.isArray(list) ? list : [];
       } catch (err) {
@@ -38,9 +32,52 @@ const BestSeller = () => {
     retry: 1,
   });
 
+  // Check scroll position and update arrow visibility
+  const checkScrollPosition = useCallback(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const { scrollLeft, scrollWidth, clientWidth } = container;
+    const isAtStart = scrollLeft <= 10; // Small threshold for floating point issues
+    const isAtEnd = scrollLeft + clientWidth >= scrollWidth - 10; // Small threshold
+
+    setShowLeftArrow(!isAtStart);
+    setShowRightArrow(!isAtEnd);
+  }, []);
+
+  // Update arrow visibility on scroll and when products change
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container || products.length === 0) {
+      setShowLeftArrow(false);
+      setShowRightArrow(false);
+      return;
+    }
+
+    // Check initial position
+    checkScrollPosition();
+
+    // Listen to scroll events
+    container.addEventListener('scroll', checkScrollPosition);
+    
+    // Also check on resize
+    const handleResize = () => {
+      setTimeout(checkScrollPosition, 100); // Small delay to ensure layout is updated
+    };
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      container.removeEventListener('scroll', checkScrollPosition);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [products, checkScrollPosition]);
+
   const scroll = useCallback((direction) => {
     if (scrollContainerRef.current) {
-      const scrollAmount = 400;
+      // Calculate scroll amount: width of one product card + gap
+      // Product card is w-64 (256px) + gap-6 (24px) = 280px
+      // On desktop, we want to scroll by exactly one product width
+      const scrollAmount = 280;
       scrollContainerRef.current.scrollBy({
         left: direction === 'left' ? -scrollAmount : scrollAmount,
         behavior: 'smooth'
@@ -62,7 +99,7 @@ const BestSeller = () => {
 
   const handleAddToCart = useCallback((e, product) => {
     e.stopPropagation(); // Prevent navigation when clicking add to cart
-    addItem({
+    const cartItem = {
       id: product._id,
       name: product.itemName,
       price: product.price,
@@ -74,7 +111,9 @@ const BestSeller = () => {
       genericName: product.genericName,
       discount: product.discount || 0,
       seller: product.seller,
-    });
+    };
+    console.log('Adding to cart:', cartItem);
+    addItem(cartItem);
   }, [addItem]);
 
   const handleProductClick = useCallback((productId) => {
@@ -82,64 +121,13 @@ const BestSeller = () => {
     navigate(`/product/${productId}`);
   }, [navigate]);
 
-  // Parallax scroll effect - move section up as user scrolls down
-  useEffect(() => {
-    let ticking = false;
-    let rafId = null;
-    const sectionElement = sectionRef.current;
-
-    if (!sectionElement) return;
-
-    const handleScroll = () => {
-      if (!ticking) {
-        rafId = requestAnimationFrame(() => {
-          const scrollY = window.scrollY;
-          const viewportHeight = window.innerHeight;
-          
-          // Only apply parallax when scrolled past the hero section
-          if (scrollY > viewportHeight * 0.3) {
-            const parallaxAmount = (scrollY - viewportHeight * 0.3) * 0.3; // Move up at 30% of scroll speed
-            sectionElement.style.transform = `translateY(-${parallaxAmount}px)`;
-          } else {
-            sectionElement.style.transform = 'translateY(0)';
-          }
-          
-          ticking = false;
-        });
-        ticking = true;
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-      if (rafId) {
-        cancelAnimationFrame(rafId);
-      }
-    };
-  }, []);
-
   return (
-    <section ref={sectionRef} className="pt-0 pb-16 md:pt-8 md:pb-16 bg-white relative z-10 transition-transform duration-75 ease-out">
+    <section className="mt-0 pt-8 pb-8 md:pt-16 md:pb-16 bg-white">
       <div className="max-w-7xl mx-auto px-4">
-        {/* Category Tabs */}
-        <div className="flex items-center gap-8 mb-8 border-b border-gray-200">
-          {categories.map((cat) => (
-            <button
-              key={cat.id}
-              onClick={() => setActiveCategory(cat.id)}
-              className={`pb-4 px-2 text-sm font-medium transition-colors relative ${
-                activeCategory === cat.id
-                  ? 'text-gray-900'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              {cat.label}
-              {activeCategory === cat.id && (
-                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gray-900" />
-              )}
-            </button>
-          ))}
+        {/* Centered Title */}
+        <div className="text-center mb-12">
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">Best sellers</h2>
+          <div className="w-16 h-0.5 bg-[#A67856] mx-auto"></div>
         </div>
 
         {/* Content Container with min-height to prevent layout shift */}
@@ -161,20 +149,29 @@ const BestSeller = () => {
           {/* Products Carousel */}
           {!loading && !error && products.length > 0 && (
             <div className="relative">
-            {/* Left Arrow */}
-            <button
-              onClick={() => scroll('left')}
-              className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white rounded-full p-2 shadow-lg hover:bg-gray-50 transition-all"
-              aria-label="Scroll left"
-            >
-              <ChevronLeft size={24} className="text-gray-700" />
-            </button>
+            {/* Left Arrow - Only show when scrolled */}
+            {showLeftArrow && (
+              <button
+                onClick={() => scroll('left')}
+                className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white rounded-full p-2 shadow-lg hover:bg-gray-50 transition-all"
+                aria-label="Scroll left"
+              >
+                <ChevronLeft size={24} className="text-gray-700" />
+              </button>
+            )}
 
-            {/* Scrollable Container */}
-            <div
-              ref={scrollContainerRef}
-              className="flex gap-6 overflow-x-auto scroll-smooth pb-4 px-12 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+            {/* Scrollable Container - Show 4 products on desktop */}
+            <div 
+              className="overflow-hidden md:px-12"
+              style={{
+                // On desktop, limit visible width to show exactly 4 products
+                // 4 products * 256px (w-64) + 3 gaps * 24px (gap-6) = 1024 + 72 = 1096px
+              }}
             >
+              <div
+                ref={scrollContainerRef}
+                className="flex gap-6 overflow-x-auto scroll-smooth pb-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ml-4 md:ml-8"
+              >
               {products.map((p) => {
                 if (!p || !p._id) return null;
                 const pricing = calculatePrice(p.price, p.discount);
@@ -182,11 +179,11 @@ const BestSeller = () => {
                 return (
                   <div
                     key={p._id}
-                    className="flex-shrink-0 w-64 bg-white overflow-hidden shadow-sm hover:shadow-lg transition-all group border-2 border-[#d4d4c4]"
+                    className="flex-shrink-0 w-40 md:w-56 bg-white overflow-hidden shadow-sm hover:shadow-lg transition-all group border-2 border-[#D9BFA9]"
                   >
                     {/* Product Image */}
                     <div 
-                      className="relative h-64 bg-gray-100 flex items-center justify-center overflow-hidden cursor-pointer"
+                      className="relative h-40 md:h-56 bg-gray-100 flex items-center justify-center overflow-hidden cursor-pointer"
                       onClick={() => handleProductClick(p._id)}
                     >
                       <img
@@ -199,37 +196,42 @@ const BestSeller = () => {
                         }}
                       />
                       {pricing.discountPercent > 0 && (
-                        <div className="absolute top-3 right-3 bg-[#946259] text-white px-2.5 py-1 text-xs font-semibold">
+                        <div className="absolute top-3 right-3 bg-[#A67856] text-white px-2.5 py-1 text-xs font-semibold">
                           Save {pricing.discountPercent}%
                         </div>
                       )}
                     </div>
 
                     {/* Product Info */}
-                    <div className="p-4">
+                    <div className="p-2 md:p-4">
                       <h3 
-                        className="text-sm font-medium text-gray-900 line-clamp-2 mb-2 min-h-[2.5rem] cursor-pointer hover:text-gray-600 transition-colors"
+                        className="text-xs md:text-sm font-medium text-gray-900 line-clamp-2 mb-1 md:mb-2 min-h-[2rem] md:min-h-[2.5rem] cursor-pointer hover:text-gray-600 transition-colors"
                         onClick={() => handleProductClick(p._id)}
                       >
                         {p.itemName}
                       </h3>
 
                       {/* Price and Add to Cart - Side by Side */}
-                      <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center justify-between gap-1 md:gap-2">
                         {/* Price Section - Left */}
-                        <div className="flex items-baseline gap-2">
+                        <div className="flex flex-col items-start gap-0.5">
                           {pricing.discounted ? (
                             <>
-                              <span className="text-base font-semibold text-gray-900">
-                                from {pricing.discounted.toLocaleString()} ALL
-                              </span>
-                              <span className="text-sm text-gray-500 line-through">
-                                {pricing.original.toLocaleString()} ALL
-                              </span>
+                              <div className="flex items-baseline gap-1 md:gap-2">
+                                <span className="text-[10px] md:text-xs text-[#4A3628] font-medium">from</span>
+                                <span className="text-xs md:text-base font-semibold text-[#4A3628]">
+                                  {pricing.discounted.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
+                                </span>
+                              </div>
+                              <div className="flex items-baseline gap-1">
+                                <span className="text-[9px] md:text-xs text-gray-500 line-through">
+                                  {pricing.original.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
+                                </span>
+                              </div>
                             </>
                           ) : (
-                            <span className="text-base font-semibold text-gray-900">
-                              {pricing.original.toLocaleString()} ALL
+                            <span className="text-xs md:text-base font-semibold text-[#4A3628]">
+                              {pricing.original.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
                             </span>
                           )}
                         </div>
@@ -237,9 +239,9 @@ const BestSeller = () => {
                         {/* Add to Cart Button - Right */}
                         <button 
                           onClick={(e) => handleAddToCart(e, p)}
-                          className="bg-[#946259] hover:bg-[#7a4f47] text-white px-3 py-2 text-sm font-semibold transition-all flex items-center justify-center gap-1 flex-shrink-0 border-2 border-[#946259]"
+                          className="bg-[#A67856] hover:bg-[#8B6345] text-white px-2 py-1 md:px-3 md:py-2 text-[10px] md:text-sm font-semibold transition-all flex items-center justify-center gap-1 flex-shrink-0 border-2 border-[#A67856]"
                         >
-                          <ShoppingBag size={16} />
+                          <ShoppingBag size={12} className="md:w-4 md:h-4" />
                           <span className="hidden sm:inline">Add</span>
                         </button>
                       </div>
@@ -247,16 +249,19 @@ const BestSeller = () => {
                   </div>
                 );
               })}
+              </div>
             </div>
 
-            {/* Right Arrow */}
-            <button
-              onClick={() => scroll('right')}
-              className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white p-2 shadow-lg hover:bg-[#faf9f6] transition-all border-2 border-[#d4d4c4]"
-              aria-label="Scroll right"
-            >
-              <ChevronRight size={24} className="text-[#946259]" />
-            </button>
+            {/* Right Arrow - Only show when there are more products */}
+            {showRightArrow && (
+              <button
+                onClick={() => scroll('right')}
+                className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white p-2 shadow-lg hover:bg-[#EBD8C8] transition-all border-2 border-[#D9BFA9]"
+                aria-label="Scroll right"
+              >
+                <ChevronRight size={24} className="text-[#A67856]" />
+              </button>
+            )}
           </div>
         )}
 

@@ -73,7 +73,7 @@ const Categories = () => {
   }
 
   return (
-    <section className="py-16">
+    <section className="py-12 md:py-16">
       <div className="container mx-auto px-4">
         {/* Header Section */}
         <div className="text-center mb-12">
@@ -94,7 +94,7 @@ const Categories = () => {
                 key={category._id || category.id}
                 className="group cursor-pointer transform transition-all duration-300 scale-95 hover:scale-100"
               >
-                <div className="bg-white shadow-sm hover:shadow-lg transition-all duration-200 border-2 border-[#d4d4c4] overflow-hidden relative">
+                <div className="bg-white shadow-sm hover:shadow-lg transition-all duration-200 border-2 border-[#D9BFA9] overflow-hidden relative">
                   {/* Category Image */}
                   <div className="relative h-48 bg-gray-100 overflow-hidden">
                     {category.categoryImage && (
@@ -128,7 +128,7 @@ const Categories = () => {
                         Available
                       </span>
                       {category.medicinesCount && (
-                        <span className="bg-[#faf9f6] text-[#946259] px-2 py-1 text-xs font-medium border-2 border-[#d4d4c4]">
+                        <span className="bg-[#EBD8C8] text-[#A67856] px-2 py-1 text-xs font-medium border-2 border-[#D9BFA9]">
                           {category.medicinesCount} products
                         </span>
                       )}
@@ -137,7 +137,7 @@ const Categories = () => {
                     {/* View Details Button */}
                     <button
                       onClick={() => handleCategoryClick(category.categoryName)}
-                      className="w-full bg-[#946259] hover:bg-[#7a4f47] text-white py-2.5 text-sm font-semibold transition-all duration-150 border-2 border-[#946259] uppercase tracking-wide"
+                      className="w-full bg-[#A67856] hover:bg-[#8B6345] text-white py-2.5 text-sm font-semibold transition-all duration-150 border-2 border-[#A67856] uppercase tracking-wide"
                     >
                       View Details
                     </button>
@@ -161,19 +161,19 @@ const Categories = () => {
 
         {/* Call to Action */}
         <div className="text-center mt-12">
-          <div className="bg-white shadow-md border-2 border-[#d4d4c4] p-8 max-w-2xl mx-auto">
-            <h3 className="text-2xl font-bold text-[#946259] mb-4 uppercase tracking-wide">
+          <div className="bg-white shadow-md border-2 border-[#D9BFA9] p-8 max-w-2xl mx-auto">
+            <h3 className="text-2xl font-bold text-[#A67856] mb-4 uppercase tracking-wide">
               Need Help Finding the Right Medicine?
             </h3>
-            <p className="text-[#2c2c2c] mb-6">
+            <p className="text-[#4A3628] mb-6">
               Our healthcare experts are here to help you find the perfect
               medicine for your needs.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="bg-[#946259] text-white px-6 py-3 font-semibold hover:bg-[#7a4f47] transition-all duration-200 border-2 border-[#946259] uppercase tracking-wide">
+              <button className="bg-[#A67856] text-white px-6 py-3 font-semibold hover:bg-[#8B6345] transition-all duration-200 border-2 border-[#A67856] uppercase tracking-wide">
                 Contact Support
               </button>
-              <button className="bg-white text-[#946259] border-2 border-[#946259] px-6 py-3 font-semibold hover:bg-[#faf9f6] transition-all duration-200 uppercase tracking-wide">
+              <button className="bg-white text-[#A67856] border-2 border-[#A67856] px-6 py-3 font-semibold hover:bg-[#EBD8C8] transition-all duration-200 uppercase tracking-wide">
                 Search Medicines
               </button>
             </div>

@@ -1,9 +1,13 @@
 import React from 'react'
 import Success from '../Pages/Payment/Success'
+import ScrollToTop from '../Components/Common/ScrollToTop'
 
 const InvoiceLayout = () => {
   return (
-    <Success />
+    <>
+      <ScrollToTop />
+      <Success />
+    </>
   )
 }
 

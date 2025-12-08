@@ -20,17 +20,11 @@ const Hero = () => {
           
           // Only update if scroll changed significantly (throttle updates)
           if (Math.abs(scrollY - lastScrollY) > 5) {
-            // Use viewport height for fade distance, shorter on mobile
-            const viewportHeight = window.innerHeight;
-            const fadeDistance = viewportHeight * 0.6; // Fade over 60% of viewport
+            const fadeDistance = window.innerHeight;
             const opacity = Math.max(0, 1 - scrollY / fadeDistance);
-            
-            // Also move the background up as we scroll
-            const translateY = Math.min(scrollY * 0.5, viewportHeight * 0.3);
             
             // Direct DOM manipulation to avoid re-renders
             heroElement.style.opacity = opacity.toString();
-            heroElement.style.transform = `translateZ(0) translateY(${translateY}px)`;
             lastScrollY = scrollY;
           }
           
@@ -52,19 +46,22 @@ const Hero = () => {
   return (
     <section
       ref={heroRef}
-      className="fixed top-0 left-0 w-full h-[65vh] md:h-screen overflow-hidden z-0"
+      className="relative w-full h-[70vh] md:h-screen overflow-hidden z-0"
       style={{ 
         backgroundImage: `url(${bg})`, 
         backgroundSize: 'cover', 
-        backgroundPosition: 'center', 
-        backgroundAttachment: 'scroll',
+        backgroundPosition: 'center top', 
+        backgroundAttachment: 'fixed',
         backgroundRepeat: 'no-repeat',
         opacity: 1,
         transform: 'translateZ(0)',
         backfaceVisibility: 'hidden',
         WebkitBackfaceVisibility: 'hidden',
-        contain: 'layout style paint',
-        isolation: 'isolate'
+        marginTop: 0,
+        paddingTop: 0,
+        top: 0,
+        left: 0,
+        right: 0
       }}
     >
       {/* Dark overlay */}
@@ -75,6 +72,21 @@ const Hero = () => {
           willChange: 'auto'
         }} 
       />
+      
+      {/* Hero Content Overlay */}
+      <div className="absolute inset-0 z-10 flex items-center justify-center md:items-end md:justify-end">
+        <div className="max-w-2xl md:max-w-3xl px-4 sm:px-6 pt-8 pb-2 sm:pt-0 sm:pb-20 md:pb-32 lg:pb-40 text-center md:text-right pr-0 md:pr-4 lg:pr-16 xl:pr-48 text-white">
+          <p className="text-base sm:text-lg md:text-xl lg:text-2xl leading-relaxed font-medium drop-shadow-lg mb-4 md:mb-6">
+            Premium beauty and skincare products crafted with natural ingredients. Experience the difference with our dermatologist-tested formulations.
+          </p>
+          <button
+            onClick={() => window.location.href = '/shop'}
+            className="bg-[#A67856] hover:bg-[#8B6345] text-white px-6 py-3 md:px-8 md:py-4 font-semibold transition-all duration-300 uppercase tracking-wide text-sm md:text-base border border-[#A67856]"
+          >
+            Zbulo produktet
+          </button>
+        </div>
+      </div>
     </section>
   );
 };

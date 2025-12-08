@@ -3,11 +3,14 @@ import Links from '../Pages/Dashboard/Others/Links';
 import { NavLink, Outlet } from 'react-router-dom';
 import { AuthContext } from '../Context/Auth/AuthContext';
 import Logo from '../Components/Common/Logo/Logo';
+import userLogo from '../assets/userLogo.png';
+import ScrollToTop from '../Components/Common/ScrollToTop';
 
 const DashboardLayout = () => {
   const { user } = useContext(AuthContext);
   return (
     <div className="min-h-screen bg-gradient-to-tr from-blue-50 via-white to-blue-100 z-50">
+      <ScrollToTop />
       <div className="drawer lg:drawer-open">
         <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
         <div className="drawer-content flex flex-col">
@@ -54,7 +57,7 @@ const DashboardLayout = () => {
           <aside className="menu bg-white/80 backdrop-blur border-r border-blue-100 shadow-xl min-h-full w-80 p-0 flex flex-col">
             <div className="p-6 border-b border-blue-100 flex items-center gap-3">
               <img
-                src={user?.photoURL || '/src/assets/userLogo.png'}
+                src={user?.photoURL || userLogo}
                 alt="User"
                 className="w-12 h-12 rounded-full shadow object-cover"
               />
