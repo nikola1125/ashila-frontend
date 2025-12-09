@@ -148,6 +148,19 @@ header {
   z-index: 100 !important;
 }
 
+/* Compact navbar on desktop */
+@media (min-width: 1024px) {
+  header nav {
+    min-height: 60px;
+    max-height: 60px;
+  }
+  
+  header nav > div > div {
+    min-height: 60px;
+    max-height: 60px;
+  }
+}
+
 /* Mobile-first responsive utilities */
 @media (max-width: 640px) {
   /* Ensure text is readable on mobile */

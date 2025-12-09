@@ -19,7 +19,7 @@ const Logo = ({ isScrolled = true }) => {
         <img 
           src={logo} 
           alt="Ashila Pharmacy Logo" 
-          className="h-16 md:h-20 w-auto object-contain" 
+          className="h-10 sm:h-12 md:h-14 lg:h-12 w-auto object-contain" 
         />
       </NavLink>
     </>

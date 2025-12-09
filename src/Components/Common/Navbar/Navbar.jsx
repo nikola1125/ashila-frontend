@@ -141,7 +141,7 @@ const Navbar = () => {
         isScrolled ? 'border-gray-200 bg-white' : 'border-transparent bg-transparent'
       }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="py-3 sm:py-4 flex items-center justify-between gap-3">
+          <div className="py-2 sm:py-2.5 lg:py-2 flex items-center justify-between gap-2 lg:gap-3">
             {/* Mobile Menu Button - Left Side */}
             <button 
               onClick={(e) => {
@@ -156,13 +156,13 @@ const Navbar = () => {
               {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
 
-            {/* Logo - centered on mobile, left on desktop */}
-            <div className="flex-shrink-0 flex-1 lg:flex-none flex justify-center lg:justify-start pl-8 sm:pl-10 lg:pl-0">
+            {/* Logo - Only visible on mobile, hidden on desktop */}
+            <div className="flex-shrink-0 flex-1 lg:hidden flex justify-center pl-8 sm:pl-10">
               <Logo />
             </div>
 
-            {/* Desktop Menu */}
-            <div className="hidden lg:flex items-center gap-4 flex-1 justify-center">
+            {/* Desktop Menu - All items centered */}
+            <div className="hidden lg:flex items-center gap-3 xl:gap-4 justify-center flex-1">
               <NavLink 
                 to="/" 
                     onClick={() => {
@@ -170,7 +170,7 @@ const Navbar = () => {
                         window.scrollTo({ top: 0, behavior: 'instant' });
                       }
                     }}
-                    className={`font-medium transition-colors text-xs uppercase tracking-wide whitespace-nowrap ${
+                    className={`font-medium transition-colors text-[10px] xl:text-xs uppercase tracking-wide whitespace-nowrap py-1 ${
                       isScrolled ? 'text-black hover:text-gray-700' : 'text-white hover:text-gray-200'
                     }`}
               >
@@ -188,13 +188,13 @@ const Navbar = () => {
                     setActiveGroup(null);
                   }}
                 >
-                  <button className={`flex items-center gap-1 font-medium transition-colors text-xs uppercase tracking-wide py-2 whitespace-nowrap ${
+                  <button className={`flex items-center gap-1 font-medium transition-colors text-[10px] xl:text-xs uppercase tracking-wide py-1 whitespace-nowrap ${
                     isScrolled ? 'text-black hover:text-gray-700' : 'text-white hover:text-gray-200'
                   }`}>
                     {category.categoryName}
                     {category.groups && category.groups.length > 0 && (
                       <ChevronDown 
-                        size={12} 
+                        size={10} 
                         className={isScrolled ? 'text-gray-700' : 'text-white/80'} 
                       />
                     )}
@@ -261,45 +261,29 @@ const Navbar = () => {
 
               <NavLink 
                 to="/contact" 
-                className={`font-medium transition-colors text-xs uppercase tracking-wide whitespace-nowrap ${
+                className={`font-medium transition-colors text-[10px] xl:text-xs uppercase tracking-wide whitespace-nowrap py-1 ${
                   isScrolled ? 'text-black hover:text-gray-700' : 'text-white hover:text-gray-200'
                 }`}
               >
                 Kontakt
               </NavLink>
-            </div>
 
-            {/* Right Section: Search and Cart (Mobile) / Search, Account, Cart (Desktop) */}
-            <div className="flex items-center gap-2 lg:gap-4 lg:ml-auto">
-              {/* Mobile Search Icon - Right Side */}
-              {!isShopPage && (
-                <button
-                  onClick={() => navigate('/shop')}
-                  className={`lg:hidden transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center ${
-                    isScrolled ? 'text-black hover:text-gray-700' : 'text-white hover:text-gray-200'
-                  }`}
-                  aria-label="Search"
-                >
-                  <Search size={18} />
-                </button>
-              )}
-
-              {/* Desktop Search Icon - Hidden on shop page */}
+              {/* Desktop Search Icon - Part of centered menu */}
               {!isShopPage && (
               <button
                   onClick={() => {
                     navigate('/shop');
                   }}
-                  className={`hidden lg:block transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center ${
+                  className={`hidden lg:block transition-colors min-h-[36px] min-w-[36px] flex items-center justify-center ${
                     isScrolled ? 'text-black hover:text-gray-700' : 'text-white hover:text-gray-200'
                   }`}
                 aria-label="Search"
               >
-                <Search size={20} />
+                <Search size={18} />
               </button>
               )}
 
-              {/* Account Dropdown - Desktop Only */}
+              {/* Account Dropdown - Desktop Only, Part of centered menu */}
               {user ? (
                 <div 
                   className="hidden lg:block relative"
@@ -308,13 +292,13 @@ const Navbar = () => {
                 >
                   <button 
                     onClick={() => setAccountDropdownOpen(!accountDropdownOpen)}
-                    className={`flex items-center gap-1 font-medium transition-colors text-xs uppercase tracking-wide whitespace-nowrap ${
+                    className={`flex items-center gap-1 font-medium transition-colors text-[10px] xl:text-xs uppercase tracking-wide whitespace-nowrap py-1 ${
                       isScrolled ? 'text-black hover:text-gray-700' : 'text-white hover:text-gray-200'
                     }`}
                   >
                     Account
                     <ChevronDown 
-                      size={12} 
+                      size={10} 
                       className={`transition-transform ${accountDropdownOpen ? 'rotate-180' : ''} ${
                         isScrolled ? 'text-gray-600' : 'text-white/80'
                       }`}
@@ -355,7 +339,7 @@ const Navbar = () => {
               ) : (
                 <NavLink 
                   to="/sign-up" 
-                  className={`hidden lg:block font-medium transition-colors text-xs uppercase tracking-wide whitespace-nowrap ${
+                  className={`hidden lg:block font-medium transition-colors text-[10px] xl:text-xs uppercase tracking-wide whitespace-nowrap py-1 ${
                     isScrolled ? 'text-black hover:text-gray-700' : 'text-white hover:text-gray-200'
                   }`}
                 >
@@ -363,13 +347,29 @@ const Navbar = () => {
                 </NavLink>
               )}
 
-              {/* Cart - Smaller on Mobile */}
-              <div className="lg:hidden">
+              {/* Cart - Part of centered menu on desktop */}
+              <div className="hidden lg:block">
                 <Cart isScrolled={isScrolled} onCartClick={() => setCartOpen(true)} iconSize={18} />
               </div>
-              <div className="hidden lg:block">
-                <Cart isScrolled={isScrolled} onCartClick={() => setCartOpen(true)} iconSize={20} />
-              </div>
+            </div>
+
+            {/* Mobile Right Section: Search and Cart */}
+            <div className="flex items-center gap-2 lg:hidden">
+              {/* Mobile Search Icon - Right Side */}
+              {!isShopPage && (
+                <button
+                  onClick={() => navigate('/shop')}
+                  className={`transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center ${
+                    isScrolled ? 'text-black hover:text-gray-700' : 'text-white hover:text-gray-200'
+                  }`}
+                  aria-label="Search"
+                >
+                  <Search size={18} />
+                </button>
+              )}
+
+              {/* Cart - Mobile */}
+              <Cart isScrolled={isScrolled} onCartClick={() => setCartOpen(true)} iconSize={18} />
             </div>
           </div>
 
