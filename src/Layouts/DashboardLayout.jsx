@@ -15,12 +15,12 @@ const DashboardLayout = () => {
         <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
         <div className="drawer-content flex flex-col">
           {/* Navbar */}
-          <div className="navbar bg-white/80 backdrop-blur shadow-md rounded-b-2xl w-full px-6 py-3 flex items-center justify-between">
+          <div className="navbar bg-white/80 backdrop-blur shadow-md rounded-b-2xl w-full px-4 sm:px-6 py-3 flex items-center justify-between">
             <div className="flex-none lg:hidden">
               <label
                 htmlFor="my-drawer-2"
                 aria-label="open sidebar"
-                className="btn btn-square btn-ghost"
+                className="btn btn-square btn-ghost min-h-[44px] min-w-[44px]"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -42,8 +42,8 @@ const DashboardLayout = () => {
             </div>
           </div>
           {/* Page content here */}
-          <main className="flex-1 p-4 md:p-8">
-            <div className="bg-white/90 rounded-3xl shadow-lg p-6 min-h-[70vh]">
+          <main className="flex-1 p-3 sm:p-4 md:p-6 lg:p-8">
+            <div className="bg-white/90 rounded-2xl sm:rounded-3xl shadow-lg p-4 sm:p-6 md:p-8 min-h-[70vh] overflow-x-hidden">
               <Outlet />
             </div>
           </main>
@@ -54,21 +54,21 @@ const DashboardLayout = () => {
             aria-label="close sidebar"
             className="drawer-overlay"
           ></label>
-          <aside className="menu bg-white/80 backdrop-blur border-r border-blue-100 shadow-xl min-h-full w-80 p-0 flex flex-col">
-            <div className="p-6 border-b border-blue-100 flex items-center gap-3">
+          <aside className="menu bg-white/80 backdrop-blur border-r border-blue-100 shadow-xl min-h-full w-64 sm:w-72 lg:w-80 p-0 flex flex-col">
+            <div className="p-4 sm:p-6 border-b border-blue-100 flex items-center gap-2 sm:gap-3">
               <img
                 src={user?.photoURL || userLogo}
                 alt="User"
-                className="w-12 h-12 rounded-full shadow object-cover"
+                className="w-10 h-10 sm:w-12 sm:h-12 rounded-full shadow object-cover flex-shrink-0"
               />
-              <div>
-                <div className="font-semibold text-blue-900">
+              <div className="min-w-0 flex-1">
+                <div className="font-semibold text-blue-900 text-sm sm:text-base truncate">
                   {user?.displayName || 'Welcome!'}
                 </div>
                 <div className="text-xs text-blue-500">Your Dashboard</div>
               </div>
             </div>
-            <div className="flex-1 p-4 overflow-y-auto">
+            <div className="flex-1 p-2 sm:p-4 overflow-y-auto -webkit-overflow-scrolling-touch">
               <Links />
             </div>
           </aside>

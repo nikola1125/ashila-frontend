@@ -40,7 +40,7 @@ if (missingVars.length > 0) {
   console.error('   VITE_FIREBASE_STORAGEBUCKET=your-project.appspot.com');
   console.error('   VITE_FIREBASE_MESSAGINGSENDERID=your-sender-id');
   console.error('   VITE_FIREBASE_APPID=your-app-id');
-  console.error('   VITE_BASE_API=http://localhost:5000');
+  console.error('   VITE_BASE_API=https://your-backend.onrender.com  # Use HTTPS for production');
   console.error('5. Restart your dev server (npm run dev)');
 }
 

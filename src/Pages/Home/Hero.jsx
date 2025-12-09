@@ -1,5 +1,5 @@
 // Hero with full screen background image that fades on scroll
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 const Hero = () => {
   const bg = 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=1600&auto=format&fit=crop&q=80';
@@ -43,15 +43,25 @@ const Hero = () => {
     };
   }, []);
 
+  // Use scroll attachment for mobile, fixed for desktop (better performance)
+  const [isMobile, setIsMobile] = useState(false);
+  
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   return (
     <section
       ref={heroRef}
-      className="relative w-full h-[70vh] md:h-screen overflow-hidden z-0"
+      className="relative w-full h-[60vh] sm:h-[70vh] md:h-screen overflow-hidden z-0"
       style={{ 
         backgroundImage: `url(${bg})`, 
         backgroundSize: 'cover', 
         backgroundPosition: 'center top', 
-        backgroundAttachment: 'fixed',
+        backgroundAttachment: isMobile ? 'scroll' : 'fixed', // Disable fixed on mobile for performance
         backgroundRepeat: 'no-repeat',
         opacity: 1,
         transform: 'translateZ(0)',
@@ -74,17 +84,34 @@ const Hero = () => {
       />
       
       {/* Hero Content Overlay */}
-      <div className="absolute inset-0 z-10 flex items-center justify-center md:items-end md:justify-end">
-        <div className="max-w-2xl md:max-w-3xl px-4 sm:px-6 pt-8 pb-2 sm:pt-0 sm:pb-20 md:pb-32 lg:pb-40 text-center md:text-right pr-0 md:pr-4 lg:pr-16 xl:pr-48 text-white">
-          <p className="text-base sm:text-lg md:text-xl lg:text-2xl leading-relaxed font-medium drop-shadow-lg mb-4 md:mb-6">
-            Premium beauty and skincare products crafted with natural ingredients. Experience the difference with our dermatologist-tested formulations.
-          </p>
-          <button
-            onClick={() => window.location.href = '/shop'}
-            className="bg-[#A67856] hover:bg-[#8B6345] text-white px-6 py-3 md:px-8 md:py-4 font-semibold transition-all duration-300 uppercase tracking-wide text-sm md:text-base border border-[#A67856]"
-          >
-            Zbulo produktet
-          </button>
+      <div className="absolute inset-0 z-10 flex items-center justify-center">
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col lg:flex-row items-center lg:items-end justify-between gap-8 lg:gap-16">
+            {/* Left side - Text content (positioned on left for desktop) */}
+            <div className="flex-1 max-w-2xl lg:max-w-3xl text-center lg:text-left lg:pb-24 xl:pb-32">
+              <p 
+                className="hero-text text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-medium text-white mb-6 md:mb-8"
+                style={{
+                  lineHeight: '1.6',
+                  textShadow: '0 2px 12px rgba(0, 0, 0, 0.6), 0 1px 3px rgba(0, 0, 0, 0.4)',
+                  fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif"
+                }}
+              >
+                Premium beauty and skincare products crafted with natural ingredients. Experience the difference with our dermatologist-tested formulations.
+              </p>
+              <div className="flex justify-center lg:justify-start">
+                <button
+                  onClick={() => window.location.href = '/shop'}
+                  className="bg-[#A67856] hover:bg-[#8B6345] active:bg-[#8B6345] text-white px-6 py-3 md:px-8 md:py-4 font-semibold transition-all duration-300 uppercase tracking-wide text-sm md:text-base border border-[#A67856] min-h-[44px] min-w-[160px] shadow-lg hover:shadow-xl transform hover:scale-105"
+                >
+                  Zbulo produktet
+                </button>
+              </div>
+            </div>
+            
+            {/* Right side - Empty space for desktop layout balance */}
+            <div className="hidden lg:block w-0 lg:w-64 xl:w-80 flex-shrink-0"></div>
+          </div>
         </div>
       </div>
     </section>

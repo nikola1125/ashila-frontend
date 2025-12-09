@@ -65,18 +65,18 @@ const Cart = () => {
       <Helmet key={location.pathname}>
         <title>Your Cart</title>
       </Helmet>
-      <div className="min-h-screen bg-[#faf9f6] py-12 px-2 md:px-0">
+      <div className="min-h-screen bg-[#faf9f6] py-8 sm:py-12 px-4 sm:px-2 md:px-0">
         <div className="max-w-3xl mx-auto bg-white shadow-md border-2 border-[#d4d4c4]">
-          <div className="p-8">
-            <div className="flex justify-between items-center mb-8">
-              <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">
+          <div className="p-4 sm:p-6 md:p-8">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 sm:mb-8">
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">
                 🛒 Your Cart
               </h2>
               <button
                 onClick={clearCart}
-                className="inline-flex items-center gap-1 text-sm font-semibold text-red-600 hover:text-white hover:bg-red-500 transition px-3 py-1.5 rounded-sm border border-red-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-red-400"
+                className="inline-flex items-center gap-1 text-xs sm:text-sm font-semibold text-red-600 hover:text-white hover:bg-red-500 transition px-3 py-2 sm:py-1.5 rounded-sm border border-red-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-red-400 min-h-[44px]"
               >
-                <FaTrash className="inline" /> Clear Cart
+                <FaTrash className="inline" /> <span className="hidden sm:inline">Clear Cart</span><span className="sm:hidden">Clear</span>
               </button>
             </div>
 
@@ -84,14 +84,14 @@ const Cart = () => {
               {items?.map((item) => (
                 <div
                   key={item.id}
-                  className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 bg-gray-50 rounded-sm border border-gray-200 shadow-sm"
+                  className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-3 sm:p-4 bg-gray-50 rounded-sm border border-gray-200 shadow-sm"
                 >
-                  <div className="flex items-center gap-4 w-full sm:w-auto">
-                    <div className="w-20 h-20 bg-gray-100 rounded-sm flex items-center justify-center mr-2 overflow-hidden">
+                  <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto">
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 rounded-sm flex items-center justify-center flex-shrink-0 overflow-hidden">
                       <img className='w-full h-full object-cover' src={item.image} alt="medicine image" />
                     </div>
-                    <div>
-                      <h3 className="font-bold text-gray-900 text-lg">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-bold text-gray-900 text-base sm:text-lg break-words">
                         {item.name}
                       </h3>
                       <p className="text-gray-700 text-sm">
@@ -110,26 +110,31 @@ const Cart = () => {
                         )}
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                      disabled={item.quantity <= 1}
-                      className="p-2 bg-[#faf9f6] hover:bg-[#946259] disabled:opacity-40 text-[#946259] transition-all border-2 border-[#946259]"
-                    >
-                      <FaMinus />
-                    </button>
-                    <span className="px-3 py-1 bg-white border-2 border-[#946259] text-[#946259] font-semibold shadow-sm">
-                      {item.quantity}
-                    </span>
-                    <button
-                      onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                      className="p-2 bg-[#faf9f6] hover:bg-[#946259] text-[#946259] transition-all border-2 border-[#946259]"
-                    >
-                      <FaPlus />
-                    </button>
+                  <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-start">
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                        disabled={item.quantity <= 1}
+                        className="p-2 sm:p-2.5 bg-[#faf9f6] hover:bg-[#946259] disabled:opacity-40 text-[#946259] transition-all border-2 border-[#946259] min-w-[44px] min-h-[44px] flex items-center justify-center"
+                        aria-label="Decrease quantity"
+                      >
+                        <FaMinus />
+                      </button>
+                      <span className="px-3 sm:px-4 py-1.5 sm:py-2 bg-white border-2 border-[#946259] text-[#946259] font-semibold shadow-sm min-w-[44px] text-center">
+                        {item.quantity}
+                      </span>
+                      <button
+                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                        className="p-2 sm:p-2.5 bg-[#faf9f6] hover:bg-[#946259] text-[#946259] transition-all border-2 border-[#946259] min-w-[44px] min-h-[44px] flex items-center justify-center"
+                        aria-label="Increase quantity"
+                      >
+                        <FaPlus />
+                      </button>
+                    </div>
                     <button
                       onClick={() => removeItem(item.id)}
-                      className="ml-2 text-red-500 hover:text-white hover:bg-red-500 p-2 rounded-sm border border-red-200 transition"
+                      className="text-red-500 hover:text-white hover:bg-red-500 p-2 sm:p-2.5 rounded-sm border border-red-200 transition min-w-[44px] min-h-[44px] flex items-center justify-center"
+                      aria-label="Remove item"
                     >
                       <FaTrash />
                     </button>
@@ -157,7 +162,7 @@ const Cart = () => {
                 </div>
                 <button
                   onClick={handleCheckout}
-                  className="w-full sm:w-auto bg-[#946259] text-white px-8 py-3 font-bold text-lg shadow-md hover:bg-[#7a4f47] transition-all border-2 border-[#946259] uppercase tracking-wide"
+                  className="w-full sm:w-auto bg-[#946259] text-white px-6 sm:px-8 py-3 sm:py-4 font-bold text-base sm:text-lg shadow-md hover:bg-[#7a4f47] active:bg-[#7a4f47] transition-all border-2 border-[#946259] uppercase tracking-wide min-h-[44px]"
                 >
                   Proceed to Checkout
                 </button>

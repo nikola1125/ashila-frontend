@@ -78,17 +78,17 @@ const ProductDetail = () => {
         <title>{product.itemName} - Product Details</title>
       </Helmet>
 
-      <div className="max-w-7xl mx-auto px-4 pt-32 md:pt-40 pb-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 sm:pt-32 md:pt-40 pb-8">
         {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 mb-8 sm:mb-12">
           {/* Left Column - Product Image */}
           <div className="relative bg-white rounded-sm overflow-hidden">
             {/* Product Image */}
-            <div className="flex items-center justify-center min-h-[500px] p-8">
+            <div className="flex items-center justify-center min-h-[300px] sm:min-h-[400px] md:min-h-[500px] p-4 sm:p-6 md:p-8">
               <img
                 src={product.image || '/placeholder.png'}
                 alt={product.itemName}
-                className="max-w-full max-h-[600px] object-contain"
+                className="max-w-full max-h-[400px] sm:max-h-[500px] md:max-h-[600px] object-contain w-full h-auto"
                 onError={(e) => {
                   e.target.src = '/placeholder.png';
                 }}
@@ -102,12 +102,12 @@ const ProductDetail = () => {
             <p className="text-sm text-gray-500 mb-2 font-light">Ashila</p>
 
             {/* Product Title */}
-            <h1 className="text-2xl md:text-3xl font-bold text-[#4A3628] mb-2">{product.itemName}</h1>
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#4A3628] mb-2 break-words">{product.itemName}</h1>
             <div className="w-16 h-0.5 bg-[#A67856] mb-4"></div>
 
             {/* Price */}
-            <div className="mb-6">
-              <span className="text-xl md:text-2xl font-semibold text-[#4A3628]">
+            <div className="mb-4 sm:mb-6">
+              <span className="text-lg sm:text-xl md:text-2xl font-semibold text-[#4A3628]">
                 {discountedPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ALL
               </span>
             </div>
@@ -165,13 +165,13 @@ const ProductDetail = () => {
                 <>
                   <button
                     onClick={handleAddToCart}
-                    className="w-full bg-white hover:bg-[#EBD8C8] text-[#4A3628] px-6 py-3 font-semibold transition-all duration-200 border border-[#4A3628] uppercase tracking-wide"
+                    className="w-full bg-white hover:bg-[#EBD8C8] text-[#4A3628] px-4 sm:px-6 py-3 sm:py-4 font-semibold transition-all duration-200 border border-[#4A3628] uppercase tracking-wide text-sm sm:text-base min-h-[44px]"
                   >
                     Add to cart
                   </button>
                   <button
                     onClick={handleBuyNow}
-                    className="w-full bg-[#A67856] hover:bg-[#8B6345] text-white px-6 py-3 font-semibold transition-all duration-200 uppercase tracking-wide"
+                    className="w-full bg-[#A67856] hover:bg-[#8B6345] text-white px-4 sm:px-6 py-3 sm:py-4 font-semibold transition-all duration-200 uppercase tracking-wide text-sm sm:text-base min-h-[44px]"
                   >
                     Buy it now
                   </button>
@@ -179,7 +179,7 @@ const ProductDetail = () => {
               ) : (
                 <button
                   disabled
-                  className="w-full bg-gray-200 text-gray-500 px-6 py-3 font-medium cursor-not-allowed"
+                  className="w-full bg-gray-200 text-gray-500 px-4 sm:px-6 py-3 sm:py-4 font-medium cursor-not-allowed min-h-[44px]"
                 >
                   Sold out
                 </button>

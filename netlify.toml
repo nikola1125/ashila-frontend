@@ -6,7 +6,16 @@
 [build.environment]
   NODE_VERSION = "18"
 
-
+# Environment variables should be set in Netlify Dashboard:
+# Site settings → Environment variables
+# Required variables:
+# - VITE_BASE_API=https://your-backend.onrender.com (MUST be HTTPS)
+# - VITE_FIREBASE_APIKEY=your-firebase-api-key
+# - VITE_FIREBASE_AUTHDOMAIN=your-project.firebaseapp.com
+# - VITE_FIREBASE_PROJECTID=your-project-id
+# - VITE_FIREBASE_STORAGEBUCKET=your-project.appspot.com
+# - VITE_FIREBASE_MESSAGINGSENDERID=your-sender-id
+# - VITE_FIREBASE_APPID=your-app-id
 
 [[redirects]]
   from = "/*"
