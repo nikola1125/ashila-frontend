@@ -161,6 +161,12 @@ header {
   }
 }
 
+/* Ensure all acne category items are the same size */
+.acne-category-grid > button {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+}
+
 /* Mobile-first responsive utilities */
 @media (max-width: 640px) {
   /* Ensure text is readable on mobile */

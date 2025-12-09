@@ -97,15 +97,15 @@ const Hero = () => {
                   fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif"
                 }}
               >
-                Premium beauty and skincare products crafted with natural ingredients. Experience the difference with our dermatologist-tested formulations.
-              </p>
+            Premium beauty and skincare products crafted with natural ingredients. Experience the difference with our dermatologist-tested formulations.
+          </p>
               <div className="flex justify-center lg:justify-start">
-                <button
-                  onClick={() => window.location.href = '/shop'}
+          <button
+            onClick={() => window.location.href = '/shop'}
                   className="bg-[#A67856] hover:bg-[#8B6345] active:bg-[#8B6345] text-white px-6 py-3 md:px-8 md:py-4 font-semibold transition-all duration-300 uppercase tracking-wide text-sm md:text-base border border-[#A67856] min-h-[44px] min-w-[160px] shadow-lg hover:shadow-xl transform hover:scale-105"
-                >
-                  Zbulo produktet
-                </button>
+          >
+            Zbulo produktet
+          </button>
               </div>
             </div>
             

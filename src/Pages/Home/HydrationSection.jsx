@@ -10,7 +10,7 @@ const HydrationSection = () => {
   };
 
   return (
-    <section className="pt-8 pb-8 md:pt-6 md:pb-12 bg-white relative overflow-hidden mt-0 md:mt-0">
+    <section className="pt-4 pb-8 md:pt-6 md:pb-12 bg-white relative overflow-hidden mt-0 md:mt-0">
       <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
         {/* Section Label */}
         <div className="mb-4 md:mb-12 text-center">

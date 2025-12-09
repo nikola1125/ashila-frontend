@@ -19,7 +19,8 @@ const Logo = ({ isScrolled = true }) => {
         <img 
           src={logo} 
           alt="Ashila Pharmacy Logo" 
-          className="h-10 sm:h-12 md:h-14 lg:h-12 w-auto object-contain" 
+          className="h-3 sm:h-4 md:h-4 lg:h-5 w-auto object-contain max-h-full max-w-[120px] lg:max-w-[100px]" 
+          style={{ maxHeight: '100%', maxWidth: '120px' }}
         />
       </NavLink>
     </>

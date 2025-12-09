@@ -156,8 +156,8 @@ const Navbar = () => {
               {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
 
-            {/* Logo - Only visible on mobile, hidden on desktop */}
-            <div className="flex-shrink-0 flex-1 lg:hidden flex justify-center pl-8 sm:pl-10">
+            {/* Logo - Mobile: Centered, Desktop: Left inside navbar */}
+            <div className="flex-shrink-0 flex-1 lg:flex-none lg:flex lg:justify-start flex justify-center items-center absolute left-1/2 lg:relative lg:left-0 lg:transform-none transform -translate-x-1/2 z-10">
               <Logo />
             </div>
 
@@ -353,13 +353,13 @@ const Navbar = () => {
               </div>
             </div>
 
-            {/* Mobile Right Section: Search and Cart */}
-            <div className="flex items-center gap-2 lg:hidden">
+            {/* Mobile Right Section: Search and Cart - Very close together */}
+            <div className="flex items-center gap-0 lg:hidden ml-auto">
               {/* Mobile Search Icon - Right Side */}
               {!isShopPage && (
                 <button
                   onClick={() => navigate('/shop')}
-                  className={`transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center ${
+                  className={`transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center -mr-3 ${
                     isScrolled ? 'text-black hover:text-gray-700' : 'text-white hover:text-gray-200'
                   }`}
                   aria-label="Search"
@@ -375,14 +375,16 @@ const Navbar = () => {
 
           {/* Mobile Menu with Animation */}
           <div 
-            className={`lg:hidden fixed top-full left-0 right-0 border-t border-gray-200 bg-white overflow-hidden z-40 shadow-lg transition-all duration-500 ease-out ${
+            className={`lg:hidden fixed top-full left-0 right-0 border-t border-gray-200 bg-white overflow-hidden z-40 shadow-lg transition-all duration-300 ease-out ${
               mobileMenuOpen 
                 ? 'opacity-100 translate-y-0 max-h-[calc(100vh-120px)] visible' 
                 : 'opacity-0 -translate-y-8 max-h-0 invisible pointer-events-none'
             }`}
             style={{ top: '100%' }}
           >
-        <div className="py-4 flex flex-col gap-0 max-h-[calc(100vh-140px)] overflow-y-auto">
+        <div className={`py-4 flex flex-col gap-0 max-h-[calc(100vh-140px)] overflow-y-auto ${
+          mobileMenuOpen ? 'opacity-100' : 'opacity-0'
+        }`}>
 
               {/* Mobile Navigation Links */}
               <NavLink 

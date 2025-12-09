@@ -39,7 +39,7 @@ const ShopGrid = ({
   return (
     <div>
       {/* Grid Layout - 2 products per row on mobile, 3 on desktop */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-5 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-5 mb-8 px-2 md:px-0">
         {paginatedMedicines?.map((medicine, index) => {
           const isVisible = visibleItems.has(`product-${medicine._id || index}`);
           return (
@@ -130,7 +130,7 @@ const ShopGrid = ({
             <div className="p-1.5 md:p-2">
               {/* Medicine Name */}
               <h3 
-                className="font-medium text-[10px] md:text-xs text-gray-900 mb-0.5 md:mb-1 line-clamp-2 min-h-[1.5rem] md:min-h-[1.75rem] cursor-pointer hover:text-gray-600 transition-colors"
+                className="font-medium text-[9px] md:text-xs text-gray-900 mb-0.5 md:mb-1 line-clamp-2 min-h-[1.5rem] md:min-h-[1.75rem] cursor-pointer hover:text-gray-600 transition-colors"
                 onClick={() => {
                   window.scrollTo({ top: 0, behavior: 'instant' });
                   navigate(`/product/${medicine._id}`);
