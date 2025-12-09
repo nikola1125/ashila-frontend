@@ -177,7 +177,7 @@ const Shop = () => {
       <Helmet key={location.pathname}>
         <title>Shop</title>
       </Helmet>
-      <section className="min-h-[80vh] pt-20 pb-4 sm:pt-24 sm:pb-8 bg-white">
+      <section className="min-h-[80vh] pt-24 pb-4 sm:pt-24 sm:pb-8 bg-white">
         <div className="max-w-full mx-auto pl-0 pr-2 md:pl-0 md:pr-4 lg:pl-0 lg:pr-6">
           {/* Header */}
           <div className="mb-8 sm:mb-12 text-center">

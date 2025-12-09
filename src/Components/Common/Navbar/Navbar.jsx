@@ -45,16 +45,30 @@ const Navbar = () => {
     return () => (mounted = false);
   }, [publicApi]);
 
-  // Handle scroll to make navbar visible - optimized single handler
+  // Handle scroll to make navbar visible - optimized single handler with debounce
   useEffect(() => {
     let ticking = false;
     let rafId = null;
+    let lastScrollY = 0;
+    let scrollTimeout = null;
 
     const handleScroll = () => {
       if (!ticking) {
         rafId = requestAnimationFrame(() => {
           const scrollY = window.scrollY;
-          setIsScrolled(scrollY > 20); // Show white navbar after scrolling 20px
+          const scrollDifference = Math.abs(scrollY - lastScrollY);
+          
+          // On shop page, always show white navbar. On home page, show after scrolling
+          if (isShopPage) {
+            setIsScrolled(true); // Always white navbar on shop page
+          } else {
+            // Only update if scroll difference is significant (prevents rapid toggling)
+            if (scrollDifference > 5) {
+              setIsScrolled(scrollY > 20); // Show white navbar after scrolling 20px
+              lastScrollY = scrollY;
+            }
+          }
+          
           ticking = false;
         });
         ticking = true;
@@ -63,7 +77,13 @@ const Navbar = () => {
 
     // Check initial scroll position
     const checkInitialScroll = () => {
-      setIsScrolled(window.scrollY > 20);
+      lastScrollY = window.scrollY;
+      // On shop page, always show white navbar
+      if (isShopPage) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(window.scrollY > 20);
+      }
     };
     
     // Check after render
@@ -75,12 +95,18 @@ const Navbar = () => {
       if (rafId) {
         cancelAnimationFrame(rafId);
       }
+      if (scrollTimeout) {
+        clearTimeout(scrollTimeout);
+      }
     };
-  }, []);
+  }, [isShopPage]);
 
-  // Close mobile menu when clicking outside or on route change
+  // Close mobile menu when clicking outside, scrolling, or on route change
   useEffect(() => {
     if (!mobileMenuOpen) return;
+
+    let lastScrollY = window.scrollY;
+    let scrollTimeout = null;
 
     const handleClickOutside = (event) => {
       const header = document.querySelector('header');
@@ -89,17 +115,26 @@ const Navbar = () => {
       }
     };
 
-    // Prevent body scroll when menu is open
-    document.body.style.overflow = 'hidden';
-    
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      // Close menu when scrolling down (more than 10px difference)
+      if (currentScrollY > lastScrollY + 10) {
+        setMobileMenuOpen(false);
+      }
+      lastScrollY = currentScrollY;
+    };
+
+    // Allow scrolling but close menu on scroll
     // Use mousedown instead of click to avoid conflicts
     document.addEventListener('mousedown', handleClickOutside);
     document.addEventListener('touchstart', handleClickOutside);
+    window.addEventListener('scroll', handleScroll, { passive: true });
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('touchstart', handleClickOutside);
-      document.body.style.overflow = '';
+      window.removeEventListener('scroll', handleScroll);
+      if (scrollTimeout) clearTimeout(scrollTimeout);
     };
   }, [mobileMenuOpen]);
 
@@ -121,7 +156,7 @@ const Navbar = () => {
   return (
     <header 
       className={`w-full fixed top-0 left-0 right-0 z-[100] transition-all duration-300 ${
-        isScrolled ? 'bg-white shadow-md' : 'bg-transparent'
+        isScrolled || isShopPage ? 'bg-white shadow-md' : 'bg-transparent'
       }`}
       style={{ 
         position: 'fixed',
@@ -138,7 +173,7 @@ const Navbar = () => {
     >
       {/* Main Navbar */}
       <nav className={`relative border-b transition-all duration-300 ${
-        isScrolled ? 'border-gray-200 bg-white' : 'border-transparent bg-transparent'
+        isScrolled || isShopPage ? 'border-gray-200 bg-white' : 'border-transparent bg-transparent'
       }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="py-2 sm:py-2.5 lg:py-2 flex items-center justify-between gap-2 lg:gap-3">
@@ -360,7 +395,7 @@ const Navbar = () => {
                 <button
                   onClick={() => navigate('/shop')}
                   className={`transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center -mr-3 ${
-                    isScrolled ? 'text-black hover:text-gray-700' : 'text-white hover:text-gray-200'
+                    isScrolled || isShopPage ? 'text-black hover:text-gray-700' : 'text-white hover:text-gray-200'
                   }`}
                   aria-label="Search"
                 >
@@ -369,7 +404,7 @@ const Navbar = () => {
               )}
 
               {/* Cart - Mobile */}
-              <Cart isScrolled={isScrolled} onCartClick={() => setCartOpen(true)} iconSize={18} />
+              <Cart isScrolled={isScrolled || isShopPage} onCartClick={() => setCartOpen(true)} iconSize={18} />
             </div>
           </div>
 
