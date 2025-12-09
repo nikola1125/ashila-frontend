@@ -7,13 +7,13 @@ const Cart = ({ isScrolled = true, onCartClick, iconSize = 20 }) => {
   return (
     <button
       onClick={onCartClick}
-      className="relative p-1.5 hover:opacity-80 transition-opacity"
+      className="relative p-1.5 hover:opacity-80 transition-opacity min-h-[44px] min-w-[44px] flex items-center justify-center"
       aria-label="Open cart"
     >
       <div className="relative">
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          className={`${isScrolled ? 'text-[#A67856]' : 'text-gray-900'}`}
+          className={isScrolled ? 'text-[#A67856]' : 'text-white'}
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"

@@ -18,7 +18,7 @@ const Home = memo(() => {
         <Hero />
       </div>
       
-      <div className="relative z-20 bg-white">
+      <div className="relative z-10 bg-white">
         <BestSeller />
         <HydrationSection />
         <AcneCategories />

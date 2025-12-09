@@ -28,22 +28,6 @@ const Navbar = () => {
   // Check if we're on shop page, product detail page, or cart page
   const isShopPage = location.pathname === '/shop' || location.pathname.startsWith('/product/') || location.pathname === '/cart';
   
-  // Handle scroll to change navbar background
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollY = window.scrollY;
-      setIsScrolled(scrollY > 0);
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    // Check initial scroll position
-    handleScroll();
-
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, []);
-
   // Fetch categories on mount
   useEffect(() => {
     let mounted = true;
@@ -61,7 +45,7 @@ const Navbar = () => {
     return () => (mounted = false);
   }, [publicApi]);
 
-  // Handle scroll to make navbar visible - throttled with requestAnimationFrame
+  // Handle scroll to make navbar visible - optimized single handler
   useEffect(() => {
     let ticking = false;
     let rafId = null;
@@ -77,17 +61,12 @@ const Navbar = () => {
       }
     };
 
-    // Check initial scroll position after a brief delay to ensure page is loaded
-    // Only set to true if actually scrolled, otherwise keep it false (transparent)
+    // Check initial scroll position
     const checkInitialScroll = () => {
-      if (window.scrollY > 20) {
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
-      }
+      setIsScrolled(window.scrollY > 20);
     };
     
-    // Use setTimeout to check after render
+    // Check after render
     setTimeout(checkInitialScroll, 0);
 
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -141,8 +120,8 @@ const Navbar = () => {
 
   return (
     <header 
-      className={`w-full fixed top-0 left-0 right-0 z-[9999] transition-all duration-300 ${
-        isScrolled ? 'bg-white shadow-sm' : 'bg-transparent'
+      className={`w-full fixed top-0 left-0 right-0 z-[100] transition-all duration-300 ${
+        isScrolled ? 'bg-white shadow-md' : 'bg-transparent'
       }`}
       style={{ 
         position: 'fixed',
@@ -153,32 +132,32 @@ const Navbar = () => {
         transform: 'translate3d(0, 0, 0)',
         WebkitBackfaceVisibility: 'hidden',
         backfaceVisibility: 'hidden',
-        willChange: 'transform',
-        WebkitOverflowScrolling: 'touch',
-        visibility: 'visible',
-        opacity: 1
+        willChange: 'auto',
+        WebkitOverflowScrolling: 'touch'
       }}
     >
       {/* Main Navbar */}
       <nav className={`relative border-b transition-all duration-300 ${
         isScrolled ? 'border-gray-200 bg-white' : 'border-transparent bg-transparent'
       }`}>
-        <div className="max-w-[95%] mx-auto px-4 md:px-6 lg:px-8">
-          <div className="py-4 flex items-center justify-between gap-3">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="py-3 sm:py-4 flex items-center justify-between gap-3">
             {/* Mobile Menu Button - Left Side */}
             <button 
               onClick={(e) => {
                 e.stopPropagation();
                 setMobileMenuOpen(!mobileMenuOpen);
               }} 
-              className="lg:hidden transition-colors z-50 text-black hover:text-gray-700"
+              className={`lg:hidden transition-colors z-50 min-h-[44px] min-w-[44px] flex items-center justify-center ${
+                isScrolled ? 'text-black hover:text-gray-700' : 'text-white hover:text-gray-200'
+              }`}
               aria-label="Toggle menu"
             >
               {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
 
-            {/* Logo - shifted slightly right on mobile */}
-            <div className="flex-shrink-0 flex-1 lg:flex-none flex justify-center lg:justify-start pl-10 sm:pl-12 lg:pl-0">
+            {/* Logo - centered on mobile, left on desktop */}
+            <div className="flex-shrink-0 flex-1 lg:flex-none flex justify-center lg:justify-start pl-8 sm:pl-10 lg:pl-0">
               <Logo />
             </div>
 
@@ -191,7 +170,9 @@ const Navbar = () => {
                         window.scrollTo({ top: 0, behavior: 'instant' });
                       }
                     }}
-                    className="font-medium transition-colors text-xs uppercase tracking-wide whitespace-nowrap text-black hover:text-gray-700"
+                    className={`font-medium transition-colors text-xs uppercase tracking-wide whitespace-nowrap ${
+                      isScrolled ? 'text-black hover:text-gray-700' : 'text-white hover:text-gray-200'
+                    }`}
               >
                 Kreu
               </NavLink>
@@ -207,12 +188,14 @@ const Navbar = () => {
                     setActiveGroup(null);
                   }}
                 >
-                  <button className="flex items-center gap-1 font-medium transition-colors text-xs uppercase tracking-wide py-2 whitespace-nowrap text-black hover:text-gray-700">
+                  <button className={`flex items-center gap-1 font-medium transition-colors text-xs uppercase tracking-wide py-2 whitespace-nowrap ${
+                    isScrolled ? 'text-black hover:text-gray-700' : 'text-white hover:text-gray-200'
+                  }`}>
                     {category.categoryName}
                     {category.groups && category.groups.length > 0 && (
                       <ChevronDown 
                         size={12} 
-                        className="text-gray-700" 
+                        className={isScrolled ? 'text-gray-700' : 'text-white/80'} 
                       />
                     )}
                   </button>
@@ -278,7 +261,9 @@ const Navbar = () => {
 
               <NavLink 
                 to="/contact" 
-                className="font-medium transition-colors text-xs uppercase tracking-wide whitespace-nowrap text-black hover:text-gray-700"
+                className={`font-medium transition-colors text-xs uppercase tracking-wide whitespace-nowrap ${
+                  isScrolled ? 'text-black hover:text-gray-700' : 'text-white hover:text-gray-200'
+                }`}
               >
                 Kontakt
               </NavLink>
@@ -290,7 +275,9 @@ const Navbar = () => {
               {!isShopPage && (
                 <button
                   onClick={() => navigate('/shop')}
-                  className="lg:hidden transition-colors text-black hover:text-gray-700"
+                  className={`lg:hidden transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center ${
+                    isScrolled ? 'text-black hover:text-gray-700' : 'text-white hover:text-gray-200'
+                  }`}
                   aria-label="Search"
                 >
                   <Search size={18} />
@@ -303,7 +290,9 @@ const Navbar = () => {
                   onClick={() => {
                     navigate('/shop');
                   }}
-                  className="hidden lg:block transition-colors text-black hover:text-gray-700"
+                  className={`hidden lg:block transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center ${
+                    isScrolled ? 'text-black hover:text-gray-700' : 'text-white hover:text-gray-200'
+                  }`}
                 aria-label="Search"
               >
                 <Search size={20} />
@@ -319,12 +308,16 @@ const Navbar = () => {
                 >
                   <button 
                     onClick={() => setAccountDropdownOpen(!accountDropdownOpen)}
-                    className="flex items-center gap-1 font-medium transition-colors text-xs uppercase tracking-wide whitespace-nowrap text-black hover:text-gray-700"
+                    className={`flex items-center gap-1 font-medium transition-colors text-xs uppercase tracking-wide whitespace-nowrap ${
+                      isScrolled ? 'text-black hover:text-gray-700' : 'text-white hover:text-gray-200'
+                    }`}
                   >
                     Account
                     <ChevronDown 
                       size={12} 
-                      className={`text-gray-600 transition-transform ${accountDropdownOpen ? 'rotate-180' : ''}`}
+                      className={`transition-transform ${accountDropdownOpen ? 'rotate-180' : ''} ${
+                        isScrolled ? 'text-gray-600' : 'text-white/80'
+                      }`}
                     />
                   </button>
                   
@@ -362,7 +355,9 @@ const Navbar = () => {
               ) : (
                 <NavLink 
                   to="/sign-up" 
-                  className="hidden lg:block font-medium transition-colors text-xs uppercase tracking-wide whitespace-nowrap text-black hover:text-gray-700"
+                  className={`hidden lg:block font-medium transition-colors text-xs uppercase tracking-wide whitespace-nowrap ${
+                    isScrolled ? 'text-black hover:text-gray-700' : 'text-white hover:text-gray-200'
+                  }`}
                 >
                   Account
                 </NavLink>
@@ -370,21 +365,22 @@ const Navbar = () => {
 
               {/* Cart - Smaller on Mobile */}
               <div className="lg:hidden">
-                <Cart onCartClick={() => setCartOpen(true)} iconSize={18} />
+                <Cart isScrolled={isScrolled} onCartClick={() => setCartOpen(true)} iconSize={18} />
               </div>
               <div className="hidden lg:block">
-                <Cart onCartClick={() => setCartOpen(true)} iconSize={20} />
+                <Cart isScrolled={isScrolled} onCartClick={() => setCartOpen(true)} iconSize={20} />
               </div>
             </div>
           </div>
 
           {/* Mobile Menu with Animation */}
           <div 
-            className={`lg:hidden fixed top-full left-0 right-0 border-t border-gray-200 bg-white overflow-hidden z-50 shadow-lg transition-all duration-500 ease-out ${
+            className={`lg:hidden fixed top-full left-0 right-0 border-t border-gray-200 bg-white overflow-hidden z-40 shadow-lg transition-all duration-500 ease-out ${
               mobileMenuOpen 
                 ? 'opacity-100 translate-y-0 max-h-[calc(100vh-120px)] visible' 
                 : 'opacity-0 -translate-y-8 max-h-0 invisible pointer-events-none'
             }`}
+            style={{ top: '100%' }}
           >
         <div className="py-4 flex flex-col gap-0 max-h-[calc(100vh-140px)] overflow-y-auto">
 
@@ -483,7 +479,7 @@ const Navbar = () => {
                                 setMobileMenuOpen(false);
                                 setMobileOpenCategoryId(null);
                               }}
-                              className="block text-white font-medium text-sm hover:bg-white/10 transition-colors px-6 py-2.5"
+                              className="block text-black font-medium text-sm hover:bg-gray-100 transition-colors px-6 py-2.5"
                             >
                               {group.groupName}
                             </NavLink>
