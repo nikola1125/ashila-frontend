@@ -13,12 +13,13 @@ const Cart = ({ isScrolled = true, onCartClick, iconSize = 20 }) => {
       <div className="relative">
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          className={`transition-colors duration-200 ${isScrolled ? 'text-[#A67856]' : 'text-white'}`}
+          className={`transition-colors duration-300 ease-in-out ${isScrolled ? 'text-[#A67856]' : 'text-white'}`}
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
           width={iconSize}
           height={iconSize}
+          style={{ willChange: 'color' }}
         >
           <path
             strokeLinecap="round"

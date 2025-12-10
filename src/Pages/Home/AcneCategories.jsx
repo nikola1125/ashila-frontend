@@ -63,26 +63,26 @@ const AcneCategories = () => {
               onClick={() => navigate(`/shop?category=${item.key}`)}
               className="group relative w-full aspect-square overflow-hidden border-2 border-[#D9BFA9] hover:border-[#A67856] shadow-sm hover:shadow-lg transition-all duration-200"
             >
-              <img
-                src={item.image}
-                alt={item.title}
+                <img
+                  src={item.image}
+                  alt={item.title}
                 className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
                 loading="lazy"
                 style={{ display: 'block', width: '100%', height: '100%', objectFit: 'cover' }}
-                onError={(e) => {
-                  e.target.src = `https://via.placeholder.com/400x400/EFEEED/999999?text=${encodeURIComponent(item.title)}`;
-                }}
-              />
-              
+                  onError={(e) => {
+                    e.target.src = `https://via.placeholder.com/400x400/EFEEED/999999?text=${encodeURIComponent(item.title)}`;
+                  }}
+                />
+                
               {/* Overlay ONLY on hover - Desktop */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col justify-end p-6 pointer-events-none">
                 <h3 className="text-white font-semibold text-base lg:text-lg mb-2 drop-shadow-lg">
-                  {item.title}
-                </h3>
+                    {item.title}
+                  </h3>
                 <div className="w-12 h-0.5 bg-[#A67856] mb-3"></div>
                 <span className="text-white text-sm bg-white/20 backdrop-blur-sm px-4 py-2 inline-block border border-white/30">
-                  Shiko produktet
-                </span>
+                    Shiko produktet
+                  </span>
               </div>
             </button>
           ))}
@@ -136,16 +136,16 @@ const AcneCategories = () => {
                       onClick={() => navigate(`/shop?category=${item.key}`)}
                       className="group relative w-full aspect-square overflow-hidden border-2 border-[#D9BFA9] active:border-[#A67856] shadow-sm transition-all duration-200"
                     >
-                      <img
-                        src={item.image}
-                        alt={item.title}
-                        className="w-full h-full object-cover"
+                        <img
+                          src={item.image}
+                          alt={item.title}
+                          className="w-full h-full object-cover"
                         loading="lazy"
                         style={{ display: 'block', width: '100%', height: '100%', objectFit: 'cover' }}
-                        onError={(e) => {
-                          e.target.src = `https://via.placeholder.com/400x400/EFEEED/999999?text=${encodeURIComponent(item.title)}`;
-                        }}
-                      />
+                          onError={(e) => {
+                            e.target.src = `https://via.placeholder.com/400x400/EFEEED/999999?text=${encodeURIComponent(item.title)}`;
+                          }}
+                        />
                       {/* Elegant static overlay for mobile - ALWAYS VISIBLE */}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent flex flex-col justify-end p-3 pointer-events-none">
                         <h3 className="text-white font-semibold text-xs text-center mb-1 drop-shadow-lg">

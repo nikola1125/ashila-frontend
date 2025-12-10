@@ -51,6 +51,7 @@ const Navbar = () => {
     let rafId = null;
     let lastScrollY = 0;
     let scrollTimeout = null;
+    let lastState = false;
 
     const handleScroll = () => {
       if (!ticking) {
@@ -60,11 +61,18 @@ const Navbar = () => {
           
           // On shop page, always show white navbar. On home page, show after scrolling
           if (isShopPage) {
-            setIsScrolled(true); // Always white navbar on shop page
+            if (!lastState) {
+              setIsScrolled(true); // Always white navbar on shop page
+              lastState = true;
+            }
           } else {
-            // Only update if scroll difference is significant (prevents rapid toggling)
-            if (scrollDifference > 5) {
-              setIsScrolled(scrollY > 20); // Show white navbar after scrolling 20px
+            // Only update if scroll difference is significant AND state would actually change
+            const newState = scrollY > 20;
+            if (scrollDifference > 10 && newState !== lastState) {
+              setIsScrolled(newState);
+              lastScrollY = scrollY;
+              lastState = newState;
+            } else if (scrollDifference > 10) {
               lastScrollY = scrollY;
             }
           }
@@ -81,8 +89,11 @@ const Navbar = () => {
       // On shop page, always show white navbar
       if (isShopPage) {
         setIsScrolled(true);
+        lastState = true;
       } else {
-        setIsScrolled(window.scrollY > 20);
+        const initialState = window.scrollY > 20;
+        setIsScrolled(initialState);
+        lastState = initialState;
       }
     };
     
