@@ -163,26 +163,27 @@ const BestSeller = () => {
           {/* Products Carousel */}
           {!loading && !error && products.length > 0 && (
             <>
-              <div className="relative">
-                {/* Left Arrow - Only show when scrolled, hidden on mobile */}
-                {showLeftArrow && (
-                  <button
-                    onClick={() => scroll('left')}
-                    className="hidden md:block absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white rounded-full p-2 shadow-lg hover:bg-gray-50 transition-all"
-                    aria-label="Scroll left"
-                  >
-                    <ChevronLeft size={24} className="text-gray-700" />
-                  </button>
-                )}
-
-                {/* Scrollable Container - Show 4 products on desktop */}
+              <div className="relative flex items-center justify-center">
+                {/* Scrollable Container - Show 4 products on desktop, centered */}
                 <div 
-                  className="overflow-hidden px-4 md:px-12"
+                  className="relative overflow-hidden px-4 md:px-0 md:mx-auto"
                   style={{
                     // On desktop, limit visible width to show exactly 4 products
-                    // 4 products * 256px (w-64) + 3 gaps * 24px (gap-6) = 1024 + 72 = 1096px
+                    // 4 products * 224px (w-56) + 3 gaps * 24px (gap-6) = 896 + 72 = 968px
+                    maxWidth: '968px'
                   }}
                 >
+                  {/* Left Arrow - Only show when scrolled, hidden on mobile */}
+                  {showLeftArrow && (
+                    <button
+                      onClick={() => scroll('left')}
+                      className="hidden md:block absolute left-0 top-1/2 -translate-y-1/2 -translate-x-12 z-10 bg-white rounded-full p-2 shadow-lg hover:bg-gray-50 transition-all"
+                      aria-label="Scroll left"
+                    >
+                      <ChevronLeft size={24} className="text-gray-700" />
+                    </button>
+                  )}
+
                   <div
                     ref={scrollContainerRef}
                     className="flex gap-6 overflow-x-auto scroll-smooth pb-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
@@ -265,18 +266,18 @@ const BestSeller = () => {
                       );
                     })}
                   </div>
-                </div>
 
-                {/* Right Arrow - Only show when there are more products, hidden on mobile */}
-                {showRightArrow && (
-                  <button
-                    onClick={() => scroll('right')}
-                    className="hidden md:block absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white p-2 shadow-lg hover:bg-[#EBD8C8] transition-all border-2 border-[#D9BFA9]"
-                    aria-label="Scroll right"
-                  >
-                    <ChevronRight size={24} className="text-[#A67856]" />
-                  </button>
-                )}
+                  {/* Right Arrow - Only show when there are more products, hidden on mobile */}
+                  {showRightArrow && (
+                    <button
+                      onClick={() => scroll('right')}
+                      className="hidden md:block absolute right-0 top-1/2 -translate-y-1/2 translate-x-12 z-10 bg-white p-2 shadow-lg hover:bg-[#EBD8C8] transition-all border-2 border-[#D9BFA9]"
+                      aria-label="Scroll right"
+                    >
+                      <ChevronRight size={24} className="text-[#A67856]" />
+                    </button>
+                  )}
+                </div>
               </div>
               
               {/* Page numbers for mobile */}

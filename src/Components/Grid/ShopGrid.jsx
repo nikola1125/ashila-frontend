@@ -46,7 +46,7 @@ const ShopGrid = ({
             <div
             key={medicine._id || index}
             id={`product-${medicine._id || index}`}
-            className={`product-card bg-white transition-all duration-200 overflow-hidden group ${
+            className={`product-card bg-white transition-all duration-200 overflow-hidden group border-2 border-[#D9BFA9] shadow-sm hover:shadow-lg ${
               isVisible 
                 ? 'opacity-100 translate-y-0' 
                 : 'opacity-0 translate-y-8'

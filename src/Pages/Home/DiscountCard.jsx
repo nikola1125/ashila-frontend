@@ -2,7 +2,7 @@ import React from 'react';
 
 const DiscountCard = ({ medicine }) => {
   return (
-    <div className="bg-white shadow-sm border-2 border-[#d4d4c4] p-4 flex flex-col items-center transition-all hover:shadow-lg">
+    <div className="bg-white shadow-sm border-2 border-[#D9BFA9] p-4 flex flex-col items-center transition-all hover:shadow-lg">
       <div className="w-28 h-28 mb-3 flex items-center justify-center bg-[#faf9f6] overflow-hidden">
         <img
           src={medicine.image}

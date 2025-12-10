@@ -96,7 +96,7 @@ const Login = () => {
     }
   };
   return (
-    <div className="flex justify-center my-6">
+    <div className="flex justify-center pt-24 sm:pt-28 md:pt-32 min-h-screen my-6">
       <div className="w-full max-w-md p-8 space-y-3 rounded-sm bg-white text-gray-800 border border-gray-300 shadow-sm">
         <Helmet key={location.pathname}>
           <title>Login</title>

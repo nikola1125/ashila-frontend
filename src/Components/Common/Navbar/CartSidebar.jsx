@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo } from 'react';
+import React, { useContext, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CartContext } from '../../../Context/Cart/CartContext';
 import { AuthContext } from '../../../Context/Auth/AuthContext';
@@ -12,11 +12,19 @@ const CartSidebar = ({ isOpen, onClose }) => {
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
+      // Prevent backdrop clicks from triggering multiple times
+      document.body.style.pointerEvents = 'none';
+      const sidebar = document.querySelector('[data-cart-sidebar]');
+      if (sidebar) {
+        sidebar.style.pointerEvents = 'auto';
+      }
     } else {
       document.body.style.overflow = 'unset';
+      document.body.style.pointerEvents = 'auto';
     }
     return () => {
       document.body.style.overflow = 'unset';
+      document.body.style.pointerEvents = 'auto';
     };
   }, [isOpen]);
 
@@ -59,20 +67,75 @@ const CartSidebar = ({ isOpen, onClose }) => {
     }
   };
 
+  const backdropRef = useRef(null);
+  const sidebarRef = useRef(null);
+
+  const handleBackdropClick = useCallback((e) => {
+    // Only close if clicking directly on backdrop, not on sidebar content
+    // Use refs for more reliable checking on mobile
+    if (
+      e.target === backdropRef.current ||
+      (backdropRef.current && backdropRef.current.contains(e.target) && 
+       !(sidebarRef.current && sidebarRef.current.contains(e.target)))
+    ) {
+      onClose();
+    }
+  }, [onClose]);
+
+  // Prevent cart from opening/closing unintentionally
+  useEffect(() => {
+    if (!isOpen) return;
+    
+    const handleEscape = (e) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    window.addEventListener('keydown', handleEscape);
+    
+    // Prevent body scroll and ensure cart stays stable
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    
+    return () => {
+      window.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [isOpen, onClose]);
+
   return (
     <>
       {/* Backdrop */}
       {isOpen && (
         <div
+          ref={backdropRef}
           className="fixed inset-0 bg-black/50 z-40 transition-opacity animate-in fade-in duration-300"
-          onClick={onClose}
+          onClick={handleBackdropClick}
+          // Prevent accidental closes on mobile touch
+          onTouchMove={(e) => {
+            // Prevent closing during touch move (swiping)
+            e.stopPropagation();
+          }}
         />
       )}
 
       {/* Sidebar */}
-      <div className={`fixed right-0 top-0 h-screen w-full max-w-md bg-white shadow-2xl z-50 flex flex-col transform transition-transform duration-300 ease-in-out overflow-y-auto ${
-        isOpen ? 'translate-x-0' : 'translate-x-full'
-      }`}>
+      <div 
+        ref={sidebarRef}
+        data-cart-sidebar
+        className={`fixed right-0 top-0 h-screen w-full max-w-md bg-white shadow-2xl z-50 flex flex-col transform transition-transform duration-300 ease-in-out overflow-y-auto ${
+          isOpen ? 'translate-x-0' : 'translate-x-full'
+        }`}
+        onClick={(e) => {
+          // Prevent clicks inside sidebar from closing it
+          e.stopPropagation();
+        }}
+        onTouchStart={(e) => {
+          // Stop touch events from bubbling to backdrop
+          e.stopPropagation();
+        }}
+      >
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-[#D9BFA9]">
           <h2 className="text-xl font-serif font-normal text-[#A67856] uppercase tracking-wide">SHPORTA E BLERJEVE</h2>
@@ -130,30 +193,32 @@ const CartSidebar = ({ isOpen, onClose }) => {
                     
                     {/* Quantity and Remove */}
                     <div className="flex items-center justify-between mt-2">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 sm:gap-2">
                         <button
                           onClick={() => updateQuantity(item.id, item.quantity - 1)}
                           disabled={item.quantity <= 1}
-                          className="w-8 h-8 flex items-center justify-center border border-[#D9BFA9] hover:bg-[#EBD8C8] disabled:opacity-50 disabled:cursor-not-allowed transition-all bg-white"
+                          className="w-10 h-10 sm:w-8 sm:h-8 flex items-center justify-center border-2 border-[#D9BFA9] hover:bg-[#EBD8C8] disabled:opacity-50 disabled:cursor-not-allowed transition-all bg-white min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0"
+                          aria-label="Decrease quantity"
                         >
-                          <Minus size={14} className="text-[#4A3628]" />
+                          <Minus size={18} className="sm:w-3.5 sm:h-3.5 text-[#4A3628]" />
                         </button>
-                        <span className="w-8 text-center text-sm font-medium text-[#4A3628]">
+                        <span className="w-10 sm:w-8 text-center text-base sm:text-sm font-medium text-[#4A3628] min-h-[44px] sm:min-h-0 flex items-center justify-center">
                           {item.quantity}
                         </span>
                         <button
                           onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                          className="w-8 h-8 flex items-center justify-center border border-[#D9BFA9] hover:bg-[#EBD8C8] transition-all bg-white"
+                          className="w-10 h-10 sm:w-8 sm:h-8 flex items-center justify-center border-2 border-[#D9BFA9] hover:bg-[#EBD8C8] transition-all bg-white min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0"
+                          aria-label="Increase quantity"
                         >
-                          <Plus size={14} className="text-[#4A3628]" />
+                          <Plus size={18} className="sm:w-3.5 sm:h-3.5 text-[#4A3628]" />
                         </button>
                       </div>
                       <button
                         onClick={() => removeItem(item.id)}
-                        className="p-1.5 hover:bg-red-50 transition-all"
+                        className="p-2 sm:p-1.5 hover:bg-red-50 transition-all min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 flex items-center justify-center"
                         aria-label="Remove item"
                       >
-                        <Trash2 size={16} className="text-[#4A3628] hover:text-red-600" />
+                        <Trash2 size={18} className="sm:w-4 sm:h-4 text-[#4A3628] hover:text-red-600" />
                       </button>
                     </div>
 

@@ -120,7 +120,12 @@ const Navbar = () => {
     let scrollTimeout = null;
 
     const handleClickOutside = (event) => {
+      // Don't close mobile menu if clicking on cart sidebar
+      const cartSidebar = document.querySelector('[data-cart-sidebar]');
       const header = document.querySelector('header');
+      if (cartSidebar && cartSidebar.contains(event.target)) {
+        return; // Don't close mobile menu if clicking on cart
+      }
       if (header && !header.contains(event.target)) {
         setMobileMenuOpen(false);
       }
@@ -354,34 +359,34 @@ const Navbar = () => {
                   {/* Account Dropdown Menu */}
                   {accountDropdownOpen && (
                     <div 
-                      className="absolute right-0 top-full mt-1 w-48 bg-white shadow-md border border-gray-200 py-1 rounded-sm z-20"
-                      onMouseEnter={() => setAccountDropdownOpen(true)}
-                      onMouseLeave={() => setAccountDropdownOpen(false)}
+                      className="absolute right-0 top-full pt-1 w-48 z-20"
                     >
-                      <NavLink
-                        to="/dashboard"
-                        onClick={() => setAccountDropdownOpen(false)}
-                        className="block px-4 py-2 text-sm text-black hover:bg-gray-50 transition-colors duration-150"
-                      >
-                        Account
-                      </NavLink>
-                  <button 
-                        onClick={async () => {
-                          try {
-                            await signOutUser();
-                            setAccountDropdownOpen(false);
-                            navigate('/');
-                          } catch (error) {
-                            console.error('Logout error:', error);
-                          }
-                        }}
-                        className="w-full text-left px-4 py-2 text-sm text-black hover:bg-gray-50 transition-colors duration-150"
-                  >
-                        Log out
-                  </button>
-                </div>
+                      <div className="bg-white shadow-md border border-gray-200 py-1 rounded-sm">
+                        <NavLink
+                          to="/dashboard"
+                          onClick={() => setAccountDropdownOpen(false)}
+                          className="block px-4 py-2 text-sm text-black hover:bg-gray-50 transition-colors duration-150"
+                        >
+                          Account
+                        </NavLink>
+                        <button 
+                          onClick={async () => {
+                            try {
+                              await signOutUser();
+                              setAccountDropdownOpen(false);
+                              navigate('/');
+                            } catch (error) {
+                              console.error('Logout error:', error);
+                            }
+                          }}
+                          className="w-full text-left px-4 py-2 text-sm text-black hover:bg-gray-50 transition-colors duration-150"
+                        >
+                          Log out
+                        </button>
+                      </div>
+                    </div>
                   )}
-              </div>
+                </div>
               ) : (
                 <NavLink 
                   to="/sign-up" 

@@ -122,7 +122,7 @@ const SignUp = () => {
   };
 
   return (
-    <div className='flex justify-center'>
+    <div className='flex justify-center pt-24 sm:pt-28 md:pt-32 min-h-screen'>
       <Helmet key={location.pathname}>
         <title>Sign Up</title>
       </Helmet>

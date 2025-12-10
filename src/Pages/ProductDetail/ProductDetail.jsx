@@ -131,13 +131,14 @@ const ProductDetail = () => {
               <label className="block text-xs font-semibold text-[#4A3628] uppercase tracking-wide mb-2">
                 QUANTITY
               </label>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 sm:gap-3">
                 <button
                   onClick={() => handleQuantityChange(-1)}
                   disabled={quantity <= 1}
-                  className="w-10 h-10 flex items-center justify-center border border-[#4A3628] hover:bg-[#EBD8C8] disabled:opacity-50 disabled:cursor-not-allowed transition-all bg-white"
+                  className="w-12 h-12 sm:w-10 sm:h-10 flex items-center justify-center border-2 border-[#4A3628] hover:bg-[#EBD8C8] disabled:opacity-50 disabled:cursor-not-allowed transition-all bg-white min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0"
+                  aria-label="Decrease quantity"
                 >
-                  <Minus size={16} className="text-[#4A3628]" />
+                  <Minus size={20} className="sm:w-4 sm:h-4 text-[#4A3628]" />
                 </button>
                 <input
                   type="number"
@@ -146,15 +147,17 @@ const ProductDetail = () => {
                     const val = parseInt(e.target.value) || 1;
                     setQuantity(Math.max(1, val));
                   }}
-                  className="w-16 h-10 text-center border border-[#4A3628] focus:outline-none bg-white text-[#4A3628] font-medium"
+                  className="w-20 h-12 sm:w-16 sm:h-10 text-center border-2 border-[#4A3628] focus:outline-none bg-white text-[#4A3628] font-medium text-base sm:text-sm min-h-[44px] sm:min-h-0"
                   min="1"
+                  readOnly
                 />
                 <button
                   onClick={() => handleQuantityChange(1)}
                   disabled={!isInStock}
-                  className="w-10 h-10 flex items-center justify-center border border-[#4A3628] hover:bg-[#EBD8C8] disabled:opacity-50 disabled:cursor-not-allowed transition-all bg-white"
+                  className="w-12 h-12 sm:w-10 sm:h-10 flex items-center justify-center border-2 border-[#4A3628] hover:bg-[#EBD8C8] disabled:opacity-50 disabled:cursor-not-allowed transition-all bg-white min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0"
+                  aria-label="Increase quantity"
                 >
-                  <Plus size={16} className="text-[#4A3628]" />
+                  <Plus size={20} className="sm:w-4 sm:h-4 text-[#4A3628]" />
                 </button>
               </div>
             </div>
