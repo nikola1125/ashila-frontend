@@ -1,15 +1,17 @@
-// Hero with full screen background image that fades on scroll
+// Hero with full screen background video that fades on scroll
 import React, { useEffect, useRef, useState } from 'react';
 
 const Hero = () => {
-  const bg = 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=1600&auto=format&fit=crop&q=80';
+  const bg = '/images/backg.mp4';
   const heroRef = useRef(null);
+  const videoRef = useRef(null);
   const rafRef = useRef(null);
 
   useEffect(() => {
     let ticking = false;
     let lastScrollY = 0;
     const heroElement = heroRef.current;
+    const videoElement = videoRef.current;
 
     if (!heroElement) return;
 
@@ -25,6 +27,9 @@ const Hero = () => {
             
             // Direct DOM manipulation to avoid re-renders
             heroElement.style.opacity = opacity.toString();
+            if (videoElement) {
+              videoElement.style.opacity = opacity.toString();
+            }
             lastScrollY = scrollY;
           }
           
@@ -58,11 +63,6 @@ const Hero = () => {
       ref={heroRef}
       className="relative w-full h-[60vh] sm:h-[70vh] md:h-screen overflow-hidden z-0"
       style={{ 
-        backgroundImage: `url(${bg})`, 
-        backgroundSize: 'cover', 
-        backgroundPosition: 'center top', 
-        backgroundAttachment: isMobile ? 'scroll' : 'fixed', // Disable fixed on mobile for performance
-        backgroundRepeat: 'no-repeat',
         opacity: 1,
         transform: 'translateZ(0)',
         backfaceVisibility: 'hidden',
@@ -74,6 +74,31 @@ const Hero = () => {
         right: 0
       }}
     >
+      {/* Background Video */}
+      <video
+        ref={videoRef}
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="absolute inset-0 w-full h-full object-cover z-0"
+        style={{
+          position: isMobile ? 'absolute' : 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          opacity: 1,
+          transform: 'translateZ(0)',
+          backfaceVisibility: 'hidden',
+          WebkitBackfaceVisibility: 'hidden',
+        }}
+      >
+        <source src={bg} type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+      
       {/* Dark overlay */}
       <div 
         className="absolute inset-0 bg-black/35 z-0" 

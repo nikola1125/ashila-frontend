@@ -128,26 +128,26 @@ const Navbar = () => {
 
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-      // Close menu when scrolling down (more than 10px difference)
-      if (currentScrollY > lastScrollY + 10) {
+
+      // iPhone fix: require real scroll, ignore minor Safari bounce (0–5px)
+      if (Math.abs(currentScrollY - lastScrollY) < 10) return;
+
+      // Only close when user scrolls DOWN at least 10px
+      if (currentScrollY > lastScrollY) {
         setMobileMenuOpen(false);
       }
+
       lastScrollY = currentScrollY;
     };
 
-    // Allow scrolling but close menu on scroll
-    // Use mousedown instead of click to avoid conflicts
-    document.addEventListener('mousedown', handleClickOutside);
-    document.addEventListener('touchstart', handleClickOutside);
-    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    document.addEventListener("click", handleClickOutside);
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('touchstart', handleClickOutside);
-      window.removeEventListener('scroll', handleScroll);
-      if (scrollTimeout) clearTimeout(scrollTimeout);
+      window.removeEventListener("scroll", handleScroll);
+      document.removeEventListener("click", handleClickOutside);
     };
-  }, [mobileMenuOpen]);
+}, [mobileMenuOpen]);
 
   // Close mobile menu on route change
   useEffect(() => {
