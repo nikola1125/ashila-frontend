@@ -101,7 +101,7 @@ const ProductCard = React.memo(({ product, pricing, index, onProductClick, onAdd
           <div className="flex justify-end pt-1">
             <button 
               onClick={(e) => onAddToCart(e, product)}
-              className="bg-transparent hover:bg-gray-100/50 text-gray-600 px-2 md:px-3 py-1 text-[9px] md:text-xs gap-1 min-w-[70px] justify-center flex items-center transition-all duration-200"
+              className="bg-white hover:bg-gray-100/50 text-gray-600 px-2 md:px-3 py-1 text-[9px] md:text-xs gap-1 min-w-[70px] justify-center flex items-center transition-all duration-200"
             >
               <ShoppingBag size={11} className="md:w-4 md:h-4" />
               <span className="hidden sm:inline">Add</span>

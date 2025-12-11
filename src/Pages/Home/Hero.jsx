@@ -12,27 +12,50 @@ const Hero = () => {
   useEffect(() => {
     let ticking = false;
     let lastScrollY = 0;
+    let scrollTimeout = null;
+    let cleanup = null;
     const heroElement = heroRef.current;
     const videoElement = videoRef.current;
 
     if (!heroElement) return;
 
+    // Wait for video to be ready in production builds
     const handleScroll = () => {
+      // Clear any pending timeout
+      if (scrollTimeout) {
+        clearTimeout(scrollTimeout);
+      }
+
       if (!ticking) {
         rafRef.current = requestAnimationFrame(() => {
           const scrollY = window.scrollY;
           
           // Only update if scroll changed significantly (throttle updates)
-          if (Math.abs(scrollY - lastScrollY) > 5) {
+          // On mobile, be more lenient to avoid glitches, especially in production
+          const isMobile = window.innerWidth < 768;
+          const threshold = isMobile ? 15 : 5; // Increased threshold for production mobile
+          
+          if (Math.abs(scrollY - lastScrollY) > threshold) {
             const fadeDistance = window.innerHeight;
             const opacity = Math.max(0, 1 - scrollY / fadeDistance);
             
             // Direct DOM manipulation to avoid re-renders
-            heroElement.style.opacity = opacity.toString();
+            // Use will-change for better performance on mobile
+            if (heroElement) {
+              heroElement.style.willChange = 'opacity';
+              heroElement.style.opacity = opacity.toString();
+            }
             if (videoElement) {
+              videoElement.style.willChange = 'opacity';
               videoElement.style.opacity = opacity.toString();
             }
             lastScrollY = scrollY;
+            
+            // Reset will-change after animation (debounced for production)
+            scrollTimeout = setTimeout(() => {
+              if (heroElement) heroElement.style.willChange = 'auto';
+              if (videoElement) videoElement.style.willChange = 'auto';
+            }, 400);
           }
           
           ticking = false;
@@ -41,9 +64,44 @@ const Hero = () => {
       }
     };
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
+    const initScrollHandler = () => {
+      window.addEventListener('scroll', handleScroll, { passive: true });
+    };
+
+    // In production, wait for video to load before initializing scroll handler
+    // This prevents timing issues in production builds where assets load differently
+    if (videoElement) {
+      let isInitialized = false;
+      const handleVideoReady = () => {
+        if (isInitialized) return;
+        isInitialized = true;
+        // Small delay to ensure everything is ready in production
+        setTimeout(initScrollHandler, 150);
+      };
+      
+      if (videoElement.readyState >= 2) {
+        // Video already loaded
+        handleVideoReady();
+      } else {
+        videoElement.addEventListener('loadeddata', handleVideoReady, { once: true });
+        videoElement.addEventListener('canplay', handleVideoReady, { once: true });
+        // Fallback timeout in case events don't fire in production (Netlify/CDN issues)
+        setTimeout(() => {
+          if (!isInitialized) {
+            handleVideoReady();
+          }
+        }, 2000);
+      }
+    } else {
+      // No video, initialize immediately
+      initScrollHandler();
+    }
+
     return () => {
       window.removeEventListener('scroll', handleScroll);
+      if (scrollTimeout) {
+        clearTimeout(scrollTimeout);
+      }
       if (rafRef.current) {
         cancelAnimationFrame(rafRef.current);
       }
@@ -60,6 +118,25 @@ const Hero = () => {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // iOS-specific fixes for scroll glitches on mobile
+  useEffect(() => {
+    if (!isMobile) return;
+
+    // Ensure smooth scrolling on iOS
+    const heroElement = heroRef.current;
+    if (heroElement) {
+      heroElement.style.WebkitOverflowScrolling = 'touch';
+      heroElement.style.overscrollBehavior = 'contain';
+    }
+
+    return () => {
+      if (heroElement) {
+        heroElement.style.WebkitOverflowScrolling = '';
+        heroElement.style.overscrollBehavior = '';
+      }
+    };
+  }, [isMobile]);
+
   return (
     <section
       ref={heroRef}
@@ -69,11 +146,15 @@ const Hero = () => {
         transform: 'translateZ(0)',
         backfaceVisibility: 'hidden',
         WebkitBackfaceVisibility: 'hidden',
+        WebkitTransform: 'translateZ(0)',
         marginTop: 0,
         paddingTop: 0,
         top: 0,
         left: 0,
-        right: 0
+        right: 0,
+        touchAction: 'pan-y',
+        WebkitOverflowScrolling: 'touch',
+        overscrollBehavior: 'contain'
       }}
     >
       {/* Background Video */}
@@ -83,6 +164,9 @@ const Hero = () => {
         loop
         muted
         playsInline
+        preload="auto"
+        webkit-playsinline="true"
+        x5-playsinline="true"
         className="absolute inset-0 w-full h-full object-cover z-0"
         style={{
           position: isMobile ? 'absolute' : 'fixed',
@@ -93,8 +177,15 @@ const Hero = () => {
           objectFit: 'cover',
           opacity: 1,
           transform: 'translateZ(0)',
+          WebkitTransform: 'translateZ(0)',
           backfaceVisibility: 'hidden',
           WebkitBackfaceVisibility: 'hidden',
+          pointerEvents: 'none',
+          touchAction: 'none',
+          willChange: 'opacity',
+          // Production-specific fixes
+          isolation: 'isolate',
+          contain: 'layout style paint'
         }}
       >
         <source src={bg} type="video/mp4" />

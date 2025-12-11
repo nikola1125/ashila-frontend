@@ -296,9 +296,9 @@ const InteractiveProductSelector = () => {
                 <button
                   onClick={handleAddToCart}
                   onTouchStart={(e) => e.stopPropagation()}
-                  className="flex-1 bg-[#A67856] hover:bg-[#8B6345] active:bg-[#7a5438] text-white py-2.5 px-4 font-medium transition-all duration-200 rounded-lg min-h-[44px] touch-manipulation text-sm"
+                  className="flex-1 bg-[#A67856] hover:bg-[#8B6345] active:bg-[#7a5438] text-white py-2.5 px-4 font-light transition-all duration-200 rounded-lg min-h-[44px] touch-manipulation text-sm"
                 >
-                  Dergo porosine
+                  Shto ne shporte
                 </button>
               </div>
             </div>
@@ -402,9 +402,9 @@ const InteractiveProductSelector = () => {
                 <button
                   onClick={handleAddToCart}
                   onTouchStart={(e) => e.stopPropagation()}
-                  className="w-full bg-[#A67856] hover:bg-[#8B6345] active:bg-[#7a5438] text-white py-3 md:py-3 px-6 font-semibold transition-all duration-200 uppercase tracking-wide rounded min-h-[44px] touch-manipulation"
+                  className="w-full bg-[#A67856] hover:bg-[#8B6345] active:bg-[#7a5438] text-white py-3 md:py-3 px-6 font-light transition-all duration-200 uppercase tracking-wide rounded min-h-[44px] touch-manipulation"
                 >
-                  Dergo porosine
+                  Shto ne shporte
                 </button>
                 <button
                   onClick={handleViewProduct}

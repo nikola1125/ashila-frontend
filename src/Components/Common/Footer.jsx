@@ -20,8 +20,8 @@ const Footer = () => {
               <a href="mailto:hello.care@ashila.co" className="block text-sm text-[#A67856] hover:text-[#A67856] transition-colors">
                 hello.care@ashila.co
               </a>
-              <a href="tel:+355689124587" className="block text-sm text-[#A67856] hover:text-[#A67856] transition-colors">
-                +355 68 912 4587
+              <a href="tel:+355686879292" className="block text-sm text-[#A67856] hover:text-[#A67856] transition-colors">
+                +355 68 687 9292
               </a>
             </div>
           </div>

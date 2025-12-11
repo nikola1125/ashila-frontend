@@ -686,14 +686,6 @@ const Navbar = () => {
                 </div>
               ))}
 
-              <NavLink 
-                to="/contact" 
-                onClick={() => setMobileMenuOpen(false)}
-                className="text-black font-medium text-sm uppercase tracking-wide hover:bg-gray-100 transition-colors px-4 py-3 border-b border-gray-200"
-              >
-                Kontakt
-              </NavLink>
-
               {/* Account in Mobile Menu */}
               {user ? (
                 <>

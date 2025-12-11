@@ -64,7 +64,7 @@ const AcneCategories = () => {
               className={`group flex flex-col items-center scale-in stagger-${Math.min(index + 1, 4)}`}
             >
               {/* Circular Image Frame */}
-              <div className="relative w-full aspect-square mb-4 rounded-full overflow-hidden border-2 border-[#D9BFA9] group-hover:border-[#A67856] shadow-sm group-hover:shadow-lg transition-all duration-200">
+              <div className="relative w-full aspect-square mb-4 rounded-full overflow-hidden border border-[#D9BFA9] group-hover:border-[#A67856] shadow-sm group-hover:shadow-lg transition-all duration-200">
                 <img
                   src={item.image}
                   alt={item.title}
@@ -105,7 +105,7 @@ const AcneCategories = () => {
               className={`group flex flex-col items-center scale-in stagger-${Math.min(index + 1, 4)}`}
             >
               {/* Circular Image Frame */}
-              <div className="relative w-full aspect-square mb-4 rounded-full overflow-hidden border-2 border-[#D9BFA9] group-hover:border-[#A67856] shadow-sm group-hover:shadow-lg transition-all duration-200">
+              <div className="relative w-full aspect-square mb-4 rounded-full overflow-hidden border border-[#D9BFA9] group-hover:border-[#A67856] shadow-sm group-hover:shadow-lg transition-all duration-200">
                 <img
                   src={item.image}
                   alt={item.title}
@@ -153,7 +153,7 @@ const AcneCategories = () => {
                       className={`group flex flex-col items-center scale-in stagger-${Math.min(itemIndex + 1, 4)}`}
                     >
                       {/* Circular Image Frame */}
-                      <div className="relative w-full aspect-square mb-3 rounded-full overflow-hidden border-2 border-[#D9BFA9] active:border-[#A67856] shadow-sm transition-all duration-200">
+                      <div className="relative w-full aspect-square mb-3 rounded-full overflow-hidden border border-[#D9BFA9] active:border-[#A67856] shadow-sm transition-all duration-200">
                         <img
                           src={item.image}
                           alt={item.title}

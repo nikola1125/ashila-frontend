@@ -117,7 +117,7 @@ const LatestProduct = () => {
                   </span>
                   <button 
                     onClick={() => handleAddToCart(product)}
-                    className="bg-[#A67856] hover:bg-[#8B6345] text-white px-2 py-1 text-xs font-semibold transition-all duration-150 flex items-center justify-center gap-1 flex-shrink-0 border-2 border-[#A67856]"
+                    className="bg-white hover:bg-gray-100 text-gray-600 px-2 py-1 text-xs font-semibold transition-all duration-150 flex items-center justify-center gap-1 flex-shrink-0 border-2 border-gray-300"
                   >
                     <ShoppingBag size={12} />
                     <span className="hidden sm:inline">Add</span>
