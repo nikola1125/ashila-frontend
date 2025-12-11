@@ -73,16 +73,28 @@ const ProductDetail = () => {
   const isInStock = product.stock > 0;
 
   return (
+<<<<<<< HEAD
     <div className="min-h-screen bg-[#faf9f6]">
+=======
+    <div className="min-h-screen bg-white">
+>>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
       <Helmet>
         <title>{product.itemName} - Product Details</title>
       </Helmet>
 
+<<<<<<< HEAD
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 sm:pt-32 md:pt-40 pb-10">
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-10 mb-10 sm:mb-12">
           {/* Left Column - Product Image */}
           <div className="relative bg-white lux-card lux-card-elevated overflow-hidden">
+=======
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 sm:pt-32 md:pt-40 pb-8">
+        {/* Main Content */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 mb-8 sm:mb-12">
+          {/* Left Column - Product Image */}
+          <div className="relative bg-white rounded-sm overflow-hidden">
+>>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
             {/* Product Image */}
             <div className="flex items-center justify-center min-h-[300px] sm:min-h-[400px] md:min-h-[500px] p-4 sm:p-6 md:p-8">
               <img
@@ -135,10 +147,17 @@ const ProductDetail = () => {
                 <button
                   onClick={() => handleQuantityChange(-1)}
                   disabled={quantity <= 1}
+<<<<<<< HEAD
                   className="w-12 h-12 sm:w-10 sm:h-10 flex items-center justify-center border-2 border-[#4A3628] hover:bg-[#EBD8C8] disabled:opacity-50 disabled:cursor-not-allowed transition-all bg-white min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 text-lg leading-none text-[#4A3628]"
                   aria-label="Decrease quantity"
                 >
                   -
+=======
+                  className="w-12 h-12 sm:w-10 sm:h-10 flex items-center justify-center border-2 border-[#4A3628] hover:bg-[#EBD8C8] disabled:opacity-50 disabled:cursor-not-allowed transition-all bg-white min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0"
+                  aria-label="Decrease quantity"
+                >
+                  <Minus size={20} className="sm:w-4 sm:h-4 text-[#4A3628]" />
+>>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
                 </button>
                 <input
                   type="number"
@@ -154,10 +173,17 @@ const ProductDetail = () => {
                 <button
                   onClick={() => handleQuantityChange(1)}
                   disabled={!isInStock}
+<<<<<<< HEAD
                   className="w-12 h-12 sm:w-10 sm:h-10 flex items-center justify-center border-2 border-[#4A3628] hover:bg-[#EBD8C8] disabled:opacity-50 disabled:cursor-not-allowed transition-all bg-white min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 text-lg leading-none text-[#4A3628]"
                   aria-label="Increase quantity"
                 >
                   +
+=======
+                  className="w-12 h-12 sm:w-10 sm:h-10 flex items-center justify-center border-2 border-[#4A3628] hover:bg-[#EBD8C8] disabled:opacity-50 disabled:cursor-not-allowed transition-all bg-white min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0"
+                  aria-label="Increase quantity"
+                >
+                  <Plus size={20} className="sm:w-4 sm:h-4 text-[#4A3628]" />
+>>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
                 </button>
               </div>
             </div>
@@ -168,13 +194,21 @@ const ProductDetail = () => {
                 <>
                   <button
                     onClick={handleAddToCart}
+<<<<<<< HEAD
                     className="w-full lux-btn-outline px-4 sm:px-6 py-3 sm:py-4 text-sm sm:text-base min-h-[44px]"
+=======
+                    className="w-full bg-white hover:bg-[#EBD8C8] text-[#4A3628] px-4 sm:px-6 py-3 sm:py-4 font-semibold transition-all duration-200 border border-[#4A3628] uppercase tracking-wide text-sm sm:text-base min-h-[44px]"
+>>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
                   >
                     Add to cart
                   </button>
                   <button
                     onClick={handleBuyNow}
+<<<<<<< HEAD
                     className="w-full lux-btn-primary px-4 sm:px-6 py-3 sm:py-4 text-sm sm:text-base min-h-[44px]"
+=======
+                    className="w-full bg-[#A67856] hover:bg-[#8B6345] text-white px-4 sm:px-6 py-3 sm:py-4 font-semibold transition-all duration-200 uppercase tracking-wide text-sm sm:text-base min-h-[44px]"
+>>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
                   >
                     Buy it now
                   </button>

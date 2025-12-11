@@ -1,5 +1,9 @@
 import { Button } from '@headlessui/react';
+<<<<<<< HEAD
 import React, { useContext } from 'react';
+=======
+import React, { useContext, useEffect, useRef, useState } from 'react';
+>>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
 import { useNavigate } from 'react-router-dom';
 import { CartContext } from '../../Context/Cart/CartContext';
 
@@ -13,10 +17,36 @@ const ShopGrid = ({
 }) => {
   const { addItem } = useContext(CartContext);
   const navigate = useNavigate();
+<<<<<<< HEAD
+=======
+  const [visibleItems, setVisibleItems] = useState(new Set());
+
+  // Intersection Observer for scroll animations
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setVisibleItems((prev) => new Set([...prev, entry.target.id]));
+          }
+        });
+      },
+      { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
+    );
+
+    const elements = document.querySelectorAll('.product-card');
+    elements.forEach((el) => observer.observe(el));
+
+    return () => {
+      elements.forEach((el) => observer.unobserve(el));
+    };
+  }, [paginatedMedicines]);
+>>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
 
   return (
     <div>
       {/* Grid Layout - 2 products per row on mobile, 3 on desktop */}
+<<<<<<< HEAD
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 md:gap-6">
         {paginatedMedicines?.map((medicine, index) => {
           return (
@@ -36,6 +66,35 @@ const ShopGrid = ({
                   navigate(`/product/${medicine._id}`);
                 }}
               >
+=======
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-5 mb-8 px-2 md:px-0">
+        {paginatedMedicines?.map((medicine, index) => {
+          const isVisible = visibleItems.has(`product-${medicine._id || index}`);
+          return (
+            <div
+            key={medicine._id || index}
+            id={`product-${medicine._id || index}`}
+            className={`product-card bg-white transition-all duration-200 overflow-hidden group border-2 border-[#D9BFA9] shadow-sm hover:shadow-lg ${
+              isVisible 
+                ? 'opacity-100 translate-y-0' 
+                : 'opacity-0 translate-y-8'
+            } transition-all duration-700 ease-out`}
+            style={{ transitionDelay: `${index * 100}ms` }}
+          >
+            {/* Medicine Image Container */}
+            <div 
+              className="relative overflow-hidden cursor-pointer flex items-center justify-center w-full"
+              style={{ 
+                aspectRatio: '1/1',
+                backgroundColor: '#EFEEED',
+                maxWidth: '100%'
+              }}
+              onClick={() => {
+                window.scrollTo({ top: 0, behavior: 'instant' });
+                navigate(`/product/${medicine._id}`);
+              }}
+            >
+>>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
               <img
                 src={medicine.image}
                 alt={medicine.itemName}
@@ -100,7 +159,11 @@ const ShopGrid = ({
             <div className="p-1.5 md:p-2">
               {/* Medicine Name */}
               <h3 
+<<<<<<< HEAD
                 className="font-medium text-[9px] md:text-xs text-gray-900 mb-1 line-clamp-2 min-h-[1.5rem] md:min-h-[1.75rem] cursor-pointer hover:text-gray-600 transition-colors"
+=======
+                className="font-medium text-[9px] md:text-xs text-gray-900 mb-0.5 md:mb-1 line-clamp-2 min-h-[1.5rem] md:min-h-[1.75rem] cursor-pointer hover:text-gray-600 transition-colors"
+>>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
                 onClick={() => {
                   window.scrollTo({ top: 0, behavior: 'instant' });
                   navigate(`/product/${medicine._id}`);
@@ -109,6 +172,7 @@ const ShopGrid = ({
                 {medicine.itemName}
               </h3>
 
+<<<<<<< HEAD
               {/* Price - aligned with BestSeller layout */}
               <div className="flex items-baseline gap-1">
                 {medicine.discount > 0 ? (
@@ -123,6 +187,22 @@ const ShopGrid = ({
                 ) : (
                   <span className="text-[10px] md:text-xs font-semibold text-[#4A3628]">
                     {Number(medicine.price).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
+=======
+              {/* Price */}
+              <div className="flex items-baseline gap-0.5 md:gap-1">
+                {medicine.discount > 0 ? (
+                  <>
+                    <span className="text-[10px] md:text-xs font-semibold text-gray-900">
+                      {(Number(medicine.price) * (1 - Number(medicine.discount) / 100)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ALL
+                    </span>
+                    <span className="text-[8px] md:text-[10px] text-gray-500 line-through">
+                      {Number(medicine.price).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ALL
+                    </span>
+                  </>
+                ) : (
+                  <span className="text-[10px] md:text-xs font-semibold text-gray-900">
+                    {Number(medicine.price).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ALL
+>>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
                   </span>
                 )}
               </div>

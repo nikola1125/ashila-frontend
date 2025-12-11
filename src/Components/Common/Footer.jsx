@@ -3,7 +3,11 @@ import logo from '../../assets/logo.png';
 
 const Footer = () => {
   return (
+<<<<<<< HEAD
     <footer className="bg-[#F5EDE4] border-t border-[#D9BFA9]">
+=======
+    <footer className="bg-[#EBD8C8] border-t border-[#D9BFA9]">
+>>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
       <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           {/* Logo and Mission */}

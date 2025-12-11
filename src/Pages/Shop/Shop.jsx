@@ -180,9 +180,15 @@ const Shop = () => {
       <section className="min-h-[80vh] pt-24 pb-4 sm:pt-24 sm:pb-8 bg-white">
         <div className="max-w-full mx-auto pl-0 pr-2 md:pl-0 md:pr-4 lg:pl-0 lg:pr-6">
           {/* Header */}
+<<<<<<< HEAD
           <div className="mb-8 sm:mb-12 text-center space-y-3">
             <p className="lux-heading">Koleksioni</p>
             <h1 className="lux-title text-gray-700 mb-0">Produktet</h1>
+=======
+          <div className="mb-8 sm:mb-12 text-center">
+            <h1 className="text-2xl sm:text-3xl font-medium text-gray-600 mb-0">Produktet</h1>
+            <div className="w-16 h-0.5 bg-[#A67856] mx-auto mt-2"></div>
+>>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
           </div>
 
           <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">

@@ -10,10 +10,17 @@ const HydrationSection = () => {
   };
 
   return (
+<<<<<<< HEAD
     <section className="bg-white relative overflow-hidden mt-0 md:mt-0 lux-section">
       <div className="lux-section-inner relative z-10">
         {/* Section Label */}
         <div className="mb-4 md:mb-12 text-center fade-in">
+=======
+    <section className="pt-4 pb-8 md:pt-6 md:pb-12 bg-white relative overflow-hidden mt-0 md:mt-0">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
+        {/* Section Label */}
+        <div className="mb-4 md:mb-12 text-center">
+>>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
           <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
             Hidratimi dhe kujdesi ndaj lëkurës
           </h2>
@@ -22,17 +29,29 @@ const HydrationSection = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-16 lg:gap-20 items-start">
           {/* Left Side - Article Content */}
+<<<<<<< HEAD
           <div className="order-2 lg:order-1 slide-left">
             <div className="max-w-xs md:max-w-lg mx-auto lg:mx-0">
               {/* Category Label */}
               <div className="mb-3 md:mb-4">
                 <span className="lux-heading text-[#A67856]">
+=======
+          <div className="order-2 lg:order-1">
+            <div className="max-w-xs md:max-w-lg mx-auto lg:mx-0">
+              {/* Category Label */}
+              <div className="mb-3 md:mb-4">
+                <span className="text-[10px] font-semibold text-[#A67856] uppercase tracking-[0.2em] letter-spacing-wider">
+>>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
                   Hidratim & Kujdes për Lëkurë
                 </span>
               </div>
 
               {/* Main Headline */}
+<<<<<<< HEAD
               <h2 className="lux-title text-[#A67856] mb-3 md:mb-4">
+=======
+              <h2 className="text-xl md:text-3xl lg:text-4xl font-bold text-[#A67856] mb-3 md:mb-4 leading-tight">
+>>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
                 Sekreti i Lëkurës së Butë Në Dimër: Hidratoje si Duhet
               </h2>
               
@@ -44,7 +63,11 @@ const HydrationSection = () => {
               
               {/* Article Text - Enhanced Typography */}
               <div className="space-y-3 md:space-y-4 mb-6 md:mb-8">
+<<<<<<< HEAD
                 <p className="text-[#4A3628] text-sm md:text-base leading-[1.7] font-light lux-subtitle max-w-none">
+=======
+                <p className="text-[#4A3628] text-sm md:text-base leading-[1.7] font-light">
+>>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
                   Në muajt e ftohtë, lëkura kërkon kujdes shtesë. Hidrato rregullisht duart, trupin dhe fytyrën me formula të pasura për të parandaluar çarjet, thatësinë dhe irritimet. Një rutinë e qëndrueshme është çelësi i një lëkure të shëndetshme.
                 </p>
               </div>
@@ -52,7 +75,11 @@ const HydrationSection = () => {
               {/* Premium Shop Button */}
               <button
                 onClick={handleShopClick}
+<<<<<<< HEAD
                 className="group relative lux-btn-outline px-6 md:px-8 py-2 md:py-3 overflow-hidden"
+=======
+                className="group relative bg-white text-[#A67856] border border-[#A67856] px-6 md:px-8 py-2 md:py-3 font-bold hover:bg-[#A67856] hover:text-white transition-all duration-300 uppercase tracking-wider text-xs overflow-hidden"
+>>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
               >
                 <span className="relative z-10 flex items-center gap-2">
                   Zbulo produktet
@@ -71,7 +98,11 @@ const HydrationSection = () => {
           </div>
 
           {/* Right Side - Product Image with Simple Pharmacy Frame */}
+<<<<<<< HEAD
           <div className="order-1 lg:order-2 flex items-start justify-start slide-right">
+=======
+          <div className="order-1 lg:order-2 flex items-start justify-start">
+>>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
             <div className="relative w-full lg:w-full">
               {/* Simple Clean Frame - Fixed for mobile */}
               <div className="relative bg-white border border-[#D9BFA9] shadow-sm hover:shadow-md transition-shadow duration-300 w-full p-2 md:p-3 lg:p-4">

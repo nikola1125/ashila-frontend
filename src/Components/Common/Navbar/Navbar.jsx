@@ -8,6 +8,7 @@ import Logo from '../Logo/Logo';
 import { Search, ChevronDown, Menu, X, ChevronRight } from 'lucide-react';
 import useAxiosSecure from '../../../hooks/useAxiosSecure';
 
+<<<<<<< HEAD
 // Static navigation hierarchy for desktop & mobile menus
 const NAV_CATEGORIES = [
   {
@@ -153,6 +154,8 @@ const NAV_CATEGORIES = [
   },
 ];
 
+=======
+>>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
 const Navbar = () => {
   const { user, signOutUser } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -173,7 +176,11 @@ const Navbar = () => {
   // Check if we're on shop page, product detail page, or cart page
   const isShopPage = location.pathname === '/shop' || location.pathname.startsWith('/product/') || location.pathname === '/cart';
   
+<<<<<<< HEAD
   // Fetch categories on mount (kept for compatibility, but navbar uses NAV_CATEGORIES)
+=======
+  // Fetch categories on mount
+>>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
   useEffect(() => {
     let mounted = true;
     (async () => {
@@ -336,8 +343,13 @@ const Navbar = () => {
       <nav className={`relative border-b transition-all duration-300 ${
         isScrolled || isShopPage ? 'border-gray-200 bg-white' : 'border-transparent bg-transparent'
       }`}>
+<<<<<<< HEAD
         <div className="w-full px-4 sm:px-6 lg:px-4">
           <div className="py-2 sm:py-2.5 lg:py-2 flex items-center justify-between gap-2 lg:gap-2">
+=======
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="py-2 sm:py-2.5 lg:py-2 flex items-center justify-between gap-2 lg:gap-3">
+>>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
             {/* Mobile Menu Button - Left Side */}
             <button 
               onClick={(e) => {
@@ -352,6 +364,7 @@ const Navbar = () => {
               {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
 
+<<<<<<< HEAD
             {/* Logo - Mobile: Centered; Desktop logo rendered inside menu row */}
             <div className="flex-shrink-0 flex-1 lg:hidden flex justify-center items-center absolute left-1/2 transform -translate-x-1/2 z-10">
               <Logo />
@@ -366,6 +379,15 @@ const Navbar = () => {
 
               {/* Desktop links group with more space after logo */}
               <div className="flex items-center gap-1.5 xl:gap-2 ml-8">
+=======
+            {/* Logo - Mobile: Centered, Desktop: Left inside navbar */}
+            <div className="flex-shrink-0 flex-1 lg:flex-none lg:flex lg:justify-start flex justify-center items-center absolute left-1/2 lg:relative lg:left-0 lg:transform-none transform -translate-x-1/2 z-10">
+              <Logo />
+            </div>
+
+            {/* Desktop Menu - All items centered */}
+            <div className="hidden lg:flex items-center gap-3 xl:gap-4 justify-center flex-1">
+>>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
               <NavLink 
                 to="/" 
                     onClick={() => {
@@ -373,7 +395,11 @@ const Navbar = () => {
                         window.scrollTo({ top: 0, behavior: 'instant' });
                       }
                     }}
+<<<<<<< HEAD
                     className={`font-medium transition-colors text-[9px] xl:text-[11px] uppercase tracking-wide whitespace-nowrap py-1 ${
+=======
+                    className={`font-medium transition-colors text-[10px] xl:text-xs uppercase tracking-wide whitespace-nowrap py-1 ${
+>>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
                       isScrolled ? 'text-black hover:text-gray-700' : 'text-white hover:text-gray-200'
                     }`}
               >
@@ -381,20 +407,35 @@ const Navbar = () => {
               </NavLink>
 
               {/* Dynamic Categories with 3-level hierarchy */}
+<<<<<<< HEAD
               {NAV_CATEGORIES.map((category) => (
                 <div
                   key={category.id}
                   className="relative group"
                   onMouseEnter={() => setOpenCategoryId(category.id)}
+=======
+              {categories.map((category) => (
+                <div
+                  key={category._id}
+                  className="relative group"
+                  onMouseEnter={() => setOpenCategoryId(category._id)}
+>>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
                   onMouseLeave={() => {
                     setOpenCategoryId(null);
                     setActiveGroup(null);
                   }}
                 >
+<<<<<<< HEAD
                   <button className={`flex items-center gap-1 font-medium transition-colors text-[9px] xl:text-[11px] uppercase tracking-wide py-1 whitespace-nowrap ${
                     isScrolled ? 'text-black hover:text-gray-700' : 'text-white hover:text-gray-200'
                   }`}>
                     {category.label}
+=======
+                  <button className={`flex items-center gap-1 font-medium transition-colors text-[10px] xl:text-xs uppercase tracking-wide py-1 whitespace-nowrap ${
+                    isScrolled ? 'text-black hover:text-gray-700' : 'text-white hover:text-gray-200'
+                  }`}>
+                    {category.categoryName}
+>>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
                     {category.groups && category.groups.length > 0 && (
                       <ChevronDown 
                         size={10} 
@@ -405,6 +446,7 @@ const Navbar = () => {
 
                   {/* First Level: Groups */}
                   {category.groups && category.groups.length > 0 && (
+<<<<<<< HEAD
                     <div className={`absolute left-0 top-full mt-1 w-56 bg-white shadow-md border border-gray-200 py-1 rounded-sm z-20 transform origin-top transition-all duration-200 ease-out ${
                       openCategoryId === category.id 
                         ? 'opacity-100 translate-y-0 scale-100 visible' 
@@ -415,10 +457,23 @@ const Navbar = () => {
                           key={group.id}
                           className="relative group/submenu"
                           onMouseEnter={() => setActiveGroup(`${category.id}-${group.id}`)}
+=======
+                    <div className={`absolute left-0 top-full mt-1 w-56 bg-white shadow-md border border-gray-200 py-1 rounded-sm z-20 transition-all duration-300 ease-out ${
+                      openCategoryId === category._id 
+                        ? 'opacity-100 translate-y-0 visible' 
+                        : 'opacity-0 -translate-y-2 invisible'
+                    }`}>
+                      {category.groups.map((group) => (
+                        <div
+                          key={group._id}
+                          className="relative group/submenu"
+                          onMouseEnter={() => setActiveGroup(`${category._id}-${group._id}`)}
+>>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
                         >
                           {group.subitems && group.subitems.length > 0 ? (
                             <>
                               <button className="flex items-center justify-between w-full px-4 py-2 text-sm text-black hover:bg-gray-100 transition-colors duration-150">
+<<<<<<< HEAD
                                 {group.label}
                                 <ChevronRight size={14} className="text-gray-600" />
                               </button>
@@ -432,27 +487,54 @@ const Navbar = () => {
                                   <NavLink
                                     key={subitem.id}
                                     to={subitem.path}
+=======
+                                {group.groupName}
+                                <ChevronRight size={14} className="text-gray-600" />
+                              </button>
+                              {/* Second Level: Subitems */}
+                              <div className={`absolute left-full top-0 ml-1 w-48 bg-white shadow-md border border-gray-200 py-1 z-20 transition-all duration-300 ease-out ${
+                                activeGroup === `${category._id}-${group._id}` 
+                                  ? 'opacity-100 translate-x-0 visible' 
+                                  : 'opacity-0 -translate-x-2 invisible'
+                              }`}>
+                                {group.subitems.map((subitem) => (
+                                  <NavLink
+                                    key={subitem._id}
+                                    to={`/shop?subcategory=${subitem.name.toLowerCase().replace(/\s+/g, '-')}`}
+>>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
                                     onClick={() => {
                                       setActiveGroup(null);
                                       setOpenCategoryId(null);
                                     }}
                                     className="block px-4 py-2 text-sm text-black hover:bg-gray-100 transition-all duration-150"
                                   >
+<<<<<<< HEAD
                                     {subitem.label}
+=======
+                                    {subitem.name}
+>>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
                                   </NavLink>
                                 ))}
                               </div>
                             </>
                           ) : (
                             <NavLink
+<<<<<<< HEAD
                               to={group.path || '/shop'}
+=======
+                              to={`/shop?group=${group.groupName.toLowerCase().replace(/\s+/g, '-')}`}
+>>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
                               onClick={() => {
                                 setActiveGroup(null);
                                 setOpenCategoryId(null);
                               }}
                               className="flex items-center justify-between w-full px-4 py-2 text-sm text-black hover:bg-gray-100 transition-colors duration-150"
                             >
+<<<<<<< HEAD
                               {group.label}
+=======
+                              {group.groupName}
+>>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
                             </NavLink>
                           )}
                         </div>
@@ -461,12 +543,44 @@ const Navbar = () => {
                   )}
                 </div>
               ))}
+<<<<<<< HEAD
               </div>
 
               {/* Desktop Account - with gap after categories */}
               {user ? (
                 <div 
                   className="hidden lg:block relative ml-8"
+=======
+
+              <NavLink 
+                to="/contact" 
+                className={`font-medium transition-colors text-[10px] xl:text-xs uppercase tracking-wide whitespace-nowrap py-1 ${
+                  isScrolled ? 'text-black hover:text-gray-700' : 'text-white hover:text-gray-200'
+                }`}
+              >
+                Kontakt
+              </NavLink>
+
+              {/* Desktop Search Icon - Part of centered menu */}
+              {!isShopPage && (
+              <button
+                  onClick={() => {
+                    navigate('/shop');
+                  }}
+                  className={`hidden lg:block transition-colors min-h-[36px] min-w-[36px] flex items-center justify-center ${
+                    isScrolled ? 'text-black hover:text-gray-700' : 'text-white hover:text-gray-200'
+                  }`}
+                aria-label="Search"
+              >
+                <Search size={18} />
+              </button>
+              )}
+
+              {/* Account Dropdown - Desktop Only, Part of centered menu */}
+              {user ? (
+                <div 
+                  className="hidden lg:block relative"
+>>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
                   onMouseEnter={() => setAccountDropdownOpen(true)}
                   onMouseLeave={() => setAccountDropdownOpen(false)}
                 >
@@ -519,7 +633,11 @@ const Navbar = () => {
               ) : (
                 <NavLink 
                   to="/sign-up" 
+<<<<<<< HEAD
                   className={`hidden lg:block font-medium transition-colors text-[10px] xl:text-xs uppercase tracking-wide whitespace-nowrap py-1 ml-8 ${
+=======
+                  className={`hidden lg:block font-medium transition-colors text-[10px] xl:text-xs uppercase tracking-wide whitespace-nowrap py-1 ${
+>>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
                     isScrolled ? 'text-black hover:text-gray-700' : 'text-white hover:text-gray-200'
                   }`}
                 >
@@ -527,6 +645,7 @@ const Navbar = () => {
                 </NavLink>
               )}
 
+<<<<<<< HEAD
               {/* Desktop Search + Cart group with space after Account */}
               <div className="hidden lg:flex items-center gap-4 ml-8">
                 {!isShopPage && (
@@ -543,6 +662,10 @@ const Navbar = () => {
                   </button>
                 )}
 
+=======
+              {/* Cart - Part of centered menu on desktop */}
+              <div className="hidden lg:block">
+>>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
                 <Cart isScrolled={isScrolled} onCartClick={() => setCartOpen(true)} iconSize={18} />
               </div>
             </div>
@@ -595,66 +718,115 @@ const Navbar = () => {
               </NavLink>
 
               {/* Mobile Categories with Expandable Structure */}
+<<<<<<< HEAD
               {NAV_CATEGORIES.map((category) => (
                 <div key={category.id} className="border-b border-gray-100">
+=======
+              {categories.map((category) => (
+                <div key={category._id} className="border-b border-gray-100">
+>>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       setMobileOpenCategoryId(
+<<<<<<< HEAD
                         mobileOpenCategoryId === category.id ? null : category.id
+=======
+                        mobileOpenCategoryId === category._id ? null : category._id
+>>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
                       );
                       setMobileOpenGroupId(null);
                     }}
                     className="w-full flex items-center justify-between text-black font-medium text-sm uppercase tracking-wide hover:bg-gray-100 transition-colors px-4 py-3"
                   >
+<<<<<<< HEAD
                     <span>{category.label}</span>
+=======
+                    <span>{category.categoryName}</span>
+>>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
                     {category.groups && category.groups.length > 0 && (
                       <ChevronDown 
                         size={18} 
                         className={`text-gray-600 transition-transform ${
+<<<<<<< HEAD
                           mobileOpenCategoryId === category.id ? 'rotate-180' : ''
+=======
+                          mobileOpenCategoryId === category._id ? 'rotate-180' : ''
+>>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
                         }`}
                       />
                     )}
                   </button>
 
                   {/* Groups */}
+<<<<<<< HEAD
                   {category.groups && category.groups.length > 0 && mobileOpenCategoryId === category.id && (
                     <div className="bg-transparent overflow-hidden transition-all duration-300">
                       {category.groups.map((group) => (
                         <div key={group.id}>
+=======
+                  {category.groups && category.groups.length > 0 && mobileOpenCategoryId === category._id && (
+                    <div className="bg-transparent overflow-hidden transition-all duration-300">
+                      {category.groups.map((group) => (
+                        <div key={group._id}>
+>>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
                           {group.subitems && group.subitems.length > 0 ? (
                             <>
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   setMobileOpenGroupId(
+<<<<<<< HEAD
                                     mobileOpenGroupId === `${category.id}-${group.id}` 
                                       ? null 
                                       : `${category.id}-${group.id}`
+=======
+                                    mobileOpenGroupId === `${category._id}-${group._id}` 
+                                      ? null 
+                                      : `${category._id}-${group._id}`
+>>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
                                   );
                                 }}
                                 className="w-full flex items-center justify-between text-black font-medium text-sm hover:bg-gray-100 transition-colors px-6 py-2.5"
                               >
+<<<<<<< HEAD
                                 <span>{group.label}</span>
                                 <ChevronRight 
                                   size={16} 
                                   className={`text-gray-400 transition-transform duration-300 ${
                                     mobileOpenGroupId === `${category.id}-${group.id}` ? 'rotate-90' : ''
+=======
+                                <span>{group.groupName}</span>
+                                <ChevronRight 
+                                  size={16} 
+                                  className={`text-gray-400 transition-transform duration-300 ${
+                                    mobileOpenGroupId === `${category._id}-${group._id}` ? 'rotate-90' : ''
+>>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
                                   }`}
                                 />
                               </button>
                               {/* Subitems */}
+<<<<<<< HEAD
                               {mobileOpenGroupId === `${category.id}-${group.id}` && (
                                 <div className={`bg-transparent overflow-hidden transition-all duration-300 ease-out ${
                                   mobileOpenGroupId === `${category.id}-${group.id}`
+=======
+                              {mobileOpenGroupId === `${category._id}-${group._id}` && (
+                                <div className={`bg-transparent overflow-hidden transition-all duration-300 ease-out ${
+                                  mobileOpenGroupId === `${category._id}-${group._id}`
+>>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
                                     ? 'max-h-96 opacity-100'
                                     : 'max-h-0 opacity-0'
                                 }`}>
                                   {group.subitems.map((subitem) => (
                                     <NavLink
+<<<<<<< HEAD
                                       key={subitem.id}
                                       to={subitem.path}
+=======
+                                      key={subitem._id}
+                                      to={`/shop?subcategory=${subitem.name.toLowerCase().replace(/\s+/g, '-')}`}
+>>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
                                       onClick={() => {
                                         setMobileMenuOpen(false);
                                         setMobileOpenGroupId(null);
@@ -662,7 +834,11 @@ const Navbar = () => {
                                       }}
                                       className="block text-black text-sm hover:bg-gray-100 transition-colors px-8 py-2"
                                     >
+<<<<<<< HEAD
                                       {subitem.label}
+=======
+                                      {subitem.name}
+>>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
                                     </NavLink>
                                   ))}
                                 </div>
@@ -670,14 +846,22 @@ const Navbar = () => {
                             </>
                           ) : (
                             <NavLink
+<<<<<<< HEAD
                               to={group.path || '/shop'}
+=======
+                              to={`/shop?group=${group.groupName.toLowerCase().replace(/\s+/g, '-')}`}
+>>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
                               onClick={() => {
                                 setMobileMenuOpen(false);
                                 setMobileOpenCategoryId(null);
                               }}
                               className="block text-black font-medium text-sm hover:bg-gray-100 transition-colors px-6 py-2.5"
                             >
+<<<<<<< HEAD
                               {group.label}
+=======
+                              {group.groupName}
+>>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
                             </NavLink>
                           )}
                         </div>

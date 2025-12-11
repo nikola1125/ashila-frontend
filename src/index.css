@@ -15,6 +15,7 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+<<<<<<< HEAD
   background-color: var(--light, #f9f7f4);
   color: var(--primary, #1a1a1a);
   letter-spacing: 0.01em;
@@ -32,6 +33,23 @@ h1, h2, h3, h4, h5, h6 {
   letter-spacing: 0.03em;
   line-height: 1.3;
   color: var(--primary, #1a1a1a);
+=======
+  background-color: #EBD8C8;  /* Soft Almond Beige */
+  color: #4A3628;              /* Rich Coffee Brown */
+  letter-spacing: 0.01em;
+  font-weight: 300;
+  line-height: 1.7;
+  margin: 0;
+  padding: 0;
+}
+
+/* Elegant headings with serif font */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Cormorant Garamond', 'Playfair Display', serif;
+  font-weight: 400;
+  letter-spacing: 0.03em;
+  line-height: 1.3;
+>>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
 }
 
 /* Refined typography for luxury feel */
@@ -55,6 +73,7 @@ p {
   -moz-osx-font-smoothing: grayscale;
 }
 
+<<<<<<< HEAD
 /* Hero CTA entrance animation */
 .hero-cta-group {
   /* container kept for potential layout tweaks; animation handled per button */
@@ -93,6 +112,8 @@ p {
   }
 }
 
+=======
+>>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
 /* Elegant table styling */
 table {
   border-collapse: collapse;
@@ -167,6 +188,7 @@ input, textarea, select {
   --brand-bg: #EBD8C8;              /* Soft Almond Beige - Base colour (elegant, warm, clean) */
   --brand-text: #4A3628;            /* Rich Coffee Brown - Text color */
   --brand-border: #D9BFA9;          /* Warm Beige - Shadows / depth */
+<<<<<<< HEAD
   
   /* Luxury Theme Variables */
   --primary: #1a1a1a;
@@ -253,6 +275,8 @@ input, textarea, select {
   .lux-subtitle {
     font-size: 1rem;
   }
+=======
+>>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
 }
 
 /* Exception: Cart badge should be round */
@@ -260,6 +284,7 @@ input, textarea, select {
   border-radius: 9999px !important;
 }
 
+<<<<<<< HEAD
 /* Reusable luxury buttons & cards (square edges, modern feel) */
 .lux-btn-primary {
   display: inline-flex;
@@ -379,6 +404,8 @@ input, textarea, select {
   z-index: 3;
 }
 
+=======
+>>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
 /* Fix navbar on mobile - prevent disappearing on scroll */
 header {
   -webkit-transform: translateZ(0);
@@ -393,6 +420,7 @@ header {
   z-index: 100 !important;
 }
 
+<<<<<<< HEAD
 /* Section animations */
 .fade-in {
   opacity: 0;
@@ -483,6 +511,8 @@ header {
   }
 }
 
+=======
+>>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
 /* Compact navbar on desktop */
 @media (min-width: 1024px) {
   header nav {
@@ -496,7 +526,10 @@ header {
   }
 }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
 /* Ensure all acne category items are the same size */
 .acne-category-grid > button {
   width: 100%;
@@ -583,7 +616,11 @@ select {
   }
 }
 
+<<<<<<< HEAD
 /* Responsive containers - Standard behavior */
+=======
+/* Responsive containers */
+>>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
 .container {
   width: 100%;
   padding-left: 1rem;
@@ -624,12 +661,15 @@ select {
   }
 }
 
+<<<<<<< HEAD
 /* Luxury container override - applies on all screen sizes including desktop */
 .luxury-container {
   max-width: 1400px !important;
   padding: 0 30px !important;
 }
 
+=======
+>>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
 /* Responsive grid improvements */
 .grid-responsive {
   display: grid;
@@ -725,6 +765,7 @@ select {
   }
 }
 
+<<<<<<< HEAD
 /* ===== LUXURY THEME STYLES ===== */
 /* Note: Base body and heading styles are merged above for desktop and mobile */
 
@@ -1334,3 +1375,5 @@ select {
     font-size: 36px;
   }
 }
+=======
+>>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc

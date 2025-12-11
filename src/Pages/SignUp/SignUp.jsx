@@ -122,7 +122,11 @@ const SignUp = () => {
   };
 
   return (
+<<<<<<< HEAD
     <div className='flex justify-center pt-16 sm:pt-24 md:pt-32 min-h-screen'>
+=======
+    <div className='flex justify-center pt-24 sm:pt-28 md:pt-32 min-h-screen'>
+>>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
       <Helmet key={location.pathname}>
         <title>Sign Up</title>
       </Helmet>

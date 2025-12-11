@@ -65,8 +65,13 @@ const Cart = () => {
       <Helmet key={location.pathname}>
         <title>Your Cart</title>
       </Helmet>
+<<<<<<< HEAD
       <div className="min-h-screen bg-[#f9f7f4] py-8 sm:py-12 px-4 sm:px-2 md:px-0">
         <div className="max-w-3xl mx-auto bg-white lux-card lux-card-elevated">
+=======
+      <div className="min-h-screen bg-[#faf9f6] py-8 sm:py-12 px-4 sm:px-2 md:px-0">
+        <div className="max-w-3xl mx-auto bg-white shadow-md border-2 border-[#d4d4c4]">
+>>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
           <div className="p-4 sm:p-6 md:p-8">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 sm:mb-8">
               <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">
@@ -74,7 +79,11 @@ const Cart = () => {
               </h2>
               <button
                 onClick={clearCart}
+<<<<<<< HEAD
                 className="inline-flex items-center gap-1 text-xs sm:text-sm font-semibold text-red-600 hover:text-white hover:bg-red-500 transition px-3 py-2 sm:py-1.5 border border-red-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-red-400 min-h-[44px]"
+=======
+                className="inline-flex items-center gap-1 text-xs sm:text-sm font-semibold text-red-600 hover:text-white hover:bg-red-500 transition px-3 py-2 sm:py-1.5 rounded-sm border border-red-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-red-400 min-h-[44px]"
+>>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
               >
                 <FaTrash className="inline" /> <span className="hidden sm:inline">Clear Cart</span><span className="sm:hidden">Clear</span>
               </button>
@@ -84,7 +93,11 @@ const Cart = () => {
               {items?.map((item) => (
                 <div
                   key={item.id}
+<<<<<<< HEAD
                   className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-3 sm:p-4 bg-gray-50 border border-gray-200"
+=======
+                  className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-3 sm:p-4 bg-gray-50 rounded-sm border border-gray-200 shadow-sm"
+>>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
                 >
                   <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto">
                     <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 rounded-sm flex items-center justify-center flex-shrink-0 overflow-hidden">
@@ -115,20 +128,34 @@ const Cart = () => {
                       <button
                         onClick={() => updateQuantity(item.id, item.quantity - 1)}
                         disabled={item.quantity <= 1}
+<<<<<<< HEAD
                         className="p-2 sm:p-2.5 bg-[#faf9f6] hover:bg-[#946259] disabled:opacity-40 text-[#946259] transition-all border-2 border-[#946259] min-w-[44px] min-h-[44px] flex items-center justify-center text-lg leading-none"
                         aria-label="Decrease quantity"
                       >
                         -
+=======
+                        className="p-2 sm:p-2.5 bg-[#faf9f6] hover:bg-[#946259] disabled:opacity-40 text-[#946259] transition-all border-2 border-[#946259] min-w-[44px] min-h-[44px] flex items-center justify-center"
+                        aria-label="Decrease quantity"
+                      >
+                        <FaMinus />
+>>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
                       </button>
                       <span className="px-3 sm:px-4 py-1.5 sm:py-2 bg-white border-2 border-[#946259] text-[#946259] font-semibold shadow-sm min-w-[44px] text-center">
                         {item.quantity}
                       </span>
                       <button
                         onClick={() => updateQuantity(item.id, item.quantity + 1)}
+<<<<<<< HEAD
                         className="p-2 sm:p-2.5 bg-[#faf9f6] hover:bg-[#946259] text-[#946259] transition-all border-2 border-[#946259] min-w-[44px] min-h-[44px] flex items-center justify-center text-lg leading-none"
                         aria-label="Increase quantity"
                       >
                         +
+=======
+                        className="p-2 sm:p-2.5 bg-[#faf9f6] hover:bg-[#946259] text-[#946259] transition-all border-2 border-[#946259] min-w-[44px] min-h-[44px] flex items-center justify-center"
+                        aria-label="Increase quantity"
+                      >
+                        <FaPlus />
+>>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
                       </button>
                     </div>
                     <button
@@ -162,7 +189,11 @@ const Cart = () => {
                 </div>
                 <button
                   onClick={handleCheckout}
+<<<<<<< HEAD
                   className="w-full sm:w-auto lux-btn-primary px-6 sm:px-8 py-3 sm:py-4 font-bold text-base sm:text-lg shadow-md min-h-[44px]"
+=======
+                  className="w-full sm:w-auto bg-[#946259] text-white px-6 sm:px-8 py-3 sm:py-4 font-bold text-base sm:text-lg shadow-md hover:bg-[#7a4f47] active:bg-[#7a4f47] transition-all border-2 border-[#946259] uppercase tracking-wide min-h-[44px]"
+>>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
                 >
                   Proceed to Checkout
                 </button>
