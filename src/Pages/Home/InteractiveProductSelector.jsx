@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useContext } from 'react';
+import React, { useState, useEffect, useRef, useContext, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import useAxiosSecure from '../../hooks/useAxiosSecure';
@@ -14,6 +14,7 @@ const InteractiveProductSelector = () => {
   const [showPanel, setShowPanel] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const panelRef = useRef(null);
+  const sectionRef = useRef(null);
 
   // Fetch products from API
   const { data: productsData = [] } = useQuery({
@@ -32,6 +33,15 @@ const InteractiveProductSelector = () => {
     staleTime: 2 * 60 * 1000,
   });
 
+  const handleClosePanel = useCallback(() => {
+    setShowPanel(false);
+    // Delay clearing selected product for smooth transition
+    setTimeout(() => {
+      setSelectedProductIndex(null);
+      setIsTransitioning(false);
+    }, 300);
+  }, []);
+
   // Set first product as selected by default on page load (mobile only)
   useEffect(() => {
     if (productsData.length > 0 && selectedProductIndex === null) {
@@ -42,6 +52,36 @@ const InteractiveProductSelector = () => {
       }
     }
   }, [productsData, selectedProductIndex]);
+
+  // Close panel as soon as scrolling starts (desktop only)
+  useEffect(() => {
+    if (!showPanel || window.innerWidth < 768) return;
+
+    let scrollTimeout = null;
+    let hasScrolled = false;
+
+    const handleScroll = () => {
+      // Close immediately on first scroll
+      if (!hasScrolled) {
+        hasScrolled = true;
+        // Clear any pending timeout
+        if (scrollTimeout) {
+          clearTimeout(scrollTimeout);
+        }
+        // Close immediately
+        handleClosePanel();
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (scrollTimeout) {
+        clearTimeout(scrollTimeout);
+      }
+    };
+  }, [showPanel, handleClosePanel]);
 
 
   // Product positions for hotspots on the produkt.png image
@@ -73,16 +113,6 @@ const InteractiveProductSelector = () => {
       }
     }
   };
-
-  const handleClosePanel = () => {
-    setShowPanel(false);
-    // Delay clearing selected product for smooth transition
-    setTimeout(() => {
-      setSelectedProductIndex(null);
-      setIsTransitioning(false);
-    }, 300);
-  };
-
 
   const handleViewProduct = () => {
     if (productsData[selectedProductIndex]?._id) {
@@ -125,7 +155,7 @@ const InteractiveProductSelector = () => {
     : Number(selectedProduct?.price || 0);
 
   return (
-    <section className="bg-white relative overflow-hidden mt-0 md:mt-0 lux-section">
+    <section ref={sectionRef} className="bg-white relative overflow-hidden mt-0 md:mt-0 lux-section">
       <div className="lux-section-inner relative z-10">
         {/* Lifestyle Image with Hotspots */}
         <div className="relative w-full aspect-[4/3] md:aspect-[16/10] max-h-[500px] md:max-h-[700px] overflow-hidden">

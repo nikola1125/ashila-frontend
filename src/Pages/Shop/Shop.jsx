@@ -2,7 +2,7 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import useAxiosSecure from '../../hooks/useAxiosSecure';
 import LoadingError from '../../Components/Common/States/LoadingError';
-import { Search, X, Filter } from 'lucide-react';
+import { Search, X, Filter, ChevronDown, ChevronUp } from 'lucide-react';
 import DataLoading from '../../Components/Common/Loaders/DataLoading';
 import ShopGrid from '../../Components/Grid/ShopGrid';
 import { Helmet } from 'react-helmet-async';
@@ -16,6 +16,27 @@ const Shop = () => {
   const [sortBy, setSortBy] = useState('alphabetical');
   const [searchTerm, setSearchTerm] = useState('');
   const [showFilters, setShowFilters] = useState(false); // Hidden on mobile by default, visible on desktop
+
+  // Category expansion states
+  const [expandedCategories, setExpandedCategories] = useState({
+    problematica: false,
+    skinTypes: false,
+    productTypes: false,
+    bodyHair: false,
+    hygiene: false,
+    motherChild: false,
+    sexualHealth: false,
+    supplements: false,
+    healthMonitors: false,
+  });
+
+  // Toggle category expansion
+  const toggleCategory = useCallback((categoryKey) => {
+    setExpandedCategories(prev => ({
+      ...prev,
+      [categoryKey]: !prev[categoryKey]
+    }));
+  }, []);
 
   // Filter states
   const [selectedProblems, setSelectedProblems] = useState([]);
@@ -302,218 +323,326 @@ const Shop = () => {
 
                   {/* Problematika */}
                   <div className="mb-6">
-                    <h3 className="text-sm font-semibold text-[#A67856] mb-3 uppercase tracking-wide">Problematika</h3>
-                    <div className="space-y-2">
-                      {filterOptions.problematica.map((option) => (
-                        <label
-                          key={option.id}
-                          className="flex items-center justify-between cursor-pointer hover:bg-[#EBD8C8] p-1"
-                        >
-                          <div className="flex items-center gap-2">
-                            <input
-                              type="checkbox"
-                              checked={selectedProblems.includes(option.id)}
-                              onChange={() => toggleFilter('problem', option.id)}
-                              className="w-4 h-4 text-[#A67856] border-2 border-[#A67856] focus:ring-[#A67856]"
-                            />
-                            <span className="text-sm text-gray-700">{option.label}</span>
-                          </div>
-                          <span className="text-xs text-gray-500">{option.count}</span>
-                        </label>
-                      ))}
-                    </div>
+                    <button
+                      onClick={() => toggleCategory('problematica')}
+                      className="w-full flex items-center justify-between text-sm font-semibold text-[#A67856] mb-3 uppercase tracking-wide hover:text-[#8B6345] transition-colors"
+                    >
+                      <span>Problematika</span>
+                      {expandedCategories.problematica ? (
+                        <ChevronUp size={18} className="text-[#A67856]" />
+                      ) : (
+                        <ChevronDown size={18} className="text-[#A67856]" />
+                      )}
+                    </button>
+                    {expandedCategories.problematica && (
+                      <div className="space-y-2">
+                        {filterOptions.problematica.map((option) => (
+                          <label
+                            key={option.id}
+                            className="flex items-center justify-between cursor-pointer hover:bg-[#EBD8C8] p-1"
+                          >
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="checkbox"
+                                checked={selectedProblems.includes(option.id)}
+                                onChange={() => toggleFilter('problem', option.id)}
+                                className="w-4 h-4 text-[#A67856] border-2 border-[#A67856] focus:ring-[#A67856]"
+                              />
+                              <span className="text-sm text-gray-700">{option.label}</span>
+                            </div>
+                            <span className="text-xs text-gray-500">{option.count}</span>
+                          </label>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   {/* Tipi i lëkurës */}
                   <div className="mb-6">
-                    <h3 className="text-sm font-semibold text-[#A67856] mb-3 uppercase tracking-wide">Tipi i lëkurës</h3>
-                    <div className="space-y-2">
-                      {filterOptions.skinTypes.map((option) => (
-                        <label
-                          key={option.id}
-                          className="flex items-center justify-between cursor-pointer hover:bg-[#EBD8C8] p-1"
-                        >
-                          <div className="flex items-center gap-2">
-                            <input
-                              type="checkbox"
-                              checked={selectedSkinTypes.includes(option.id)}
-                              onChange={() => toggleFilter('skinType', option.id)}
-                              className="w-4 h-4 text-[#A67856] border-2 border-[#A67856] focus:ring-[#A67856]"
-                            />
-                            <span className="text-sm text-gray-700">{option.label}</span>
-                          </div>
-                          <span className="text-xs text-gray-500">{option.count}</span>
-                        </label>
-                      ))}
-                    </div>
+                    <button
+                      onClick={() => toggleCategory('skinTypes')}
+                      className="w-full flex items-center justify-between text-sm font-semibold text-[#A67856] mb-3 uppercase tracking-wide hover:text-[#8B6345] transition-colors"
+                    >
+                      <span>Tipi i lëkurës</span>
+                      {expandedCategories.skinTypes ? (
+                        <ChevronUp size={18} className="text-[#A67856]" />
+                      ) : (
+                        <ChevronDown size={18} className="text-[#A67856]" />
+                      )}
+                    </button>
+                    {expandedCategories.skinTypes && (
+                      <div className="space-y-2">
+                        {filterOptions.skinTypes.map((option) => (
+                          <label
+                            key={option.id}
+                            className="flex items-center justify-between cursor-pointer hover:bg-[#EBD8C8] p-1"
+                          >
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="checkbox"
+                                checked={selectedSkinTypes.includes(option.id)}
+                                onChange={() => toggleFilter('skinType', option.id)}
+                                className="w-4 h-4 text-[#A67856] border-2 border-[#A67856] focus:ring-[#A67856]"
+                              />
+                              <span className="text-sm text-gray-700">{option.label}</span>
+                            </div>
+                            <span className="text-xs text-gray-500">{option.count}</span>
+                          </label>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   {/* Lloji i produktit */}
                   <div className="mb-6">
-                    <h3 className="text-sm font-semibold text-[#A67856] mb-3 uppercase tracking-wide">Lloji i produktit</h3>
-                    <div className="space-y-2">
-                      {filterOptions.productTypes.map((option) => (
-                        <label
-                          key={option.id}
-                          className="flex items-center justify-between cursor-pointer hover:bg-[#EBD8C8] p-1"
-                        >
-                          <div className="flex items-center gap-2">
-                            <input
-                              type="checkbox"
-                              checked={selectedProductTypes.includes(option.id)}
-                              onChange={() => toggleFilter('productType', option.id)}
-                              className="w-4 h-4 text-[#A67856] border-2 border-[#A67856] focus:ring-[#A67856]"
-                            />
-                            <span className="text-sm text-gray-700">{option.label}</span>
-                          </div>
-                          <span className="text-xs text-gray-500">{option.count}</span>
-                        </label>
-                      ))}
-                    </div>
+                    <button
+                      onClick={() => toggleCategory('productTypes')}
+                      className="w-full flex items-center justify-between text-sm font-semibold text-[#A67856] mb-3 uppercase tracking-wide hover:text-[#8B6345] transition-colors"
+                    >
+                      <span>Lloji i produktit</span>
+                      {expandedCategories.productTypes ? (
+                        <ChevronUp size={18} className="text-[#A67856]" />
+                      ) : (
+                        <ChevronDown size={18} className="text-[#A67856]" />
+                      )}
+                    </button>
+                    {expandedCategories.productTypes && (
+                      <div className="space-y-2">
+                        {filterOptions.productTypes.map((option) => (
+                          <label
+                            key={option.id}
+                            className="flex items-center justify-between cursor-pointer hover:bg-[#EBD8C8] p-1"
+                          >
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="checkbox"
+                                checked={selectedProductTypes.includes(option.id)}
+                                onChange={() => toggleFilter('productType', option.id)}
+                                className="w-4 h-4 text-[#A67856] border-2 border-[#A67856] focus:ring-[#A67856]"
+                              />
+                              <span className="text-sm text-gray-700">{option.label}</span>
+                            </div>
+                            <span className="text-xs text-gray-500">{option.count}</span>
+                          </label>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   {/* Trupin & Flokë */}
                   <div className="mb-6">
-                    <h3 className="text-sm font-semibold text-[#A67856] mb-3 uppercase tracking-wide">Trupin & Flokë</h3>
-                    <div className="space-y-2">
-                      {filterOptions.bodyHair.map((option) => (
-                        <label
-                          key={option.id}
-                          className="flex items-center justify-between cursor-pointer hover:bg-[#EBD8C8] p-1"
-                        >
-                          <div className="flex items-center gap-2">
-                            <input
-                              type="checkbox"
-                              checked={selectedBodyHair.includes(option.id)}
-                              onChange={() => toggleFilter('bodyHair', option.id)}
-                              className="w-4 h-4 text-[#A67856] border-2 border-[#A67856] focus:ring-[#A67856]"
-                            />
-                            <span className="text-sm text-gray-700">{option.label}</span>
-                          </div>
-                          <span className="text-xs text-gray-500">{option.count}</span>
-                        </label>
-                      ))}
-                    </div>
+                    <button
+                      onClick={() => toggleCategory('bodyHair')}
+                      className="w-full flex items-center justify-between text-sm font-semibold text-[#A67856] mb-3 uppercase tracking-wide hover:text-[#8B6345] transition-colors"
+                    >
+                      <span>Trupin & Flokë</span>
+                      {expandedCategories.bodyHair ? (
+                        <ChevronUp size={18} className="text-[#A67856]" />
+                      ) : (
+                        <ChevronDown size={18} className="text-[#A67856]" />
+                      )}
+                    </button>
+                    {expandedCategories.bodyHair && (
+                      <div className="space-y-2">
+                        {filterOptions.bodyHair.map((option) => (
+                          <label
+                            key={option.id}
+                            className="flex items-center justify-between cursor-pointer hover:bg-[#EBD8C8] p-1"
+                          >
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="checkbox"
+                                checked={selectedBodyHair.includes(option.id)}
+                                onChange={() => toggleFilter('bodyHair', option.id)}
+                                className="w-4 h-4 text-[#A67856] border-2 border-[#A67856] focus:ring-[#A67856]"
+                              />
+                              <span className="text-sm text-gray-700">{option.label}</span>
+                            </div>
+                            <span className="text-xs text-gray-500">{option.count}</span>
+                          </label>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   {/* Higjene */}
                   <div className="mb-6">
-                    <h3 className="text-sm font-semibold text-[#A67856] mb-3 uppercase tracking-wide">Higjene</h3>
-                    <div className="space-y-2">
-                      {filterOptions.hygiene.map((option) => (
-                        <label
-                          key={option.id}
-                          className="flex items-center justify-between cursor-pointer hover:bg-[#EBD8C8] p-1"
-                        >
-                          <div className="flex items-center gap-2">
-                            <input
-                              type="checkbox"
-                              checked={selectedHygiene.includes(option.id)}
-                              onChange={() => toggleFilter('hygiene', option.id)}
-                              className="w-4 h-4 text-[#A67856] border-2 border-[#A67856] focus:ring-[#A67856]"
-                            />
-                            <span className="text-sm text-gray-700">{option.label}</span>
-                          </div>
-                          <span className="text-xs text-gray-500">{option.count}</span>
-                        </label>
-                      ))}
-                    </div>
+                    <button
+                      onClick={() => toggleCategory('hygiene')}
+                      className="w-full flex items-center justify-between text-sm font-semibold text-[#A67856] mb-3 uppercase tracking-wide hover:text-[#8B6345] transition-colors"
+                    >
+                      <span>Higjene</span>
+                      {expandedCategories.hygiene ? (
+                        <ChevronUp size={18} className="text-[#A67856]" />
+                      ) : (
+                        <ChevronDown size={18} className="text-[#A67856]" />
+                      )}
+                    </button>
+                    {expandedCategories.hygiene && (
+                      <div className="space-y-2">
+                        {filterOptions.hygiene.map((option) => (
+                          <label
+                            key={option.id}
+                            className="flex items-center justify-between cursor-pointer hover:bg-[#EBD8C8] p-1"
+                          >
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="checkbox"
+                                checked={selectedHygiene.includes(option.id)}
+                                onChange={() => toggleFilter('hygiene', option.id)}
+                                className="w-4 h-4 text-[#A67856] border-2 border-[#A67856] focus:ring-[#A67856]"
+                              />
+                              <span className="text-sm text-gray-700">{option.label}</span>
+                            </div>
+                            <span className="text-xs text-gray-500">{option.count}</span>
+                          </label>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   {/* Nena & Fëmijë */}
                   <div className="mb-6">
-                    <h3 className="text-sm font-semibold text-[#A67856] mb-3 uppercase tracking-wide">Nena & Fëmijë</h3>
-                    <div className="space-y-2">
-                      {filterOptions.motherChild.map((option) => (
-                        <label
-                          key={option.id}
-                          className="flex items-center justify-between cursor-pointer hover:bg-[#EBD8C8] p-1"
-                        >
-                          <div className="flex items-center gap-2">
-                            <input
-                              type="checkbox"
-                              checked={selectedMotherChild.includes(option.id)}
-                              onChange={() => toggleFilter('motherChild', option.id)}
-                              className="w-4 h-4 text-[#A67856] border-2 border-[#A67856] focus:ring-[#A67856]"
-                            />
-                            <span className="text-sm text-gray-700">{option.label}</span>
-                          </div>
-                          <span className="text-xs text-gray-500">{option.count}</span>
-                        </label>
-                      ))}
-                    </div>
+                    <button
+                      onClick={() => toggleCategory('motherChild')}
+                      className="w-full flex items-center justify-between text-sm font-semibold text-[#A67856] mb-3 uppercase tracking-wide hover:text-[#8B6345] transition-colors"
+                    >
+                      <span>Nena & Fëmijë</span>
+                      {expandedCategories.motherChild ? (
+                        <ChevronUp size={18} className="text-[#A67856]" />
+                      ) : (
+                        <ChevronDown size={18} className="text-[#A67856]" />
+                      )}
+                    </button>
+                    {expandedCategories.motherChild && (
+                      <div className="space-y-2">
+                        {filterOptions.motherChild.map((option) => (
+                          <label
+                            key={option.id}
+                            className="flex items-center justify-between cursor-pointer hover:bg-[#EBD8C8] p-1"
+                          >
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="checkbox"
+                                checked={selectedMotherChild.includes(option.id)}
+                                onChange={() => toggleFilter('motherChild', option.id)}
+                                className="w-4 h-4 text-[#A67856] border-2 border-[#A67856] focus:ring-[#A67856]"
+                              />
+                              <span className="text-sm text-gray-700">{option.label}</span>
+                            </div>
+                            <span className="text-xs text-gray-500">{option.count}</span>
+                          </label>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   {/* Shendeti Seksual */}
                   <div className="mb-6">
-                    <h3 className="text-sm font-semibold text-[#A67856] mb-3 uppercase tracking-wide">Shendeti Seksual</h3>
-                    <div className="space-y-2">
-                      {filterOptions.sexualHealth.map((option) => (
-                        <label
-                          key={option.id}
-                          className="flex items-center justify-between cursor-pointer hover:bg-[#EBD8C8] p-1"
-                        >
-                          <div className="flex items-center gap-2">
-                            <input
-                              type="checkbox"
-                              checked={selectedSexualHealth.includes(option.id)}
-                              onChange={() => toggleFilter('sexualHealth', option.id)}
-                              className="w-4 h-4 text-[#A67856] border-2 border-[#A67856] focus:ring-[#A67856]"
-                            />
-                            <span className="text-sm text-gray-700">{option.label}</span>
-                          </div>
-                          <span className="text-xs text-gray-500">{option.count}</span>
-                        </label>
-                      ))}
-                    </div>
+                    <button
+                      onClick={() => toggleCategory('sexualHealth')}
+                      className="w-full flex items-center justify-between text-sm font-semibold text-[#A67856] mb-3 uppercase tracking-wide hover:text-[#8B6345] transition-colors"
+                    >
+                      <span>Shendeti Seksual</span>
+                      {expandedCategories.sexualHealth ? (
+                        <ChevronUp size={18} className="text-[#A67856]" />
+                      ) : (
+                        <ChevronDown size={18} className="text-[#A67856]" />
+                      )}
+                    </button>
+                    {expandedCategories.sexualHealth && (
+                      <div className="space-y-2">
+                        {filterOptions.sexualHealth.map((option) => (
+                          <label
+                            key={option.id}
+                            className="flex items-center justify-between cursor-pointer hover:bg-[#EBD8C8] p-1"
+                          >
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="checkbox"
+                                checked={selectedSexualHealth.includes(option.id)}
+                                onChange={() => toggleFilter('sexualHealth', option.id)}
+                                className="w-4 h-4 text-[#A67856] border-2 border-[#A67856] focus:ring-[#A67856]"
+                              />
+                              <span className="text-sm text-gray-700">{option.label}</span>
+                            </div>
+                            <span className="text-xs text-gray-500">{option.count}</span>
+                          </label>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   {/* Suplemente & Vitamina */}
                   <div className="mb-6">
-                    <h3 className="text-sm font-semibold text-[#A67856] mb-3 uppercase tracking-wide">Suplemente & Vitamina</h3>
-                    <div className="space-y-2">
-                      {filterOptions.supplements.map((option) => (
-                        <label
-                          key={option.id}
-                          className="flex items-center justify-between cursor-pointer hover:bg-[#EBD8C8] p-1"
-                        >
-                          <div className="flex items-center gap-2">
-                            <input
-                              type="checkbox"
-                              checked={selectedSupplements.includes(option.id)}
-                              onChange={() => toggleFilter('supplements', option.id)}
-                              className="w-4 h-4 text-[#A67856] border-2 border-[#A67856] focus:ring-[#A67856]"
-                            />
-                            <span className="text-sm text-gray-700">{option.label}</span>
-                          </div>
-                          <span className="text-xs text-gray-500">{option.count}</span>
-                        </label>
-                      ))}
-                    </div>
+                    <button
+                      onClick={() => toggleCategory('supplements')}
+                      className="w-full flex items-center justify-between text-sm font-semibold text-[#A67856] mb-3 uppercase tracking-wide hover:text-[#8B6345] transition-colors"
+                    >
+                      <span>Suplemente & Vitamina</span>
+                      {expandedCategories.supplements ? (
+                        <ChevronUp size={18} className="text-[#A67856]" />
+                      ) : (
+                        <ChevronDown size={18} className="text-[#A67856]" />
+                      )}
+                    </button>
+                    {expandedCategories.supplements && (
+                      <div className="space-y-2">
+                        {filterOptions.supplements.map((option) => (
+                          <label
+                            key={option.id}
+                            className="flex items-center justify-between cursor-pointer hover:bg-[#EBD8C8] p-1"
+                          >
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="checkbox"
+                                checked={selectedSupplements.includes(option.id)}
+                                onChange={() => toggleFilter('supplements', option.id)}
+                                className="w-4 h-4 text-[#A67856] border-2 border-[#A67856] focus:ring-[#A67856]"
+                              />
+                              <span className="text-sm text-gray-700">{option.label}</span>
+                            </div>
+                            <span className="text-xs text-gray-500">{option.count}</span>
+                          </label>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   {/* Monitoruesit e Shëndetit */}
                   <div className="mb-6">
-                    <h3 className="text-sm font-semibold text-[#A67856] mb-3 uppercase tracking-wide">Monitoruesit e Shëndetit</h3>
-                    <div className="space-y-2">
-                      {filterOptions.healthMonitors.map((option) => (
-                        <label
-                          key={option.id}
-                          className="flex items-center justify-between cursor-pointer hover:bg-[#EBD8C8] p-1"
-                        >
-                          <div className="flex items-center gap-2">
-                            <input
-                              type="checkbox"
-                              checked={selectedHealthMonitors.includes(option.id)}
-                              onChange={() => toggleFilter('healthMonitors', option.id)}
-                              className="w-4 h-4 text-[#A67856] border-2 border-[#A67856] focus:ring-[#A67856]"
-                            />
-                            <span className="text-sm text-gray-700">{option.label}</span>
-                          </div>
-                          <span className="text-xs text-gray-500">{option.count}</span>
-                        </label>
-                      ))}
-                    </div>
+                    <button
+                      onClick={() => toggleCategory('healthMonitors')}
+                      className="w-full flex items-center justify-between text-sm font-semibold text-[#A67856] mb-3 uppercase tracking-wide hover:text-[#8B6345] transition-colors"
+                    >
+                      <span>Monitoruesit e Shëndetit</span>
+                      {expandedCategories.healthMonitors ? (
+                        <ChevronUp size={18} className="text-[#A67856]" />
+                      ) : (
+                        <ChevronDown size={18} className="text-[#A67856]" />
+                      )}
+                    </button>
+                    {expandedCategories.healthMonitors && (
+                      <div className="space-y-2">
+                        {filterOptions.healthMonitors.map((option) => (
+                          <label
+                            key={option.id}
+                            className="flex items-center justify-between cursor-pointer hover:bg-[#EBD8C8] p-1"
+                          >
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="checkbox"
+                                checked={selectedHealthMonitors.includes(option.id)}
+                                onChange={() => toggleFilter('healthMonitors', option.id)}
+                                className="w-4 h-4 text-[#A67856] border-2 border-[#A67856] focus:ring-[#A67856]"
+                              />
+                              <span className="text-sm text-gray-700">{option.label}</span>
+                            </div>
+                            <span className="text-xs text-gray-500">{option.count}</span>
+                          </label>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
