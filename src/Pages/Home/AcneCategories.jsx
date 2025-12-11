@@ -48,11 +48,7 @@ const AcneCategories = () => {
     <section className="py-8 md:py-16 bg-white">
       <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
         {/* Centered Title */}
-<<<<<<< HEAD
         <div className="text-center mb-8 md:mb-12 fade-in">
-=======
-        <div className="text-center mb-8 md:mb-12">
->>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
           <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-[#4A3628] mb-3 md:mb-4">
             Bli sipas llojit të akneve
           </h2>
@@ -61,19 +57,11 @@ const AcneCategories = () => {
 
         {/* Desktop Grid Layout - 5 items, NO overlay by default, images fully visible */}
         <div className="hidden lg:grid grid-cols-5 gap-6 lg:gap-8 acne-category-grid">
-<<<<<<< HEAD
           {items.map((item, index) => (
             <button
               key={item.key}
               onClick={() => navigate(`/shop?category=${item.key}`)}
               className={`group relative w-full aspect-square overflow-hidden border-2 border-[#D9BFA9] hover:border-[#A67856] shadow-sm hover:shadow-lg transition-all duration-200 scale-in stagger-${Math.min(index + 1, 4)}`}
-=======
-          {items.map((item) => (
-            <button
-              key={item.key}
-              onClick={() => navigate(`/shop?category=${item.key}`)}
-              className="group relative w-full aspect-square overflow-hidden border-2 border-[#D9BFA9] hover:border-[#A67856] shadow-sm hover:shadow-lg transition-all duration-200"
->>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
             >
                 <img
                   src={item.image}
@@ -102,19 +90,11 @@ const AcneCategories = () => {
 
         {/* Tablet Grid Layout - 3 columns */}
         <div className="hidden md:grid lg:hidden grid-cols-3 gap-6">
-<<<<<<< HEAD
           {items.map((item, index) => (
             <button
               key={item.key}
               onClick={() => navigate(`/shop?category=${item.key}`)}
               className={`group relative w-full aspect-square overflow-hidden border-2 border-[#D9BFA9] hover:border-[#A67856] shadow-sm hover:shadow-lg transition-all duration-200 scale-in stagger-${Math.min(index + 1, 4)}`}
-=======
-          {items.map((item) => (
-            <button
-              key={item.key}
-              onClick={() => navigate(`/shop?category=${item.key}`)}
-              className="group relative w-full aspect-square overflow-hidden border-2 border-[#D9BFA9] hover:border-[#A67856] shadow-sm hover:shadow-lg transition-all duration-200"
->>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
             >
               <img
                 src={item.image}
@@ -142,11 +122,7 @@ const AcneCategories = () => {
         </div>
 
         {/* Mobile - Swipeable slider with 2 items per page */}
-<<<<<<< HEAD
         <div className="block md:hidden fade-in">
-=======
-        <div className="block md:hidden">
->>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
           <div
             ref={sliderRef}
             className="flex overflow-x-auto snap-x snap-mandatory scroll-smooth [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"

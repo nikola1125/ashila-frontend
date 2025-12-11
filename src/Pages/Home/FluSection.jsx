@@ -1,12 +1,12 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import hydrationImage from '../../assets/hidratim.png';
+import gripImage from '../../assets/grip.png';
 
-const HydrationSection = () => {
+const FluSection = () => {
   const navigate = useNavigate();
 
   const handleShopClick = () => {
-    navigate('/shop?category=hydration');
+    navigate('/shop?category=vitamins');
   };
 
   return (
@@ -15,25 +15,43 @@ const HydrationSection = () => {
         {/* Section Label */}
         <div className="mb-4 md:mb-12 text-center fade-in">
           <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
-            Hidratimi dhe kujdesi ndaj lëkurës
+            Vitaminat dhe Mbrojtja Kundër Gripit
           </h2>
           <div className="w-16 h-0.5 bg-[#A67856] mx-auto"></div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-16 lg:gap-20 items-start">
-          {/* Left Side - Article Content */}
-          <div className="order-2 lg:order-1 slide-left">
-            <div className="max-w-xs md:max-w-lg mx-auto lg:mx-0">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-10 lg:gap-12 items-start">
+          {/* Left Side - Product Image with Simple Pharmacy Frame */}
+          <div className="order-1 lg:order-1 flex items-start justify-start slide-left">
+            <div className="relative w-full lg:w-4/5">
+              {/* Simple Clean Frame - Fixed for mobile */}
+              <div className="relative bg-white border border-[#D9BFA9] shadow-sm hover:shadow-md transition-shadow duration-300 w-full py-1 px-1 md:py-2 md:px-2 lg:py-3 lg:px-3">
+                {/* Image Container */}
+                <div className="relative w-full overflow-hidden bg-white">
+                  <img
+                    src={gripImage}
+                    alt="Vitaminat dhe Mbrojtja Kundër Gripit"
+                    className="w-full h-auto object-contain max-h-[250px] md:max-h-[350px] lg:max-h-[600px]"
+                    loading="lazy"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Side - Article Content */}
+          <div className="order-2 lg:order-2 slide-right">
+            <div className="max-w-xs md:max-w-lg mx-auto lg:mx-0 lg:ml-4">
               {/* Category Label */}
               <div className="mb-3 md:mb-4">
                 <span className="lux-heading text-[#A67856]">
-                  Hidratim & Kujdes për Lëkurë
+                  Vitaminat & Imuniteti
                 </span>
               </div>
 
               {/* Main Headline */}
               <h2 className="lux-title text-[#A67856] mb-3 md:mb-4">
-                Sekreti i Lëkurës së Butë Në Dimër: Hidratoje si Duhet
+                Vitaminat: Mbrojtësi Juaj Kundër Gripit
               </h2>
               
               {/* Elegant Underline */}
@@ -45,7 +63,7 @@ const HydrationSection = () => {
               {/* Article Text - Enhanced Typography */}
               <div className="space-y-3 md:space-y-4 mb-6 md:mb-8">
                 <p className="text-[#4A3628] text-sm md:text-base leading-[1.7] font-light lux-subtitle max-w-none">
-                  Në muajt e ftohtë, lëkura kërkon kujdes shtesë. Hidrato rregullisht duart, trupin dhe fytyrën me formula të pasura për të parandaluar çarjet, thatësinë dhe irritimet. Një rutinë e qëndrueshme është çelësi i një lëkure të shëndetshme.
+                  Vitaminat, veçanërisht C, D dhe B6, janë thelbësore për forcimin e sistemit imunitar dhe parandalimin e gripit sezonal. Ato ndihmojnë në luftën kundër infeksioneve dhe përshpejtojnë rikuperimin, duke mbështetur trupin gjatë sezonit të gripit dhe duke ulur rrezikun e infektimit.
                 </p>
               </div>
 
@@ -69,28 +87,11 @@ const HydrationSection = () => {
               </button>
             </div>
           </div>
-
-          {/* Right Side - Product Image with Simple Pharmacy Frame */}
-          <div className="order-1 lg:order-2 flex items-start justify-start slide-right">
-            <div className="relative w-full lg:w-full">
-              {/* Simple Clean Frame - Fixed for mobile */}
-              <div className="relative bg-white border border-[#D9BFA9] shadow-sm hover:shadow-md transition-shadow duration-300 w-full p-2 md:p-3 lg:p-4">
-                {/* Image Container */}
-                <div className="relative w-full overflow-hidden bg-white">
-                  <img
-                    src={hydrationImage}
-                    alt="Hidratim & Kujdes për Lëkurë"
-                    className="w-full h-auto object-contain max-h-[250px] md:max-h-[350px] lg:max-h-[600px]"
-                    loading="lazy"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </section>
   );
 };
 
-export default HydrationSection;
+export default FluSection;
+

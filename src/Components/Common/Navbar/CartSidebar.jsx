@@ -197,34 +197,20 @@ const CartSidebar = ({ isOpen, onClose }) => {
                         <button
                           onClick={() => updateQuantity(item.id, item.quantity - 1)}
                           disabled={item.quantity <= 1}
-<<<<<<< HEAD
                           className="w-10 h-10 sm:w-8 sm:h-8 flex items-center justify-center border-2 border-[#D9BFA9] hover:bg-[#EBD8C8] disabled:opacity-50 disabled:cursor-not-allowed transition-all bg-white min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 text-lg leading-none text-[#4A3628]"
                           aria-label="Decrease quantity"
                         >
                           -
-=======
-                          className="w-10 h-10 sm:w-8 sm:h-8 flex items-center justify-center border-2 border-[#D9BFA9] hover:bg-[#EBD8C8] disabled:opacity-50 disabled:cursor-not-allowed transition-all bg-white min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0"
-                          aria-label="Decrease quantity"
-                        >
-                          <Minus size={18} className="sm:w-3.5 sm:h-3.5 text-[#4A3628]" />
->>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
                         </button>
                         <span className="w-10 sm:w-8 text-center text-base sm:text-sm font-medium text-[#4A3628] min-h-[44px] sm:min-h-0 flex items-center justify-center">
                           {item.quantity}
                         </span>
                         <button
                           onClick={() => updateQuantity(item.id, item.quantity + 1)}
-<<<<<<< HEAD
                           className="w-10 h-10 sm:w-8 sm:h-8 flex items-center justify-center border-2 border-[#D9BFA9] hover:bg-[#EBD8C8] transition-all bg-white min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 text-lg leading-none text-[#4A3628]"
                           aria-label="Increase quantity"
                         >
                           +
-=======
-                          className="w-10 h-10 sm:w-8 sm:h-8 flex items-center justify-center border-2 border-[#D9BFA9] hover:bg-[#EBD8C8] transition-all bg-white min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0"
-                          aria-label="Increase quantity"
-                        >
-                          <Plus size={18} className="sm:w-3.5 sm:h-3.5 text-[#4A3628]" />
->>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
                         </button>
                       </div>
                       <button
@@ -281,4 +267,3 @@ const CartSidebar = ({ isOpen, onClose }) => {
 };
 
 export default CartSidebar;
-

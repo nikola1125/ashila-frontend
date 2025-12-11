@@ -30,6 +30,32 @@ const ProductDetail = () => {
     enabled: !!id,
   });
 
+  // Fetch related products (same category, excluding current product)
+  const { data: relatedProducts = [] } = useQuery({
+    queryKey: ['relatedProducts', product?.category?._id, id],
+    queryFn: async () => {
+      if (!product?.category?._id) return [];
+      const response = await publicApi.get(`/medicines`);
+      const allProducts = response?.result || response || [];
+      // Filter: same category, exclude current product, limit to 4
+      const related = allProducts
+        .filter(p => 
+          p._id !== id && 
+          (p.category?._id === product.category._id || p.category === product.category._id)
+        )
+        .slice(0, 4);
+      // If not enough in same category, add random products
+      if (related.length < 4) {
+        const random = allProducts
+          .filter(p => p._id !== id && !related.find(r => r._id === p._id))
+          .slice(0, 4 - related.length);
+        return [...related, ...random].slice(0, 4);
+      }
+      return related;
+    },
+    enabled: !!product && !!product.category,
+  });
+
   const handleQuantityChange = useCallback((delta) => {
     setQuantity((prev) => Math.max(1, prev + delta));
   }, []);
@@ -73,28 +99,16 @@ const ProductDetail = () => {
   const isInStock = product.stock > 0;
 
   return (
-<<<<<<< HEAD
     <div className="min-h-screen bg-[#faf9f6]">
-=======
-    <div className="min-h-screen bg-white">
->>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
       <Helmet>
         <title>{product.itemName} - Product Details</title>
       </Helmet>
 
-<<<<<<< HEAD
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 sm:pt-32 md:pt-40 pb-10">
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-10 mb-10 sm:mb-12">
           {/* Left Column - Product Image */}
           <div className="relative bg-white lux-card lux-card-elevated overflow-hidden">
-=======
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 sm:pt-32 md:pt-40 pb-8">
-        {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 mb-8 sm:mb-12">
-          {/* Left Column - Product Image */}
-          <div className="relative bg-white rounded-sm overflow-hidden">
->>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
             {/* Product Image */}
             <div className="flex items-center justify-center min-h-[300px] sm:min-h-[400px] md:min-h-[500px] p-4 sm:p-6 md:p-8">
               <img
@@ -147,17 +161,10 @@ const ProductDetail = () => {
                 <button
                   onClick={() => handleQuantityChange(-1)}
                   disabled={quantity <= 1}
-<<<<<<< HEAD
                   className="w-12 h-12 sm:w-10 sm:h-10 flex items-center justify-center border-2 border-[#4A3628] hover:bg-[#EBD8C8] disabled:opacity-50 disabled:cursor-not-allowed transition-all bg-white min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 text-lg leading-none text-[#4A3628]"
                   aria-label="Decrease quantity"
                 >
                   -
-=======
-                  className="w-12 h-12 sm:w-10 sm:h-10 flex items-center justify-center border-2 border-[#4A3628] hover:bg-[#EBD8C8] disabled:opacity-50 disabled:cursor-not-allowed transition-all bg-white min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0"
-                  aria-label="Decrease quantity"
-                >
-                  <Minus size={20} className="sm:w-4 sm:h-4 text-[#4A3628]" />
->>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
                 </button>
                 <input
                   type="number"
@@ -173,17 +180,10 @@ const ProductDetail = () => {
                 <button
                   onClick={() => handleQuantityChange(1)}
                   disabled={!isInStock}
-<<<<<<< HEAD
                   className="w-12 h-12 sm:w-10 sm:h-10 flex items-center justify-center border-2 border-[#4A3628] hover:bg-[#EBD8C8] disabled:opacity-50 disabled:cursor-not-allowed transition-all bg-white min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 text-lg leading-none text-[#4A3628]"
                   aria-label="Increase quantity"
                 >
                   +
-=======
-                  className="w-12 h-12 sm:w-10 sm:h-10 flex items-center justify-center border-2 border-[#4A3628] hover:bg-[#EBD8C8] disabled:opacity-50 disabled:cursor-not-allowed transition-all bg-white min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0"
-                  aria-label="Increase quantity"
-                >
-                  <Plus size={20} className="sm:w-4 sm:h-4 text-[#4A3628]" />
->>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
                 </button>
               </div>
             </div>
@@ -194,21 +194,13 @@ const ProductDetail = () => {
                 <>
                   <button
                     onClick={handleAddToCart}
-<<<<<<< HEAD
                     className="w-full lux-btn-outline px-4 sm:px-6 py-3 sm:py-4 text-sm sm:text-base min-h-[44px]"
-=======
-                    className="w-full bg-white hover:bg-[#EBD8C8] text-[#4A3628] px-4 sm:px-6 py-3 sm:py-4 font-semibold transition-all duration-200 border border-[#4A3628] uppercase tracking-wide text-sm sm:text-base min-h-[44px]"
->>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
                   >
                     Add to cart
                   </button>
                   <button
                     onClick={handleBuyNow}
-<<<<<<< HEAD
                     className="w-full lux-btn-primary px-4 sm:px-6 py-3 sm:py-4 text-sm sm:text-base min-h-[44px]"
-=======
-                    className="w-full bg-[#A67856] hover:bg-[#8B6345] text-white px-4 sm:px-6 py-3 sm:py-4 font-semibold transition-all duration-200 uppercase tracking-wide text-sm sm:text-base min-h-[44px]"
->>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
                   >
                     Buy it now
                   </button>
@@ -264,7 +256,7 @@ const ProductDetail = () => {
         </div>
 
         {/* Product Description */}
-        <div className="border-t border-[#D9BFA9] pt-8">
+        <div className="border-t border-[#D9BFA9] pt-8 mb-8">
           <h2 className="text-xl font-semibold text-[#4A3628] mb-4">Description</h2>
           <div className="prose max-w-none text-[#4A3628] leading-relaxed">
             {product.description ? (
@@ -292,6 +284,82 @@ const ProductDetail = () => {
             )}
           </div>
         </div>
+
+        {/* Breaking Line */}
+        <div className="border-t border-[#D9BFA9] my-12"></div>
+
+        {/* Related Products Section */}
+        {relatedProducts.length > 0 && (
+          <div className="mt-12">
+            <h2 className="text-2xl font-semibold text-[#4A3628] mb-8 text-center">Sugjerime</h2>
+            <div className="flex overflow-x-auto gap-4 sm:gap-6 pb-4 sm:pb-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] sm:grid sm:grid-cols-3 lg:grid-cols-4">
+              {relatedProducts.map((relatedProduct) => {
+                const relatedDiscountedPrice = relatedProduct.discount > 0
+                  ? Number(relatedProduct.price) * (1 - Number(relatedProduct.discount) / 100)
+                  : Number(relatedProduct.price);
+
+                return (
+                  <div
+                    key={relatedProduct._id}
+                    className="bg-white overflow-hidden cursor-pointer flex flex-col lux-card lux-card-elevated hover:shadow-lg transition-shadow flex-shrink-0 w-40 sm:w-auto"
+                    onClick={() => {
+                      window.scrollTo({ top: 0, behavior: 'instant' });
+                      navigate(`/product/${relatedProduct._id}`);
+                    }}
+                  >
+                    {/* Product Image */}
+                    <div 
+                      className="relative flex items-center justify-center w-full bg-[#EFEEED]"
+                      style={{ aspectRatio: '1/1' }}
+                    >
+                      <img
+                        src={relatedProduct.image || '/placeholder.png'}
+                        alt={relatedProduct.itemName}
+                        className="w-full h-full object-contain p-4"
+                        onError={(e) => {
+                          e.target.src = '/placeholder.png';
+                        }}
+                      />
+                      {relatedProduct.discount > 0 && (
+                        <div className="absolute top-2 left-2 bg-[#A67856] text-white px-2 py-1 text-[10px] font-semibold">
+                          Save {relatedProduct.discount}%
+                        </div>
+                      )}
+                      {relatedProduct.stock === 0 && (
+                        <div className="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 text-[10px] font-semibold">
+                          Sold Out
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Product Info */}
+                    <div className="p-3">
+                      <h3 className="text-sm font-medium text-gray-900 mb-2 line-clamp-2 min-h-[2.5rem]">
+                        {relatedProduct.itemName}
+                      </h3>
+                      <div className="flex items-baseline gap-1">
+                        {relatedProduct.discount > 0 ? (
+                          <>
+                            <span className="text-sm font-semibold text-[#A67856]">
+                              {relatedDiscountedPrice.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
+                            </span>
+                            <span className="text-xs text-gray-400 line-through">
+                              {Number(relatedProduct.price).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
+                            </span>
+                          </>
+                        ) : (
+                          <span className="text-sm font-semibold text-[#4A3628]">
+                            {Number(relatedProduct.price).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
 
     </div>
@@ -299,4 +367,3 @@ const ProductDetail = () => {
 };
 
 export default ProductDetail;
-

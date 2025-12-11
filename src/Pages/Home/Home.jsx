@@ -4,6 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import { useLocation } from 'react-router-dom';
 import BestSeller from './BestSeller';
 import HydrationSection from './HydrationSection';
+import FluSection from './FluSection';
 import AcneCategories from './AcneCategories';
 
 const Home = memo(() => {
@@ -21,6 +22,7 @@ const Home = memo(() => {
       <div className="relative z-10 bg-white">
         <BestSeller />
         <HydrationSection />
+        <FluSection />
         <AcneCategories />
       </div>
     </>  

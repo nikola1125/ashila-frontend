@@ -6,6 +6,110 @@ import DataLoading from '../../Components/Common/Loaders/DataLoading';
 import { ChevronLeft, ChevronRight, ShoppingBag } from 'lucide-react';
 import { CartContext } from '../../Context/Cart/CartContext';
 
+// Product Card Component with animation
+const ProductCard = React.memo(({ product, pricing, index, onProductClick, onAddToCart }) => {
+  const productRef = useRef(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        setIsVisible(true);
+        observer.disconnect();
+      }
+    }, {
+      threshold: 0.1,
+      rootMargin: '50px'
+    });
+
+    if (productRef.current) {
+      observer.observe(productRef.current);
+      // Also set visible after a short delay to ensure visibility on desktop
+      const timeout = setTimeout(() => {
+        setIsVisible(true);
+      }, 100);
+      return () => {
+        clearTimeout(timeout);
+        observer.disconnect();
+      };
+    }
+  }, []);
+
+  return (
+    <div
+      ref={productRef}
+      className={`flex-shrink-0 w-40 md:w-56 overflow-hidden transition-all group bg-white scale-in ${isVisible ? 'visible' : ''} stagger-${Math.min(index + 1, 4)}`}
+    >
+      {/* Product Image */}
+      <div 
+        className="relative flex items-center justify-center w-full bg-[#EFEEED] cursor-pointer"
+        style={{ aspectRatio: '1/1' }}
+        onClick={() => onProductClick(product._id)}
+      >
+        <img
+          src={product.image || '/placeholder.png'}
+          alt={product.itemName}
+          loading="lazy"
+          className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+          onError={(e) => {
+            e.target.src = '/placeholder.png';
+          }}
+        />
+        {pricing.discountPercent > 0 && (
+          <div className="absolute top-2 right-2 bg-[#A67856] text-white px-2 py-1 text-[10px] font-semibold tracking-wide">
+            Save {pricing.discountPercent}%
+          </div>
+        )}
+        {product.stock === 0 && (
+          <div className="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 text-[10px] font-semibold tracking-wide">
+            Sold Out
+          </div>
+        )}
+      </div>
+
+      {/* Product Info */}
+      <div className="p-2 md:p-3">
+        <h3 
+          className="text-[10px] md:text-xs font-medium text-gray-900 line-clamp-2 mb-1.5 cursor-pointer hover:text-gray-600 transition-colors min-h-[1.75rem]"
+          onClick={() => onProductClick(product._id)}
+        >
+          {product.itemName}
+        </h3>
+
+        {/* Price and Add to Cart - vertically stacked like reference */}
+        <div className="flex flex-col gap-1">
+          <div className="flex items-baseline gap-1">
+            {pricing.discounted ? (
+              <>
+                <span className="text-[11px] md:text-sm font-semibold text-[#A67856]">
+                  from {pricing.discounted.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
+                </span>
+                <span className="text-[9px] md:text-xs text-gray-400 line-through">
+                  {pricing.original.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
+                </span>
+              </>
+            ) : (
+              <span className="text-[11px] md:text-sm font-semibold text-[#4A3628]">
+                {pricing.original.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
+              </span>
+            )}
+          </div>
+
+          <div className="flex justify-end pt-1">
+            <button 
+              onClick={(e) => onAddToCart(e, product)}
+              className="bg-transparent hover:bg-gray-100/50 text-gray-600 px-2 md:px-3 py-1 text-[9px] md:text-xs gap-1 min-w-[70px] justify-center flex items-center transition-all duration-200"
+            >
+              <ShoppingBag size={11} className="md:w-4 md:h-4" />
+              <span className="hidden sm:inline">Add</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+});
+
 const BestSeller = () => {
   const { publicApi } = useAxiosSecure();
   const { addItem } = useContext(CartContext);
@@ -136,7 +240,6 @@ const BestSeller = () => {
   }, [navigate]);
 
   return (
-<<<<<<< HEAD
     <section className="mt-0 bg-white lux-section">
       <div className="lux-section-inner">
         {/* Centered Title */}
@@ -146,14 +249,6 @@ const BestSeller = () => {
           <p className="lux-subtitle mx-auto">
             Produktet më të preferuara nga klientët tanë, të kuruara për rezultate të dukshme dhe të qëndrueshme.
           </p>
-=======
-    <section className="mt-0 pt-8 pb-4 md:pt-16 md:pb-16 bg-white">
-      <div className="max-w-7xl mx-auto px-4 md:px-4">
-        {/* Centered Title */}
-        <div className="text-center mb-12">
-          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">Best sellers</h2>
-          <div className="w-16 h-0.5 bg-[#A67856] mx-auto"></div>
->>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
         </div>
 
         {/* Content Container with min-height to prevent layout shift */}
@@ -200,137 +295,19 @@ const BestSeller = () => {
                     ref={scrollContainerRef}
                     className="flex gap-6 overflow-x-auto scroll-smooth pb-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
                   >
-<<<<<<< HEAD
                     {products.map((p, index) => {
-=======
-                    {products.map((p) => {
->>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
                       if (!p || !p._id) return null;
                       const pricing = calculatePrice(p.price, p.discount);
                       
                       return (
-                        <div
+                        <ProductCard
                           key={p._id}
-<<<<<<< HEAD
-                          className={`flex-shrink-0 w-40 md:w-56 overflow-hidden transition-all group bg-white scale-in stagger-${Math.min(index + 1, 4)}`}
-                        >
-                          {/* Product Image */}
-                          <div 
-                            className="relative flex items-center justify-center w-full bg-[#EFEEED] cursor-pointer"
-                            style={{ aspectRatio: '1/1' }}
-=======
-                          className="flex-shrink-0 w-40 md:w-56 bg-white overflow-hidden shadow-sm hover:shadow-lg transition-all group border-2 border-[#D9BFA9]"
-                        >
-                          {/* Product Image */}
-                          <div 
-                            className="relative h-40 md:h-56 bg-gray-100 flex items-center justify-center overflow-hidden cursor-pointer"
->>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
-                            onClick={() => handleProductClick(p._id)}
-                          >
-                            <img
-                              src={p.image || '/placeholder.png'}
-                              alt={p.itemName}
-                              loading="lazy"
-<<<<<<< HEAD
-                              className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
-=======
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
->>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
-                              onError={(e) => {
-                                e.target.src = '/placeholder.png';
-                              }}
-                            />
-                            {pricing.discountPercent > 0 && (
-<<<<<<< HEAD
-                              <div className="absolute top-2 right-2 bg-[#A67856] text-white px-2 py-1 text-[10px] font-semibold tracking-wide">
-=======
-                              <div className="absolute top-3 right-3 bg-[#A67856] text-white px-2.5 py-1 text-xs font-semibold">
->>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
-                                Save {pricing.discountPercent}%
-                              </div>
-                            )}
-                          </div>
-
-                          {/* Product Info */}
-<<<<<<< HEAD
-                          <div className="p-2 md:p-3">
-                            <h3 
-                              className="text-[10px] md:text-xs font-medium text-gray-900 line-clamp-2 mb-1.5 cursor-pointer hover:text-gray-600 transition-colors min-h-[1.75rem]"
-=======
-                          <div className="p-2 md:p-4">
-                            <h3 
-                              className="text-xs md:text-sm font-medium text-gray-900 line-clamp-2 mb-1 md:mb-2 min-h-[2rem] md:min-h-[2.5rem] cursor-pointer hover:text-gray-600 transition-colors"
->>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
-                              onClick={() => handleProductClick(p._id)}
-                            >
-                              {p.itemName}
-                            </h3>
-
-<<<<<<< HEAD
-                            {/* Price and Add to Cart - vertically stacked like reference */}
-                            <div className="flex flex-col gap-1">
-                              <div className="flex items-baseline gap-1">
-                                {pricing.discounted ? (
-                                  <>
-                                    <span className="text-[11px] md:text-sm font-semibold text-[#A67856]">
-                                      from {pricing.discounted.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
-                                    </span>
-                                    <span className="text-[9px] md:text-xs text-gray-400 line-through">
-                                      {pricing.original.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
-                                    </span>
-                                  </>
-                                ) : (
-                                  <span className="text-[11px] md:text-sm font-semibold text-[#4A3628]">
-=======
-                            {/* Price and Add to Cart - Side by Side */}
-                            <div className="flex items-center justify-between gap-1 md:gap-2">
-                              {/* Price Section - Left */}
-                              <div className="flex flex-col items-start gap-0.5">
-                                {pricing.discounted ? (
-                                  <>
-                                    <div className="flex items-baseline gap-1 md:gap-2">
-                                      <span className="text-[10px] md:text-xs text-[#4A3628] font-medium">from</span>
-                                      <span className="text-xs md:text-base font-semibold text-[#4A3628]">
-                                        {pricing.discounted.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
-                                      </span>
-                                    </div>
-                                    <div className="flex items-baseline gap-1">
-                                      <span className="text-[9px] md:text-xs text-gray-500 line-through">
-                                        {pricing.original.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
-                                      </span>
-                                    </div>
-                                  </>
-                                ) : (
-                                  <span className="text-xs md:text-base font-semibold text-[#4A3628]">
->>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
-                                    {pricing.original.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
-                                  </span>
-                                )}
-                              </div>
-
-<<<<<<< HEAD
-                              <div className="flex justify-end pt-1">
-                                <button 
-                                  onClick={(e) => handleAddToCart(e, p)}
-                                  className="lux-btn-primary px-2 md:px-3 py-1 text-[9px] md:text-xs gap-1 min-w-[70px] justify-center"
-                                >
-                                  <ShoppingBag size={11} className="md:w-4 md:h-4" />
-                                  <span className="hidden sm:inline">Add</span>
-                                </button>
-                              </div>
-=======
-                              {/* Add to Cart Button - Right */}
-                              <button 
-                                onClick={(e) => handleAddToCart(e, p)}
-                                className="bg-[#A67856] hover:bg-[#8B6345] text-white px-2 py-1 md:px-3 md:py-2 text-[10px] md:text-sm font-semibold transition-all flex items-center justify-center gap-1 flex-shrink-0 border-2 border-[#A67856]"
-                              >
-                                <ShoppingBag size={12} className="md:w-4 md:h-4" />
-                                <span className="hidden sm:inline">Add</span>
-                              </button>
->>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
-                            </div>
-                          </div>
-                        </div>
+                          product={p}
+                          pricing={pricing}
+                          index={index}
+                          onProductClick={handleProductClick}
+                          onAddToCart={handleAddToCart}
+                        />
                       );
                     })}
                   </div>

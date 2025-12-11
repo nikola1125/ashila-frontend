@@ -20,7 +20,6 @@ const Newsletter = () => {
   };
 
   return (
-<<<<<<< HEAD
     <section className="lux-section bg-white px-4">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-10 md:mb-12 space-y-3">
@@ -29,15 +28,6 @@ const Newsletter = () => {
             Stay Updated with Ashila
           </h2>
           <p className="lux-subtitle mx-auto">
-=======
-    <section className="py-16 px-4">
-      <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-12">
-          <h2 className="text-2xl md:text-4xl font-bold text-gray-800 mb-4">
-            Stay Updated with Ashila
-          </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
->>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
             Get the latest updates on new medicines, exclusive discounts, health tips, and special offers delivered directly to your inbox.
           </p>
         </div>
@@ -59,11 +49,7 @@ const Newsletter = () => {
                 <button
                   type="submit"
                   disabled={isLoading || !email}
-<<<<<<< HEAD
                   className="lux-btn-primary px-8 py-4 shadow-md disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
-=======
-                  className="px-8 py-4 bg-[#946259] text-white font-bold shadow-md hover:bg-[#7a4f47] focus:outline-none focus:ring-2 focus:ring-[#946259] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap border-2 border-[#946259] uppercase tracking-wide"
->>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
                 >
                   {isLoading ? (
                     <div className="flex items-center gap-2">
@@ -77,11 +63,7 @@ const Newsletter = () => {
               </div>
             </form>
           ) : (
-<<<<<<< HEAD
             <div className="text-center p-8 bg-white lux-card lux-card-elevated">
-=======
-            <div className="text-center p-8 bg-white border-2 border-[#d4d4c4] shadow-md">
->>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
               <div className="w-16 h-16 bg-[#946259] flex items-center justify-center mx-auto mb-4 border-2 border-[#946259]">
                 <svg className="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
@@ -91,11 +73,7 @@ const Newsletter = () => {
               <p className="text-[#2c2c2c] mb-4">Thank you for subscribing to our newsletter. You'll receive updates soon!</p>
               <button
                 onClick={() => setIsSubscribed(false)}
-<<<<<<< HEAD
                 className="lux-btn-primary px-6 py-2 font-semibold"
-=======
-                className="px-6 py-2 bg-[#946259] text-white hover:bg-[#7a4f47] transition-all duration-300 border-2 border-[#946259] font-semibold uppercase tracking-wide"
->>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
               >
                 Subscribe Another Email
               </button>
@@ -146,4 +124,4 @@ const Newsletter = () => {
   );
 };
 
-export default Newsletter; 
+export default Newsletter;

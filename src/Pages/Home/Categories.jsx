@@ -73,7 +73,6 @@ const Categories = () => {
   }
 
   return (
-<<<<<<< HEAD
     <section className="lux-section">
       <div className="lux-section-inner">
         {/* Header Section */}
@@ -83,16 +82,6 @@ const Categories = () => {
             Medicine Categories
           </h2>
           <p className="lux-subtitle mx-auto">
-=======
-    <section className="py-12 md:py-16">
-      <div className="container mx-auto px-4">
-        {/* Header Section */}
-        <div className="text-center mb-12">
-          <h2 className="text-2xl md:text-4xl font-bold text-gray-900 mb-4">
-            Medicine Categories
-          </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
->>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
             Explore our comprehensive range of medical categories. Find the
             right medicines and healthcare products for your needs.
           </p>
@@ -106,11 +95,7 @@ const Categories = () => {
                 key={category._id || category.id}
                 className="group cursor-pointer transform transition-all duration-300 scale-95 hover:scale-100"
               >
-<<<<<<< HEAD
                 <div className="lux-card lux-card-hover overflow-hidden relative bg-white">
-=======
-                <div className="bg-white shadow-sm hover:shadow-lg transition-all duration-200 border-2 border-[#D9BFA9] overflow-hidden relative">
->>>>>>> ea66fd40a6e2147c3388b6e1e2051246ee7624cc
                   {/* Category Image */}
                   <div className="relative h-48 bg-gray-100 overflow-hidden">
                     {category.categoryImage && (
