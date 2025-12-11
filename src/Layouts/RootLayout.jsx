@@ -3,6 +3,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import Footer from '../Components/Common/Footer';
 import Navbar from '../Components/Common/Navbar/Navbar';
 import ScrollToTop from '../Components/Common/ScrollToTop';
+import ScrollToTopButton from '../Components/Common/ScrollToTopButton';
 import { initScrollAnimations } from '../utils/scrollAnimations';
 
 const RootLayout = () => {
@@ -32,6 +33,7 @@ const RootLayout = () => {
         <Outlet />
       </main>
       <Footer />
+      <ScrollToTopButton />
     </div>
   );
 };

@@ -1,158 +1,391 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import useAxiosSecure from '../../hooks/useAxiosSecure';
+import { X } from 'lucide-react';
+import { CartContext } from '../../Context/Cart/CartContext';
+import { toast } from 'react-toastify';
 
 const InteractiveProductSelector = () => {
   const navigate = useNavigate();
-  const [selectedProductIndex, setSelectedProductIndex] = useState(0);
+  const { publicApi } = useAxiosSecure();
+  const { addItem } = useContext(CartContext);
+  const [selectedProductIndex, setSelectedProductIndex] = useState(null);
+  const [showPanel, setShowPanel] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const panelRef = useRef(null);
 
-  // Images from public/images - cycling through available images
-  const productImages = [
-    '/images/25-12-248-5_f6d1d39c-0dbb-41df-b09b-606b8643c4d4.webp',
-    '/images/2d6c295f-0d8b-4ed7-9048-15c38970f06c.webp',
-    '/images/4_191a7880-0b71-4057-9ab7-35e79aafa669.webp',
-    '/images/5_0bf7b0e1-73b6-44dd-94f4-dc404b267c7a.webp',
-    '/images/baume.webp',
-    '/images/BeautyofJoseon-ReliefSuntexture.webp',
-    '/images/centella.webp',
-    '/images/ceravefoaming2.webp',
-    '/images/IMG_2112_301a03db-e67d-4e84-9cd9-9c97c40824d2.webp',
-    '/images/MisshaALLAROUNDSUNSPF50.webp',
-    '/images/puff_254f1eef-7b9c-446a-be78-d82c14da0c4b.webp',
-    '/images/skin55ml_c9356fb5-f92f-4b33-b31b-0c44cf88c58e.webp',
-    '/images/TheOrdinaryGlycolicAcid7_ToningSolutiontexture.webp',
-  ];
+  // Fetch products from API
+  const { data: productsData = [] } = useQuery({
+    queryKey: ['interactiveProducts'],
+    queryFn: async () => {
+      try {
+        const response = await publicApi.get('/medicines');
+        const allProducts = response?.result || response || [];
+        // Return first 4 products for the interactive selector
+        return Array.isArray(allProducts) ? allProducts.slice(0, 4) : [];
+      } catch (err) {
+        console.warn('Failed to fetch products for interactive selector:', err);
+        return [];
+      }
+    },
+    staleTime: 2 * 60 * 1000,
+  });
 
-  // Use first 6 images, cycling if needed
-  const displayImages = Array.from({ length: 6 }, (_, i) => 
-    productImages[i % productImages.length]
-  );
+  // Set first product as selected by default on page load (mobile only)
+  useEffect(() => {
+    if (productsData.length > 0 && selectedProductIndex === null) {
+      // Only set default on mobile (screen width < 768px)
+      if (window.innerWidth < 768) {
+        setSelectedProductIndex(0);
+        setShowPanel(true);
+      }
+    }
+  }, [productsData, selectedProductIndex]);
 
-  // Product positions for circles (these would be adjusted based on actual image)
+
+  // Product positions for hotspots on the produkt.png image
   // Format: { x: percentage, y: percentage }
-  const productPositions = [
-    { x: 20, y: 30 },   // Product 1
-    { x: 50, y: 25 },   // Product 2
-    { x: 80, y: 30 },   // Product 3
-    { x: 25, y: 65 },   // Product 4
-    { x: 55, y: 70 },   // Product 5
-    { x: 85, y: 65 },   // Product 6
+  // Positions adjusted to be inside each of the 4 products visible in the image
+  const hotspotPositions = [
+    { x: 20, y: 50 },   // Product 1 - Left side product (white bottle with green cap)
+    { x: 52, y: 45 },   // Product 2 - Center product (gold ANEW jar)
+    { x: 75, y: 48 },   // Product 3 - Right side product (purple cap product)
+    { x: 45, y: 72 },   // Product 4 - Bottom product
   ];
 
-  const selectedImage = displayImages[selectedProductIndex];
-
-  const handleProductClick = (index) => {
-    setSelectedProductIndex(index);
+  const handleHotspotClick = (index, e) => {
+    e.stopPropagation();
+    if (selectedProductIndex === index && showPanel) {
+      // If clicking the same hotspot, just close
+      handleClosePanel();
+    } else {
+      // If different product or panel is closed, open with image transition only
+      if (selectedProductIndex !== null && showPanel) {
+        // Switching products - animate image only
+        setIsTransitioning(true);
+        setSelectedProductIndex(index);
+        setTimeout(() => setIsTransitioning(false), 300);
+      } else {
+        // Opening panel for first time
+        setSelectedProductIndex(index);
+        setShowPanel(true);
+      }
+    }
   };
+
+  const handleClosePanel = () => {
+    setShowPanel(false);
+    // Delay clearing selected product for smooth transition
+    setTimeout(() => {
+      setSelectedProductIndex(null);
+      setIsTransitioning(false);
+    }, 300);
+  };
+
 
   const handleViewProduct = () => {
-    navigate('/shop');
+    if (productsData[selectedProductIndex]?._id) {
+      window.scrollTo({ top: 0, behavior: 'instant' });
+      navigate(`/product/${productsData[selectedProductIndex]._id}`);
+    } else {
+      navigate('/shop');
+    }
   };
+
+  const handleAddToCart = (e) => {
+    e.stopPropagation();
+    if (selectedProduct && productsData[selectedProductIndex]) {
+      const product = productsData[selectedProductIndex];
+      const cartItem = {
+        id: product._id,
+        name: product.itemName,
+        price: product.price,
+        discountedPrice: product.discount > 0
+          ? (Number(product.price) * (1 - Number(product.discount) / 100)).toFixed(2)
+          : null,
+        image: product.image,
+        company: product.company,
+        genericName: product.genericName,
+        discount: product.discount || 0,
+        seller: product.seller,
+      };
+      addItem(cartItem);
+      toast.success('Produkti u shtua në shportë');
+    }
+  };
+
+  if (!productsData || productsData.length === 0) {
+    return null;
+  }
+
+  const selectedProduct = selectedProductIndex !== null ? productsData[selectedProductIndex] : null;
+  const discountedPrice = selectedProduct?.discount > 0
+    ? Number(selectedProduct.price) * (1 - Number(selectedProduct.discount) / 100)
+    : Number(selectedProduct?.price || 0);
 
   return (
     <section className="bg-white relative overflow-hidden mt-0 md:mt-0 lux-section">
       <div className="lux-section-inner relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 lg:gap-16 items-center">
-          {/* Left Side - Group Image with Clickable Circles */}
-          <div className="order-1 lg:order-1 relative">
-            <div className="relative w-full bg-[#EFEEED] aspect-square max-h-[500px] lg:max-h-[600px]">
-              {/* Group Product Image */}
-              <div className="w-full h-full flex items-center justify-center p-8">
-                <div className="grid grid-cols-3 gap-4 w-full h-full">
-                  {displayImages.map((image, index) => (
-                    <div key={index} className="flex items-center justify-center">
-                      <img
-                        src={image}
-                        alt={`Product ${index + 1}`}
-                        className="max-w-full max-h-full object-contain opacity-60"
-                        onError={(e) => {
-                          e.target.src = '/placeholder.png';
-                        }}
-                      />
+        {/* Lifestyle Image with Hotspots */}
+        <div className="relative w-full aspect-[4/3] md:aspect-[16/10] max-h-[500px] md:max-h-[700px] overflow-hidden">
+          {/* Lifestyle Product Image */}
+          <img
+            src="/images/produkt.png"
+            alt="Skincare Products Collection"
+            className="w-full h-full object-cover pointer-events-none"
+            loading="lazy"
+            onError={(e) => {
+              e.target.src = '/placeholder.png';
+            }}
+          />
+
+          {/* Hotspot Overlays */}
+          {productsData.map((product, index) => {
+            const handleTouch = (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleHotspotClick(index, e);
+            };
+
+            return (
+              <button
+                key={product._id || index}
+                onClick={(e) => handleHotspotClick(index, e)}
+                onTouchEnd={handleTouch}
+                className={`absolute hotspot-button ${
+                  selectedProductIndex === index ? 'hotspot-active' : ''
+                }`}
+                style={{
+                  left: `${hotspotPositions[index]?.x || 0}%`,
+                  top: `${hotspotPositions[index]?.y || 0}%`,
+                  transform: 'translate(-50%, -50%)',
+                  touchAction: 'manipulation',
+                  WebkitTapHighlightColor: 'transparent',
+                  zIndex: 10,
+                  width: '24px',
+                  height: '24px',
+                }}
+                aria-label={`View ${product.itemName || `product ${index + 1}`}`}
+              >
+                <span className="ring"></span>
+                <span className="circle"></span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Mobile Product Details - Below Image */}
+        {selectedProduct && (
+          <div className={`md:hidden w-full bg-white transition-all duration-300 ease-in-out overflow-hidden ${
+            showPanel ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'
+          }`}>
+            <div className="p-4">
+              <div className="flex gap-4 items-start mb-4">
+                {/* Product Thumbnail - Fixed size to prevent movement */}
+                <div 
+                  className="relative flex-shrink-0 rounded-lg overflow-hidden bg-transparent"
+                  style={{ 
+                    width: '80px',
+                    height: '80px',
+                    minHeight: '80px',
+                  }}
+                >
+                  <img
+                    key={selectedProduct._id || selectedProductIndex}
+                    src={selectedProduct.image || '/placeholder.png'}
+                    alt={selectedProduct.itemName}
+                    className="absolute inset-0 w-full h-full object-contain p-2 transition-opacity duration-300"
+                    style={{
+                      opacity: isTransitioning ? 0 : 1,
+                    }}
+                    loading="lazy"
+                    onError={(e) => {
+                      e.target.src = '/placeholder.png';
+                    }}
+                  />
+                  {selectedProduct.discount > 0 && (
+                    <div className="absolute top-1 left-1 bg-[#A67856] text-white px-2 py-0.5 text-xs font-semibold rounded">
+                      Save {selectedProduct.discount}%
                     </div>
-                  ))}
+                  )}
+                  {selectedProduct.stock === 0 && (
+                    <div className="absolute top-1 left-1 bg-red-500 text-white px-2 py-0.5 text-xs font-semibold rounded">
+                      Sold Out
+                    </div>
+                  )}
+                </div>
+
+                {/* Product Info - Fixed height to prevent movement */}
+                <div className="flex-1 min-w-0" style={{ minHeight: '80px' }}>
+                  {/* Product Name */}
+                  <h2 
+                    className="text-sm font-semibold text-[#4A3628] mb-2 cursor-pointer hover:text-[#A67856] transition-colors"
+                    onClick={handleViewProduct}
+                    style={{
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
+                      lineHeight: '1.4',
+                      maxHeight: '2.8em',
+                    }}
+                  >
+                    {selectedProduct.itemName}
+                  </h2>
+
+                  {/* Price */}
+                  <div className="mb-3" style={{ minHeight: '28px' }}>
+                    {selectedProduct.discount > 0 ? (
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-lg font-bold text-[#A67856]">
+                          {discountedPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ALL
+                        </span>
+                        <span className="text-sm text-gray-400 line-through">
+                          {Number(selectedProduct.price).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ALL
+                        </span>
+                      </div>
+                    ) : (
+                      <span className="text-lg font-bold text-[#4A3628]">
+                        {Number(selectedProduct.price).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ALL
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
 
-              {/* Clickable Circles Overlay */}
-              {displayImages.map((image, index) => (
+              {/* Action Buttons */}
+              <div className="flex gap-2">
                 <button
-                  key={index}
-                  onClick={() => handleProductClick(index)}
-                  className={`absolute w-8 h-8 md:w-10 md:h-10 rounded-full border-2 transition-all duration-300 ${
-                    selectedProductIndex === index
-                      ? 'bg-[#A67856] border-[#A67856] scale-125'
-                      : 'bg-white border-gray-400 hover:border-[#A67856] hover:scale-110'
-                  }`}
-                  style={{
-                    left: `${productPositions[index]?.x || 0}%`,
-                    top: `${productPositions[index]?.y || 0}%`,
-                    transform: 'translate(-50%, -50%)',
-                  }}
-                  aria-label={`Select product ${index + 1}`}
+                  onClick={handleViewProduct}
+                  onTouchStart={(e) => e.stopPropagation()}
+                  className="flex-1 bg-gray-100 hover:bg-gray-200 active:bg-gray-300 text-[#4A3628] py-2.5 px-4 font-medium transition-all duration-200 rounded-lg min-h-[44px] touch-manipulation text-sm"
                 >
-                  <div className={`w-full h-full rounded-full ${
-                    selectedProductIndex === index ? 'bg-[#A67856]' : 'bg-white'
-                  }`}></div>
+                  More details
                 </button>
-              ))}
+                <button
+                  onClick={handleAddToCart}
+                  onTouchStart={(e) => e.stopPropagation()}
+                  className="flex-1 bg-[#A67856] hover:bg-[#8B6345] active:bg-[#7a5438] text-white py-2.5 px-4 font-medium transition-all duration-200 rounded-lg min-h-[44px] touch-manipulation text-sm"
+                >
+                  Dergo porosine
+                </button>
+              </div>
             </div>
           </div>
+        )}
 
-          {/* Right Side - Selected Product Info */}
-          <div className="order-2 lg:order-2">
-            <div className="max-w-lg mx-auto lg:mx-0">
-              {/* Category Label */}
-              <div className="mb-3 md:mb-4">
-                <span className="lux-heading text-[#A67856]">
-                  Produkt i Përzgjedhur
-                </span>
+        {/* Desktop Side Panel for Product Details */}
+        <div
+          ref={panelRef}
+          className={`hidden md:block fixed top-16 right-0 h-[calc(100vh-64px)] w-[450px] lg:w-[500px] bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out overflow-y-auto ${
+            showPanel ? 'translate-x-0' : 'translate-x-full'
+          }`}
+          style={{
+            WebkitOverflowScrolling: 'touch',
+            overscrollBehavior: 'contain',
+          }}
+        >
+          {selectedProduct && (
+            <div className="flex flex-col h-full">
+              {/* Panel Header */}
+              <div className="flex items-center justify-between p-4 md:p-6 border-b border-gray-100 flex-shrink-0">
+                <h3 className="text-lg md:text-xl font-semibold text-[#4A3628]">Product Details</h3>
+                <button
+                  onClick={handleClosePanel}
+                  onTouchStart={(e) => e.stopPropagation()}
+                  className="p-2 hover:bg-gray-50 active:bg-gray-100 rounded-full transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center touch-manipulation"
+                  aria-label="Close panel"
+                >
+                  <X size={20} className="text-gray-600" />
+                </button>
               </div>
 
-              {/* Product Name */}
-              <h2 className="lux-title text-[#A67856] mb-3 md:mb-4">
-                Produkt Premium
-              </h2>
-              
-              {/* Elegant Underline */}
-              <div className="flex items-center gap-3 mb-4 md:mb-6">
-                <div className="w-16 h-0.5 bg-[#A67856]"></div>
-                <div className="w-1.5 h-1.5 bg-[#A67856]"></div>
-              </div>
-
-              {/* Product Description */}
-              <div className="mb-6 md:mb-8">
-                <p className="text-[#4A3628] text-sm md:text-base leading-[1.7] font-light lux-subtitle max-w-none">
-                  Produkt i kualitetit të lartë, i kuruar me kujdes për nevojat tuaja. Formuluar me përbërës natyralë dhe efektivë për rezultate optimale.
-                </p>
-              </div>
-
-              {/* Price */}
-              <div className="mb-6 md:mb-8">
-                <span className="text-xl md:text-2xl font-semibold text-[#4A3628]">
-                  2,500.00 ALL
-                </span>
-              </div>
-
-              {/* View Product Button */}
-              <button
-                onClick={handleViewProduct}
-                className="group relative lux-btn-outline px-6 md:px-8 py-2 md:py-3 overflow-hidden"
-              >
-                <span className="relative z-10 flex items-center gap-2">
-                  Shiko produktin
-                  <svg 
-                    className="w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-300" 
-                    fill="none" 
-                    stroke="currentColor" 
-                    viewBox="0 0 24 24"
+              {/* Panel Content */}
+              <div className="flex-1 overflow-y-auto p-4 md:p-6" style={{ touchAction: 'pan-y' }}>
+                {/* Product Image with smooth transition - Fixed container to prevent movement */}
+                <div className="flex items-center justify-center mb-6" style={{ minHeight: '300px' }}>
+                  <div 
+                    className="relative flex items-center justify-center rounded-lg overflow-hidden bg-transparent"
+                    style={{ 
+                      aspectRatio: '1/1',
+                      width: '100%',
+                      maxWidth: '300px',
+                      height: '300px',
+                    }}
                   >
-                    <path strokeLinecap="square" strokeLinejoin="miter" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                  </svg>
-                </span>
-                <div className="absolute inset-0 bg-[#A67856] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
-              </button>
+                    <img
+                      key={selectedProduct._id || selectedProductIndex}
+                      src={selectedProduct.image || '/placeholder.png'}
+                      alt={selectedProduct.itemName}
+                      className="absolute inset-0 w-full h-full object-contain p-6 transition-opacity duration-300"
+                      style={{
+                        opacity: isTransitioning ? 0 : 1,
+                      }}
+                      loading="lazy"
+                      onError={(e) => {
+                        e.target.src = '/placeholder.png';
+                      }}
+                    />
+                    {selectedProduct.discount > 0 && (
+                      <div className="absolute top-3 left-3 bg-[#A67856] text-white px-3 py-1 text-xs font-semibold rounded">
+                        Save {selectedProduct.discount}%
+                      </div>
+                    )}
+                    {selectedProduct.stock === 0 && (
+                      <div className="absolute top-3 left-3 bg-red-500 text-white px-3 py-1 text-xs font-semibold rounded">
+                        Sold Out
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Product Name */}
+                <h2 
+                  className="text-xl md:text-2xl font-semibold text-[#4A3628] mb-4 cursor-pointer hover:text-[#A67856] transition-colors"
+                  onClick={handleViewProduct}
+                >
+                  {selectedProduct.itemName}
+                </h2>
+
+                {/* Price */}
+                <div className="mb-6">
+                  {selectedProduct.discount > 0 ? (
+                    <div className="flex items-baseline gap-3">
+                      <span className="text-2xl md:text-3xl font-bold text-[#A67856]">
+                        {discountedPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ALL
+                      </span>
+                      <span className="text-lg text-gray-400 line-through">
+                        {Number(selectedProduct.price).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ALL
+                      </span>
+                    </div>
+                  ) : (
+                    <span className="text-2xl md:text-3xl font-bold text-[#4A3628]">
+                      {Number(selectedProduct.price).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ALL
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Panel Footer */}
+              <div className="p-4 md:p-6 border-t border-gray-100 bg-gray-50 flex-shrink-0 space-y-3">
+                <button
+                  onClick={handleAddToCart}
+                  onTouchStart={(e) => e.stopPropagation()}
+                  className="w-full bg-[#A67856] hover:bg-[#8B6345] active:bg-[#7a5438] text-white py-3 md:py-3 px-6 font-semibold transition-all duration-200 uppercase tracking-wide rounded min-h-[44px] touch-manipulation"
+                >
+                  Dergo porosine
+                </button>
+                <button
+                  onClick={handleViewProduct}
+                  onTouchStart={(e) => e.stopPropagation()}
+                  className="w-full bg-white hover:bg-gray-50 active:bg-gray-100 text-[#4A3628] border-2 border-[#A67856] py-3 md:py-3 px-6 font-semibold transition-all duration-200 uppercase tracking-wide rounded min-h-[44px] touch-manipulation"
+                >
+                  Shiko detajet
+                </button>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </section>
@@ -160,4 +393,3 @@ const InteractiveProductSelector = () => {
 };
 
 export default InteractiveProductSelector;
-

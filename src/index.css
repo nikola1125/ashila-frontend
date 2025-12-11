@@ -427,6 +427,107 @@ header {
   }
 }
 
+/* Hotspot Button Styles - Pulsate animation with warm white */
+@keyframes pulsate {
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  45% {
+    transform: scale(1.75);
+    opacity: 0;
+  }
+}
+
+@keyframes stop-pulsate {
+  from {
+    opacity: 0.4;
+  }
+  to {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+.hotspot-button {
+  position: absolute;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  z-index: 10;
+}
+
+.hotspot-button .ring {
+  display: block;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 1.5em;
+  height: 1.5em;
+  margin: -0.75em auto auto -0.75em;
+  transform-origin: 50% 50%;
+  border-radius: 50%;
+  border: 1px solid rgba(217, 191, 169, 1);
+  opacity: 0;
+  animation: pulsate 3s ease-out infinite;
+}
+
+.hotspot-button:hover .ring {
+  animation: none;
+}
+
+.hotspot-button:active .ring {
+  animation: stop-pulsate 0.3s;
+}
+
+.hotspot-button .circle {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 20px;
+  height: 20px;
+  margin: -0.416em auto auto -0.416em;
+  background: rgba(217, 191, 169, 1);
+  border-radius: 50%;
+  opacity: 0.6;
+  transform-origin: 50% 50%;
+  transition: opacity 0.2s ease-in, transform 0.1s ease-out;
+  color: white;
+  font-size: 1.5em;
+  padding: 0;
+  text-align: center;
+  line-height: 20px;
+  overflow: hidden;
+}
+
+.hotspot-button:hover .circle {
+  opacity: 0.8;
+  cursor: pointer;
+}
+
+.hotspot-button:active .circle {
+  transform: scale(0.875);
+}
+
+.hotspot-active .circle {
+  background: rgba(217, 191, 169, 1);
+  opacity: 0.9;
+}
+
+@media (max-width: 768px) {
+  .hotspot-button .circle {
+    width: 18px;
+    height: 18px;
+    line-height: 18px;
+  }
+  
+  .hotspot-button .ring {
+    width: 1.25em;
+    height: 1.25em;
+    margin: -0.625em auto auto -0.625em;
+  }
+}
+
 @keyframes scaleInAnimation {
   0% {
     transform: scale(0.95);
@@ -515,9 +616,14 @@ header {
 }
 
 /* Ensure all acne category items are the same size */
+/* Override square edges for circular acne category frames */
+.acne-category-grid button > div[class*="rounded-full"],
+button > div[class*="rounded-full"] {
+  border-radius: 50% !important;
+}
+
 .acne-category-grid > button {
   width: 100%;
-  aspect-ratio: 1 / 1;
 }
 
 /* Mobile-first responsive utilities */

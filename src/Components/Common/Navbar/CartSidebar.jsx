@@ -53,7 +53,7 @@ const CartSidebar = ({ isOpen, onClose }) => {
     updateQuantity,
   } = useContext(CartContext);
   const { user } = useContext(AuthContext);
-  const { privateApi } = useAxiosSecure();
+  const { publicApi, privateApi } = useAxiosSecure();
 
   // Ensure items is always an array
   const cartItems = useMemo(() => {
@@ -63,14 +63,15 @@ const CartSidebar = ({ isOpen, onClose }) => {
 
   const handleCheckout = async () => {
     try {
-      if (!user) {
-        toast.warn('Please log in to proceed with checkout');
-        onClose();
-        navigate('/login');
-        return;
-      }
       const sellersGroup = groupItemsBySeller(cartItems);
-      const response = await privateApi.post('/checkout', sellersGroup);
+      // Use publicApi for guest checkout, privateApi if user is logged in
+      const api = user ? privateApi : publicApi;
+      const checkoutData = {
+        ...sellersGroup,
+        guestEmail: user ? undefined : null, // Will be collected during checkout if guest
+        isGuest: !user
+      };
+      const response = await api.post('/checkout', checkoutData);
       if (response) {
         window.location.href = response;
       } else {

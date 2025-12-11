@@ -10,7 +10,7 @@ const HydrationSection = () => {
   };
 
   return (
-    <section className="bg-white relative overflow-hidden mt-0 md:mt-0 lux-section">
+    <section className="bg-white relative overflow-hidden -mt-8 md:mt-0 lux-section">
       <div className="lux-section-inner relative z-10">
         {/* Section Label */}
         <div className="mb-4 md:mb-12 text-center fade-in">

@@ -173,6 +173,8 @@ const Navbar = () => {
 
   // Check if we're on shop page, product detail page, cart page, or sign-up page
   const isShopPage = location.pathname === '/shop' || location.pathname.startsWith('/product/') || location.pathname === '/cart' || location.pathname === '/sign-up';
+  // Check if we're on login or register pages
+  const isAuthPage = location.pathname === '/login' || location.pathname === '/sign-up';
     // Fetch categories on mount (kept for compatibility, but navbar uses NAV_CATEGORIES)
   // Fetch categories on mount
   useEffect(() => {
@@ -318,7 +320,7 @@ const Navbar = () => {
   return (
     <header 
       className={`w-full fixed top-0 left-0 right-0 z-[100] transition-all duration-300 ${
-        isScrolled || isShopPage ? 'bg-white shadow-md' : 'bg-transparent'
+        isScrolled || isShopPage || isAuthPage ? 'bg-white shadow-md' : 'bg-transparent'
       }`}
       style={{ 
         position: 'fixed',
@@ -335,7 +337,7 @@ const Navbar = () => {
     >
       {/* Main Navbar */}
       <nav className={`relative border-b transition-all duration-300 ${
-        isScrolled || isShopPage ? 'border-gray-200 bg-white' : 'border-transparent bg-transparent'
+        isScrolled || isShopPage || isAuthPage ? 'border-gray-200 bg-white' : 'border-transparent bg-transparent'
       }`}>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -347,7 +349,7 @@ const Navbar = () => {
                 setMobileMenuOpen(!mobileMenuOpen);
               }} 
               className={`lg:hidden transition-colors z-50 min-h-[44px] min-w-[44px] flex items-center justify-center ${
-                isScrolled ? 'text-black hover:text-gray-700' : 'text-white hover:text-gray-200'
+                isScrolled || isAuthPage ? 'text-black hover:text-gray-700' : 'text-white hover:text-gray-200'
               }`}
               aria-label="Toggle menu"
             >
@@ -371,7 +373,7 @@ const Navbar = () => {
                   }
                 }}
                 className={`font-medium transition-colors text-[10px] xl:text-xs uppercase tracking-wide whitespace-nowrap py-1 ${
-                  isScrolled ? 'text-black hover:text-gray-700' : 'text-white hover:text-gray-200'
+                  isScrolled || isAuthPage ? 'text-black hover:text-gray-700' : 'text-white hover:text-gray-200'
                 }`}
               >
                 Kreu
@@ -389,13 +391,13 @@ const Navbar = () => {
                   }}
                 >
                   <button className={`flex items-center gap-1 font-medium transition-colors text-[10px] xl:text-xs uppercase tracking-wide py-1 whitespace-nowrap ${
-                    isScrolled ? 'text-black hover:text-gray-700' : 'text-white hover:text-gray-200'
+                    isScrolled || isAuthPage ? 'text-black hover:text-gray-700' : 'text-white hover:text-gray-200'
                   }`}>
                     {category.label}
                     {category.groups && category.groups.length > 0 && (
                       <ChevronDown 
                         size={10} 
-                        className={isScrolled ? 'text-gray-700' : 'text-white/80'} 
+                        className={isScrolled || isAuthPage ? 'text-gray-700' : 'text-white/80'} 
                       />
                     )}
                   </button>
@@ -469,14 +471,14 @@ const Navbar = () => {
                   <button 
                     onClick={() => setAccountDropdownOpen(!accountDropdownOpen)}
                     className={`flex items-center gap-1 font-medium transition-colors text-[10px] xl:text-xs uppercase tracking-wide whitespace-nowrap py-1 ${
-                      isScrolled ? 'text-black hover:text-gray-700' : 'text-white hover:text-gray-200'
+                      isScrolled || isAuthPage ? 'text-black hover:text-gray-700' : 'text-white hover:text-gray-200'
                     }`}
                   >
                     Account
                     <ChevronDown 
                       size={10} 
                       className={`transition-transform ${accountDropdownOpen ? 'rotate-180' : ''} ${
-                        isScrolled ? 'text-gray-600' : 'text-white/80'
+                        isScrolled || isAuthPage ? 'text-gray-600' : 'text-white/80'
                       }`}
                     />
                   </button>
@@ -516,7 +518,7 @@ const Navbar = () => {
                 <NavLink 
                   to="/sign-up" 
                   className={`hidden lg:block font-medium transition-colors text-[10px] xl:text-xs uppercase tracking-wide whitespace-nowrap py-1 ml-8 ${
-                    isScrolled ? 'text-black hover:text-gray-700' : 'text-white hover:text-gray-200'
+                    isScrolled || isAuthPage ? 'text-black hover:text-gray-700' : 'text-white hover:text-gray-200'
                   }`}
                 >
                   Account
@@ -530,7 +532,7 @@ const Navbar = () => {
                     navigate('/shop');
                   }}
                   className={`hidden lg:block transition-colors min-h-[36px] min-w-[36px] flex items-center justify-center ml-8 ${
-                    isScrolled ? 'text-black hover:text-gray-700' : 'text-white hover:text-gray-200'
+                    isScrolled || isAuthPage ? 'text-black hover:text-gray-700' : 'text-white hover:text-gray-200'
                   }`}
                 aria-label="Search"
               >
@@ -540,7 +542,7 @@ const Navbar = () => {
 
               {/* Cart - Part of centered menu on desktop */}
               <div className="hidden lg:block ml-2">
-                <Cart isScrolled={isScrolled} onCartClick={() => setCartOpen(true)} iconSize={18} />
+                <Cart isScrolled={isScrolled || isAuthPage} onCartClick={() => setCartOpen(true)} iconSize={18} />
               </div>
             </div>
 
@@ -551,7 +553,7 @@ const Navbar = () => {
                 <button
                   onClick={() => navigate('/shop')}
                   className={`transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center -mr-3 ${
-                    isScrolled || isShopPage ? 'text-black hover:text-gray-700' : 'text-white hover:text-gray-200'
+                    isScrolled || isShopPage || isAuthPage ? 'text-black hover:text-gray-700' : 'text-white hover:text-gray-200'
                   }`}
                   aria-label="Search"
                 >
@@ -560,7 +562,7 @@ const Navbar = () => {
               )}
 
               {/* Cart - Mobile */}
-              <Cart isScrolled={isScrolled || isShopPage} onCartClick={() => setCartOpen(true)} iconSize={18} />
+              <Cart isScrolled={isScrolled || isShopPage || isAuthPage} onCartClick={() => setCartOpen(true)} iconSize={18} />
             </div>
           </div>
 

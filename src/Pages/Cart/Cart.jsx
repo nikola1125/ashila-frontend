@@ -20,16 +20,19 @@ const Cart = () => {
     clearCart,
   } = useContext(CartContext);
   const { user } = useContext(AuthContext);
-  const { privateApi } = useAxiosSecure();
+  const { publicApi, privateApi } = useAxiosSecure();
 
   const handleCheckout = async () => {
     try {
-      if (!user) {
-        throw new Error('Please log in to proceed with checkout');
-      }
       const sellersGroup = groupItemsBySeller(items);
-
-      const response = await privateApi.post('/checkout', sellersGroup);
+      // Use publicApi for guest checkout, privateApi if user is logged in
+      const api = user ? privateApi : publicApi;
+      const checkoutData = {
+        ...sellersGroup,
+        guestEmail: user ? undefined : null, // Will be collected during checkout if guest
+        isGuest: !user
+      };
+      const response = await api.post('/checkout', checkoutData);
 
       if (response) {
         window.location.href = response;

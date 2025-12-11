@@ -116,7 +116,8 @@ const Hero = () => {
           <div className="flex flex-col items-end gap-3 hero-cta-group">
             <button
               onClick={() => {
-                window.open('https://wa.me/355692429567', '_blank');
+                const message = encodeURIComponent('Pershendetje, interesohem per te bere nje skin test.');
+                window.open(`https://wa.me/355686879292?text=${message}`, '_blank');
               }}
               className="lux-btn-primary px-4 py-2 text-sm md:px-8 md:py-3 md:text-base shadow-lg hover:shadow-xl transform hover:scale-[1.02] hero-cta-primary"
             >
