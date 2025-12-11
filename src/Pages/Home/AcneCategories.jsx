@@ -5,6 +5,7 @@ import pustulesImage from '../../assets/pustules.png';
 import blackHeadsImage from '../../assets/blackHeads.jpg';
 import cystImage from '../../assets/cyst.png';
 import backAcneImage from '../../assets/backAcne.png';
+import { getProductImage } from '../../utils/productImages';
 
 const items = [
   { key: 'papules', title: 'Papules', image: papulesImage },
@@ -78,7 +79,7 @@ const AcneCategories = () => {
                   } : { objectFit: 'cover' }}
                   loading="lazy"
                   onError={(e) => {
-                    e.target.src = `https://via.placeholder.com/400x400/EFEEED/999999?text=${encodeURIComponent(item.title)}`;
+                    e.target.src = getProductImage();
                   }}
                 />
               </div>
@@ -119,7 +120,7 @@ const AcneCategories = () => {
                   } : { objectFit: 'cover' }}
                   loading="lazy"
                   onError={(e) => {
-                    e.target.src = `https://via.placeholder.com/400x400/EFEEED/999999?text=${encodeURIComponent(item.title)}`;
+                    e.target.src = getProductImage();
                   }}
                 />
               </div>
@@ -167,7 +168,7 @@ const AcneCategories = () => {
                           } : { objectFit: 'cover' }}
                           loading="lazy"
                           onError={(e) => {
-                            e.target.src = `https://via.placeholder.com/400x400/EFEEED/999999?text=${encodeURIComponent(item.title)}`;
+                            e.target.src = getProductImage();
                           }}
                         />
                       </div>

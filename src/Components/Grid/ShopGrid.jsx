@@ -2,6 +2,7 @@ import { Button } from '@headlessui/react';
 import React, { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CartContext } from '../../Context/Cart/CartContext';
+import { getProductImage } from '../../utils/productImages';
 
 const ShopGrid = ({
   paginatedMedicines,
@@ -16,117 +17,78 @@ const ShopGrid = ({
 
   return (
     <div>
-      {/* Grid Layout - 2 products per row on mobile, 3 on desktop */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 md:gap-6 justify-center lg:justify-start">
+      {/* Grid Layout - Using auto-fill with minmax */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5 justify-items-center">
         {paginatedMedicines?.map((medicine, index) => {
           return (
             <div
               key={medicine._id || index}
-              className="overflow-hidden cursor-pointer flex flex-col bg-white"
+              className="w-full max-w-[280px] border border-gray-200 overflow-hidden bg-white text-center pb-4 flex flex-col h-full"
             >
+              {/* Product Image Container */}
               <div 
-                className="relative overflow-hidden cursor-pointer flex items-center justify-center w-full"
-                style={{ 
-                  aspectRatio: '1/1',
-                  backgroundColor: '#EFEEED',
-                  maxWidth: '100%'
-                }}
+                className="relative w-full overflow-hidden bg-[#f9f9f9] cursor-pointer h-[200px] md:h-[250px]"
                 onClick={() => {
                   window.scrollTo({ top: 0, behavior: 'instant' });
                   navigate(`/product/${medicine._id}`);
                 }}
               >
-              <img
-                src={medicine.image}
-                alt={medicine.itemName}
-                className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
-              />
-              
-              {/* Discount Badge - Top Left */}
-              {medicine.discount > 0 && (
-                <div className="absolute top-0.5 left-0.5 bg-[#A67856] text-white px-1 py-0.5 text-[8px] md:text-[9px] font-semibold">
-                  Save {medicine.discount}%
-                </div>
-              )}
+                <img
+                  src={getProductImage(medicine.image, medicine._id || index)}
+                  alt={medicine.itemName}
+                  className="w-full h-full object-contain p-5"
+                  onError={(e) => {
+                    e.target.src = getProductImage(null, medicine._id || index);
+                  }}
+                />
+                
+                {/* Discount Badge - Top Right */}
+                {medicine.discount > 0 && (
+                  <div className="absolute top-2.5 right-2.5 bg-red-500 text-white px-2.5 py-1.5 text-sm font-bold">
+                    Save {medicine.discount}%
+                  </div>
+                )}
 
-              {/* Sold Out Badge - Top Left (if stock is 0) */}
-              {medicine.stock === 0 && (
-                <div className="absolute top-0.5 left-0.5 bg-red-500 text-white px-1 py-0.5 text-[8px] md:text-[9px] font-semibold">
-                  Sold Out
-                </div>
-              )}
-
-              {/* Add to Cart Icon - Bottom Right Overlay */}
-              <button
-                className="absolute bottom-2 right-2 bg-white hover:bg-gray-100/50 text-gray-600 p-1 md:p-1.5 transition-all duration-200 flex items-center justify-center z-10"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  addItem({
-                    id: medicine._id,
-                    name: medicine.itemName,
-                    price: medicine.price,
-                    discountedPrice: (
-                      Number(medicine.price) *
-                      (1 - Number(medicine.discount) / 100)
-                    ).toFixed(2),
-                    image: medicine.image,
-                    company: medicine.company,
-                    genericName: medicine.genericName,
-                    discount: medicine.discount,
-                    seller: medicine.seller,
-                  });
-                }}
-                disabled={medicine.stock === 0}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="w-2.5 h-2.5 md:w-3 md:h-3"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
-                  <line x1="3" y1="6" x2="21" y2="6"></line>
-                  <path d="M16 10a4 4 0 0 1-8 0"></path>
-                </svg>
-              </button>
-            </div>
-
-            {/* Card Content - Below Image */}
-            <div className="p-1.5 md:p-2">
-              {/* Medicine Name */}
-              <h3 
-                className="font-medium text-[9px] md:text-xs text-gray-900 mb-1 line-clamp-2 min-h-[1.5rem] md:min-h-[1.75rem] cursor-pointer hover:text-gray-600 transition-colors"
-                onClick={() => {
-                  window.scrollTo({ top: 0, behavior: 'instant' });
-                  navigate(`/product/${medicine._id}`);
-                }}
-              >
-                {medicine.itemName}
-              </h3>
-
-              {/* Price - aligned with BestSeller layout */}
-              <div className="flex items-baseline gap-1">
-                {medicine.discount > 0 ? (
-                  <>
-                    <span className="text-[10px] md:text-xs font-semibold text-[#A67856]">
-                      from {(Number(medicine.price) * (1 - Number(medicine.discount) / 100)).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
-                    </span>
-                    <span className="text-[8px] md:text-[10px] text-gray-400 line-through">
-                      {Number(medicine.price).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
-                    </span>
-                  </>
-                ) : (
-                  <span className="text-[10px] md:text-xs font-semibold text-[#4A3628]">
-                    {Number(medicine.price).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
-                  </span>
+                {/* Sold Out Badge - Top Left */}
+                {medicine.stock === 0 && (
+                  <div className="absolute top-2.5 left-2.5 bg-red-500 text-white px-2.5 py-1.5 text-sm font-bold">
+                    Sold Out
+                  </div>
                 )}
               </div>
+
+              {/* Product Info */}
+              <div className="px-2.5 pt-4 flex flex-col flex-grow">
+                {/* Medicine Name */}
+                <h3 
+                  className="text-base mb-2.5 text-gray-800 min-h-[40px] line-clamp-2 cursor-pointer hover:text-gray-600 transition-colors"
+                  onClick={() => {
+                    window.scrollTo({ top: 0, behavior: 'instant' });
+                    navigate(`/product/${medicine._id}`);
+                  }}
+                >
+                  {medicine.itemName}
+                </h3>
+
+                {/* Price */}
+                <div className="flex items-center justify-center gap-2.5 mt-auto">
+                  {medicine.discount > 0 ? (
+                    <>
+                      <span className="text-lg font-bold text-black">
+                        {(Number(medicine.price) * (1 - Number(medicine.discount) / 100)).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
+                      </span>
+                      <span className="text-sm text-gray-400 line-through">
+                        {Number(medicine.price).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
+                      </span>
+                    </>
+                  ) : (
+                    <span className="text-lg font-bold text-black">
+                      {Number(medicine.price).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
+                    </span>
+                  )}
+                </div>
+              </div>
             </div>
-          </div>
           );
         })}
       </div>

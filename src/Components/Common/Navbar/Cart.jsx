@@ -8,22 +8,30 @@ const Cart = ({ isScrolled = true, onCartClick, iconSize = 20 }) => {
   const isScrollingRef = useRef(false);
   const scrollTimeoutRef = useRef(null);
 
-  // Track if user is actively scrolling
+  // Track if user is actively scrolling - longer timeout to prevent accidental opens
   useEffect(() => {
     let scrollTimer = null;
+    let lastScrollY = window.scrollY;
     
     const handleScroll = () => {
-      isScrollingRef.current = true;
+      const currentScrollY = window.scrollY;
+      const scrollDelta = Math.abs(currentScrollY - lastScrollY);
+      lastScrollY = currentScrollY;
       
-      // Clear existing timeout
-      if (scrollTimer) {
-        clearTimeout(scrollTimer);
+      // If scroll is significant, mark as scrolling
+      if (scrollDelta > 1) {
+        isScrollingRef.current = true;
+        
+        // Clear existing timeout
+        if (scrollTimer) {
+          clearTimeout(scrollTimer);
+        }
+        
+        // Set scrolling to false after scroll stops (longer delay to prevent accidental opens)
+        scrollTimer = setTimeout(() => {
+          isScrollingRef.current = false;
+        }, 300);
       }
-      
-      // Set scrolling to false after scroll stops
-      scrollTimer = setTimeout(() => {
-        isScrollingRef.current = false;
-      }, 150);
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -42,6 +50,12 @@ const Cart = ({ isScrolled = true, onCartClick, iconSize = 20 }) => {
   const handleTouchStart = (e) => {
     // Prevent event from bubbling up
     e.stopPropagation();
+    
+    // Don't start touch handling if user is actively scrolling
+    if (isScrollingRef.current) {
+      return;
+    }
+    
     touchStartRef.current = {
       x: e.touches[0].clientX,
       y: e.touches[0].clientY,
@@ -57,8 +71,8 @@ const Cart = ({ isScrolled = true, onCartClick, iconSize = 20 }) => {
       const deltaY = Math.abs(e.touches[0].clientY - touchStartRef.current.y);
       const scrollDelta = Math.abs(window.scrollY - touchStartRef.current.scrollY);
       
-      // If moved more than 8px OR page scrolled, consider it a scroll, not a tap
-      if (deltaX > 8 || deltaY > 8 || scrollDelta > 5) {
+      // Much stricter: if moved more than 5px OR page scrolled at all, consider it a scroll, not a tap
+      if (deltaX > 5 || deltaY > 5 || scrollDelta > 1) {
         touchMovedRef.current = true;
       }
     }
@@ -72,12 +86,22 @@ const Cart = ({ isScrolled = true, onCartClick, iconSize = 20 }) => {
       const timeDiff = Date.now() - touchStartRef.current.time;
       const scrollDelta = Math.abs(window.scrollY - touchStartRef.current.scrollY);
       
-      // Only trigger if:
-      // 1. It was a quick tap (less than 250ms)
-      // 2. Minimal movement (already checked via touchMovedRef)
-      // 3. Page didn't scroll during the touch
-      // 4. User is not actively scrolling
-      if (timeDiff < 250 && scrollDelta < 3 && !isScrollingRef.current) {
+      // Very strict conditions - only trigger if:
+      // 1. It was a very quick tap (less than 200ms)
+      // 2. Absolutely no movement (already checked via touchMovedRef)
+      // 3. Page didn't scroll at all during the touch (scrollDelta must be 0)
+      // 4. User is not actively scrolling (with extra check)
+      // 5. Final touch position matches start position (within 2px tolerance)
+      const finalDeltaX = Math.abs(e.changedTouches[0].clientX - touchStartRef.current.x);
+      const finalDeltaY = Math.abs(e.changedTouches[0].clientY - touchStartRef.current.y);
+      
+      if (
+        timeDiff < 200 && 
+        scrollDelta === 0 && 
+        !isScrollingRef.current &&
+        finalDeltaX < 2 &&
+        finalDeltaY < 2
+      ) {
         e.preventDefault();
         onCartClick();
       }

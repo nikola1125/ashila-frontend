@@ -1,4 +1,5 @@
 import React from 'react';
+import { getProductImage } from '../../utils/productImages';
 import logo from '../../assets/logo.png';
 
 const DiscountCard = ({ medicine }) => {
@@ -26,11 +27,11 @@ const DiscountCard = ({ medicine }) => {
       {/* Product Image */}
       <div className="w-32 h-32 md:w-36 md:h-36 mb-4 mt-2 flex items-center justify-center bg-white overflow-hidden relative z-[2]">
         <img
-          src={medicine.image}
+          src={getProductImage(medicine.image, medicine._id)}
           alt={medicine.itemName}
-          className="product-img w-full h-full object-contain"
+          className="product-img w-full h-full object-cover"
           onError={(e) => {
-            e.target.src = '/placeholder.png';
+            e.target.src = getProductImage(null, medicine._id);
           }}
         />
       </div>

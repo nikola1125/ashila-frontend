@@ -5,6 +5,7 @@ import useAxiosSecure from '../../hooks/useAxiosSecure';
 import DataLoading from '../../Components/Common/Loaders/DataLoading';
 import { ChevronLeft, ChevronRight, ShoppingBag } from 'lucide-react';
 import { CartContext } from '../../Context/Cart/CartContext';
+import { getProductImage } from '../../utils/productImages';
 
 // Product Card Component with animation
 const ProductCard = React.memo(({ product, pricing, index, onProductClick, onAddToCart }) => {
@@ -41,72 +42,59 @@ const ProductCard = React.memo(({ product, pricing, index, onProductClick, onAdd
   return (
     <div
       ref={productRef}
-      className={`flex-shrink-0 w-40 md:w-56 overflow-hidden transition-all group bg-white scale-in ${isVisible ? 'visible' : ''} stagger-${Math.min(index + 1, 4)}`}
+      className={`w-[200px] md:w-full md:max-w-[280px] flex-shrink-0 border border-gray-200 overflow-hidden bg-white text-center pb-4 flex flex-col h-full ${isVisible ? 'visible' : ''} stagger-${Math.min(index + 1, 4)}`}
     >
-      {/* Product Image */}
+      {/* Product Image Container */}
       <div 
-        className="relative flex items-center justify-center w-full bg-[#EFEEED] cursor-pointer"
-        style={{ aspectRatio: '1/1' }}
+        className="relative w-full overflow-hidden bg-[#f9f9f9] cursor-pointer h-[200px] md:h-[250px]"
         onClick={() => onProductClick(product._id)}
       >
         <img
-          src={product.image || '/placeholder.png'}
+          src={getProductImage(product.image, product._id || index)}
           alt={product.itemName}
           loading="lazy"
-          className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+          className="w-full h-full object-contain p-5"
           onError={(e) => {
-            e.target.src = '/placeholder.png';
+            e.target.src = getProductImage(null, product._id || index);
           }}
         />
         {pricing.discountPercent > 0 && (
-          <div className="absolute top-2 right-2 bg-[#A67856] text-white px-2 py-1 text-[10px] font-semibold tracking-wide">
+          <div className="absolute top-2.5 right-2.5 bg-red-500 text-white px-2.5 py-1.5 text-sm font-bold">
             Save {pricing.discountPercent}%
           </div>
         )}
         {product.stock === 0 && (
-          <div className="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 text-[10px] font-semibold tracking-wide">
+          <div className="absolute top-2.5 left-2.5 bg-red-500 text-white px-2.5 py-1.5 text-sm font-bold">
             Sold Out
           </div>
         )}
       </div>
 
       {/* Product Info */}
-      <div className="p-2 md:p-3">
+      <div className="px-2.5 pt-4 flex flex-col flex-grow">
         <h3 
-          className="text-[10px] md:text-xs font-medium text-gray-900 line-clamp-2 mb-1.5 cursor-pointer hover:text-gray-600 transition-colors min-h-[1.75rem]"
+          className="text-base mb-2.5 text-gray-800 min-h-[40px] line-clamp-2 cursor-pointer hover:text-gray-600 transition-colors"
           onClick={() => onProductClick(product._id)}
         >
           {product.itemName}
         </h3>
 
-        {/* Price and Add to Cart - vertically stacked like reference */}
-        <div className="flex flex-col gap-1">
-          <div className="flex items-baseline gap-1">
-            {pricing.discounted ? (
-              <>
-                <span className="text-[11px] md:text-sm font-semibold text-[#A67856]">
-                  from {pricing.discounted.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
-                </span>
-                <span className="text-[9px] md:text-xs text-gray-400 line-through">
-                  {pricing.original.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
-                </span>
-              </>
-            ) : (
-              <span className="text-[11px] md:text-sm font-semibold text-[#4A3628]">
+        {/* Price */}
+        <div className="flex items-center justify-center gap-2.5 mt-auto">
+          {pricing.discounted ? (
+            <>
+              <span className="text-lg font-bold text-black">
+                {pricing.discounted.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
+              </span>
+              <span className="text-sm text-gray-400 line-through">
                 {pricing.original.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
               </span>
-            )}
-          </div>
-
-          <div className="flex justify-end pt-1">
-            <button 
-              onClick={(e) => onAddToCart(e, product)}
-              className="bg-white hover:bg-gray-50 text-gray-600 px-1.5 md:px-2 py-0.5 text-[8px] md:text-[10px] gap-0.5 min-w-[60px] md:min-w-[65px] justify-center flex items-center transition-all duration-200 border border-gray-200 shadow-sm hover:shadow-md rounded"
-            >
-              <ShoppingBag size={9} className="md:w-3 md:h-3" />
-              <span className="hidden sm:inline">Add</span>
-            </button>
-          </div>
+            </>
+          ) : (
+            <span className="text-lg font-bold text-black">
+              {pricing.original.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
+            </span>
+          )}
         </div>
       </div>
     </div>
@@ -293,7 +281,7 @@ const BestSeller = () => {
 
                   <div
                     ref={scrollContainerRef}
-                    className="flex gap-6 overflow-x-auto scroll-smooth pb-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+                    className="flex md:grid md:grid-cols-4 gap-5 overflow-x-auto scroll-smooth pb-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] md:overflow-x-visible md:justify-items-center"
                   >
                     {products.map((p, index) => {
                       if (!p || !p._id) return null;

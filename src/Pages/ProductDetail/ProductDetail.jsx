@@ -7,6 +7,7 @@ import { Helmet } from 'react-helmet-async';
 import { ShoppingBag, Minus, Plus, Facebook, Twitter, Mail } from 'lucide-react';
 import DataLoading from '../../Components/Common/Loaders/DataLoading';
 import LoadingError from '../../Components/Common/States/LoadingError';
+import { getProductImage } from '../../utils/productImages';
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -44,12 +45,12 @@ const ProductDetail = () => {
           (p.category?._id === product.category._id || p.category === product.category._id)
         )
         .slice(0, 4);
-      // If not enough in same category, add random products
+      // If not enough in same category, add products in order (no random)
       if (related.length < 4) {
-        const random = allProducts
+        const additional = allProducts
           .filter(p => p._id !== id && !related.find(r => r._id === p._id))
           .slice(0, 4 - related.length);
-        return [...related, ...random].slice(0, 4);
+        return [...related, ...additional].slice(0, 4);
       }
       return related;
     },
@@ -112,11 +113,11 @@ const ProductDetail = () => {
             {/* Product Image */}
             <div className="flex items-center justify-center min-h-[300px] sm:min-h-[400px] md:min-h-[500px] p-4 sm:p-6 md:p-8">
               <img
-                src={product.image || '/placeholder.png'}
+                src={getProductImage(product.image, product._id)}
                 alt={product.itemName}
                 className="max-w-full max-h-[400px] sm:max-h-[500px] md:max-h-[600px] object-contain w-full h-auto"
                 onError={(e) => {
-                  e.target.src = '/placeholder.png';
+                  e.target.src = getProductImage(null, product._id);
                 }}
               />
             </div>
@@ -292,8 +293,8 @@ const ProductDetail = () => {
         {relatedProducts.length > 0 && (
           <div className="mt-12">
             <h2 className="text-2xl font-semibold text-[#4A3628] mb-8 text-center">Sugjerime</h2>
-            <div className="flex overflow-x-auto gap-4 sm:gap-6 pb-4 sm:pb-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] sm:grid sm:grid-cols-3 lg:grid-cols-4">
-              {relatedProducts.map((relatedProduct) => {
+            <div className="flex sm:grid sm:grid-cols-3 lg:grid-cols-4 gap-5 overflow-x-auto scroll-smooth pb-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] sm:overflow-x-visible sm:justify-items-center">
+              {relatedProducts.map((relatedProduct, index) => {
                 const relatedDiscountedPrice = relatedProduct.discount > 0
                   ? Number(relatedProduct.price) * (1 - Number(relatedProduct.discount) / 100)
                   : Number(relatedProduct.price);
@@ -301,54 +302,53 @@ const ProductDetail = () => {
                 return (
                   <div
                     key={relatedProduct._id}
-                    className="bg-white overflow-hidden cursor-pointer flex flex-col lux-card lux-card-elevated hover:shadow-lg transition-shadow flex-shrink-0 w-40 sm:w-auto"
+                    className="w-[200px] sm:w-full sm:max-w-[280px] flex-shrink-0 border border-gray-200 overflow-hidden bg-white text-center pb-4 flex flex-col h-full cursor-pointer hover:shadow-lg transition-shadow"
                     onClick={() => {
                       window.scrollTo({ top: 0, behavior: 'instant' });
                       navigate(`/product/${relatedProduct._id}`);
                     }}
                   >
-                    {/* Product Image */}
+                    {/* Product Image Container */}
                     <div 
-                      className="relative flex items-center justify-center w-full bg-[#EFEEED]"
-                      style={{ aspectRatio: '1/1' }}
+                      className="relative w-full overflow-hidden bg-[#f9f9f9] h-[200px] md:h-[250px]"
                     >
                       <img
-                        src={relatedProduct.image || '/placeholder.png'}
+                        src={getProductImage(relatedProduct.image, relatedProduct._id || index)}
                         alt={relatedProduct.itemName}
-                        className="w-full h-full object-contain p-4"
+                        className="w-full h-full object-contain p-5"
                         onError={(e) => {
-                          e.target.src = '/placeholder.png';
+                          e.target.src = getProductImage(null, relatedProduct._id || index);
                         }}
                       />
                       {relatedProduct.discount > 0 && (
-                        <div className="absolute top-2 left-2 bg-[#A67856] text-white px-2 py-1 text-[10px] font-semibold">
+                        <div className="absolute top-2.5 right-2.5 bg-red-500 text-white px-2.5 py-1.5 text-sm font-bold">
                           Save {relatedProduct.discount}%
                         </div>
                       )}
                       {relatedProduct.stock === 0 && (
-                        <div className="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 text-[10px] font-semibold">
+                        <div className="absolute top-2.5 left-2.5 bg-red-500 text-white px-2.5 py-1.5 text-sm font-bold">
                           Sold Out
                         </div>
                       )}
                     </div>
 
                     {/* Product Info */}
-                    <div className="p-3">
-                      <h3 className="text-sm font-medium text-gray-900 mb-2 line-clamp-2 min-h-[2.5rem]">
+                    <div className="px-2.5 pt-4 flex flex-col flex-grow">
+                      <h3 className="text-base mb-2.5 text-gray-800 min-h-[40px] line-clamp-2">
                         {relatedProduct.itemName}
                       </h3>
-                      <div className="flex items-baseline gap-1">
+                      <div className="flex items-center justify-center gap-2.5 mt-auto">
                         {relatedProduct.discount > 0 ? (
                           <>
-                            <span className="text-sm font-semibold text-[#A67856]">
+                            <span className="text-lg font-bold text-black">
                               {relatedDiscountedPrice.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
                             </span>
-                            <span className="text-xs text-gray-400 line-through">
+                            <span className="text-sm text-gray-400 line-through">
                               {Number(relatedProduct.price).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
                             </span>
                           </>
                         ) : (
-                          <span className="text-sm font-semibold text-[#4A3628]">
+                          <span className="text-lg font-bold text-black">
                             {Number(relatedProduct.price).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
                           </span>
                         )}

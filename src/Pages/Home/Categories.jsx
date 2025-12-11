@@ -5,26 +5,28 @@ import useAxiosSecure from '../../hooks/useAxiosSecure';
 import DataLoading from '../../Components/Common/Loaders/DataLoading';
 import LoadingError from '../../Components/Common/States/LoadingError';
 
+import { getNextProductImage } from '../../utils/productImages';
+
 // Mock categories data for development
 const mockCategories = [
   {
     _id: '1',
     categoryName: 'Kujdesi ndaj fytyres',
-    categoryImage: 'https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=400&h=300&fit=crop',
+    categoryImage: getNextProductImage(),
     description: 'Face care products',
     medicinesCount: 45
   },
   {
     _id: '2',
     categoryName: 'Trupi dhe floke',
-    categoryImage: 'https://images.unsplash.com/photo-1571781926291-c477ebfd024b?w=400&h=300&fit=crop',
+    categoryImage: getNextProductImage(),
     description: 'Body and hair care products',
     medicinesCount: 32
   },
   {
     _id: '3',
     categoryName: 'Nena dhe femija',
-    categoryImage: 'https://images.unsplash.com/photo-1555252333-9f8e92e65df9?w=400&h=300&fit=crop',
+    categoryImage: getNextProductImage(),
     description: 'Mother and child products',
     medicinesCount: 28
   },
@@ -102,7 +104,7 @@ const Categories = () => {
                         loading="lazy"
                         className="w-full h-full object-cover"
                         onError={(e) => {
-                          e.target.style.display = 'none';
+                          e.target.src = getNextProductImage();
                         }}
                       />
                     )}

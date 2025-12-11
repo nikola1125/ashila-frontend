@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { getNextProductImage } from '../../utils/productImages';
 
 // Mock promotional data for demonstration
 const mockPromotions = [
@@ -8,24 +9,21 @@ const mockPromotions = [
     title: 'Summer Health Sale',
     description: 'Get up to 50% off on summer essentials',
     discount: '50%',
-    image:
-      'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&h=300&fit=crop',
+    image: getNextProductImage(),
   },
   {
     id: 2,
     title: 'New Customer Special',
     description: 'First-time buyers get 25% off',
     discount: '25%',
-    image:
-      'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&h=300&fit=crop',
+    image: getNextProductImage(),
   },
   {
     id: 3,
     title: 'Bulk Purchase Bonus',
     description: 'Buy 3+ items and save 30%',
     discount: '30%',
-    image:
-      'https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=400&h=300&fit=crop',
+    image: getNextProductImage(),
   },
 ];
 

@@ -4,6 +4,7 @@ import useAxiosSecure from '../../hooks/useAxiosSecure';
 import { Loader2, ShoppingBag } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { CartContext } from '../../Context/Cart/CartContext';
+import { getProductImage } from '../../utils/productImages';
 
 const LatestProduct = () => {
   const { publicApi } = useAxiosSecure();
@@ -95,12 +96,12 @@ const LatestProduct = () => {
             >
               <div className="aspect-square overflow-hidden">
                 <img
-                  src={product.image || '/placeholder.png'}
+                  src={getProductImage(product.image)}
                   alt={product.itemName}
                   loading="lazy"
                   className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                   onError={(e) => {
-                    e.target.src = '/placeholder.png';
+                    e.target.src = getProductImage();
                   }}
                 />
               </div>

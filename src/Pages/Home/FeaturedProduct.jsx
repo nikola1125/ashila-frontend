@@ -1,4 +1,5 @@
 import React from 'react';
+import { getProductImage } from '../../utils/productImages';
 
 const FeaturedProduct = ({ title = 'Featured Product', description, image }) => {
   return (
@@ -18,12 +19,12 @@ const FeaturedProduct = ({ title = 'Featured Product', description, image }) => 
         <div className="flex items-center justify-center">
           <div className="w-full max-w-md bg-white shadow-md border-2 border-[#d4d4c4] p-6">
             <img 
-              src={image || '/placeholder.png'} 
+              src={getProductImage(image)} 
               alt={title} 
               loading="lazy"
-              className="w-full h-72 object-contain" 
+              className="w-full h-72 object-cover" 
               onError={(e) => {
-                e.target.src = '/placeholder.png';
+                e.target.src = getProductImage();
               }}
             />
           </div>

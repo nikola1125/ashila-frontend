@@ -6,6 +6,7 @@ import useAxiosSecure from '../../../hooks/useAxiosSecure';
 import { toast } from 'react-toastify';
 import { groupItemsBySeller } from '../../../utils/groupItemsBySeller';
 import { X, Plus, Minus, Trash2, Bell } from 'lucide-react';
+import { getProductImage } from '../../../utils/productImages';
 
 const CartSidebar = ({ isOpen, onClose }) => {
   // Prevent body scroll when cart is open (iOS-safe approach)
@@ -226,11 +227,11 @@ const CartSidebar = ({ isOpen, onClose }) => {
                   {/* Product Image */}
                   <div className="w-20 h-20 flex-shrink-0 overflow-hidden bg-[#EFEEED] border border-[#D9BFA9]">
                     <img
-                      src={item.image || '/placeholder.png'}
+                      src={getProductImage(item.image)}
                       alt={item.name}
                       className="w-full h-full object-cover"
                       onError={(e) => {
-                        e.target.src = '/placeholder.png';
+                        e.target.src = getProductImage();
                       }}
                     />
                   </div>

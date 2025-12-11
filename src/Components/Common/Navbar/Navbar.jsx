@@ -216,12 +216,12 @@ const Navbar = () => {
               lastState = true;
             }
           } else {
-            // Use higher threshold for mobile to prevent flickering
-            const scrollThreshold = isMobile ? 30 : 20;
+            // Use slightly higher threshold for mobile but keep it responsive
+            const scrollThreshold = isMobile ? 25 : 20;
             const newState = scrollY > scrollThreshold;
             
-            // Only update if scroll difference is significant (higher threshold on mobile)
-            const minScrollDiff = isMobile ? 15 : 10;
+            // Lower threshold for faster response
+            const minScrollDiff = isMobile ? 8 : 10;
             
             if (scrollDifference > minScrollDiff && newState !== lastState) {
               // Clear any pending state change
@@ -229,8 +229,8 @@ const Navbar = () => {
                 clearTimeout(stateChangeTimeout);
               }
               
-              // Add small delay on mobile to prevent rapid toggling
-              const delay = isMobile ? 50 : 0;
+              // Minimal delay on mobile for instant feel
+              const delay = isMobile ? 10 : 0;
               
               stateChangeTimeout = setTimeout(() => {
                 setIsScrolled(newState);
@@ -256,8 +256,8 @@ const Navbar = () => {
         setIsScrolled(true);
         lastState = true;
       } else {
-        // Use higher threshold for mobile
-        const scrollThreshold = isMobile ? 30 : 20;
+        // Use slightly higher threshold for mobile but keep it responsive
+        const scrollThreshold = isMobile ? 25 : 20;
         const initialState = window.scrollY > scrollThreshold;
         setIsScrolled(initialState);
         lastState = initialState;
@@ -341,7 +341,7 @@ const Navbar = () => {
 
   return (
     <header 
-      className={`w-full fixed top-0 left-0 right-0 z-[100] transition-all duration-300 ${
+      className={`w-full fixed top-0 left-0 right-0 z-[100] transition-all duration-150 ${
         isScrolled || isShopPage || isAuthPage ? 'bg-white shadow-md' : 'bg-transparent'
       }`}
       style={{ 
@@ -358,7 +358,7 @@ const Navbar = () => {
       }}
     >
       {/* Main Navbar */}
-      <nav className={`relative border-b transition-all duration-300 ${
+      <nav className={`relative border-b transition-all duration-150 ${
         isScrolled || isShopPage || isAuthPage ? 'border-gray-200 bg-white' : 'border-transparent bg-transparent'
       }`}>
 
