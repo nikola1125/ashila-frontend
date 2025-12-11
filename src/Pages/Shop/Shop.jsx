@@ -2,7 +2,7 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import useAxiosSecure from '../../hooks/useAxiosSecure';
 import LoadingError from '../../Components/Common/States/LoadingError';
-import { Search, X, Filter, ChevronDown, ChevronUp } from 'lucide-react';
+import { Search, X, Filter, ChevronDown } from 'lucide-react';
 import DataLoading from '../../Components/Common/Loaders/DataLoading';
 import ShopGrid from '../../Components/Grid/ShopGrid';
 import { Helmet } from 'react-helmet-async';
@@ -282,9 +282,7 @@ const Shop = () => {
             {/* Mobile Filter Overlay */}
             {showFilters && (
               <div 
-                className={`fixed inset-0 bg-black/50 z-[10001] lg:hidden transition-opacity duration-300 ${
-                  showFilters ? 'opacity-100' : 'opacity-0'
-                }`}
+                className="fixed inset-0 bg-black/50 z-[10001] lg:hidden transition-opacity duration-300 ease-in-out opacity-100"
                 onClick={() => setShowFilters(false)}
               />
             )}
@@ -292,8 +290,8 @@ const Shop = () => {
             <aside className={`${
               showFilters 
                 ? 'fixed lg:relative inset-y-0 left-0 lg:inset-auto w-80 lg:w-72 z-[10002] lg:z-auto translate-x-0' 
-                : 'hidden lg:block lg:w-72 -translate-x-full lg:translate-x-0'
-            } transition-all duration-300 ease-in-out overflow-hidden flex-shrink-0`}>
+                : 'fixed lg:block lg:relative lg:inset-auto lg:w-72 -translate-x-full lg:translate-x-0'
+            } transition-transform duration-300 ease-in-out overflow-hidden flex-shrink-0`}>
               <div className="bg-white h-full flex flex-col lg:sticky lg:top-20">
                 <div className="p-6 overflow-y-auto flex-1">
                   {/* Mobile Close Button */}
@@ -328,14 +326,17 @@ const Shop = () => {
                       className="w-full flex items-center justify-between text-sm font-semibold text-[#A67856] mb-3 uppercase tracking-wide hover:text-[#8B6345] transition-colors"
                     >
                       <span>Problematika</span>
-                      {expandedCategories.problematica ? (
-                        <ChevronUp size={18} className="text-[#A67856]" />
-                      ) : (
-                        <ChevronDown size={18} className="text-[#A67856]" />
-                      )}
+                      <ChevronDown 
+                        size={18} 
+                        className={`text-[#A67856] transition-transform duration-300 ease-in-out ${
+                          expandedCategories.problematica ? 'rotate-180' : 'rotate-0'
+                        }`}
+                      />
                     </button>
-                    {expandedCategories.problematica && (
-                      <div className="space-y-2">
+                    <div className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                      expandedCategories.problematica ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+                    }`}>
+                      <div className="space-y-2 pt-1">
                         {filterOptions.problematica.map((option) => (
                           <label
                             key={option.id}
@@ -354,7 +355,7 @@ const Shop = () => {
                           </label>
                         ))}
                       </div>
-                    )}
+                    </div>
                   </div>
 
                   {/* Tipi i lëkurës */}
@@ -364,14 +365,17 @@ const Shop = () => {
                       className="w-full flex items-center justify-between text-sm font-semibold text-[#A67856] mb-3 uppercase tracking-wide hover:text-[#8B6345] transition-colors"
                     >
                       <span>Tipi i lëkurës</span>
-                      {expandedCategories.skinTypes ? (
-                        <ChevronUp size={18} className="text-[#A67856]" />
-                      ) : (
-                        <ChevronDown size={18} className="text-[#A67856]" />
-                      )}
+                      <ChevronDown 
+                        size={18} 
+                        className={`text-[#A67856] transition-transform duration-300 ease-in-out ${
+                          expandedCategories.skinTypes ? 'rotate-180' : 'rotate-0'
+                        }`}
+                      />
                     </button>
-                    {expandedCategories.skinTypes && (
-                      <div className="space-y-2">
+                    <div className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                      expandedCategories.skinTypes ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+                    }`}>
+                      <div className="space-y-2 pt-1">
                         {filterOptions.skinTypes.map((option) => (
                           <label
                             key={option.id}
@@ -390,7 +394,7 @@ const Shop = () => {
                           </label>
                         ))}
                       </div>
-                    )}
+                    </div>
                   </div>
 
                   {/* Lloji i produktit */}
@@ -400,14 +404,17 @@ const Shop = () => {
                       className="w-full flex items-center justify-between text-sm font-semibold text-[#A67856] mb-3 uppercase tracking-wide hover:text-[#8B6345] transition-colors"
                     >
                       <span>Lloji i produktit</span>
-                      {expandedCategories.productTypes ? (
-                        <ChevronUp size={18} className="text-[#A67856]" />
-                      ) : (
-                        <ChevronDown size={18} className="text-[#A67856]" />
-                      )}
+                      <ChevronDown 
+                        size={18} 
+                        className={`text-[#A67856] transition-transform duration-300 ease-in-out ${
+                          expandedCategories.productTypes ? 'rotate-180' : 'rotate-0'
+                        }`}
+                      />
                     </button>
-                    {expandedCategories.productTypes && (
-                      <div className="space-y-2">
+                    <div className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                      expandedCategories.productTypes ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+                    }`}>
+                      <div className="space-y-2 pt-1">
                         {filterOptions.productTypes.map((option) => (
                           <label
                             key={option.id}
@@ -426,7 +433,7 @@ const Shop = () => {
                           </label>
                         ))}
                       </div>
-                    )}
+                    </div>
                   </div>
 
                   {/* Trupin & Flokë */}
@@ -436,14 +443,17 @@ const Shop = () => {
                       className="w-full flex items-center justify-between text-sm font-semibold text-[#A67856] mb-3 uppercase tracking-wide hover:text-[#8B6345] transition-colors"
                     >
                       <span>Trupin & Flokë</span>
-                      {expandedCategories.bodyHair ? (
-                        <ChevronUp size={18} className="text-[#A67856]" />
-                      ) : (
-                        <ChevronDown size={18} className="text-[#A67856]" />
-                      )}
+                      <ChevronDown 
+                        size={18} 
+                        className={`text-[#A67856] transition-transform duration-300 ease-in-out ${
+                          expandedCategories.bodyHair ? 'rotate-180' : 'rotate-0'
+                        }`}
+                      />
                     </button>
-                    {expandedCategories.bodyHair && (
-                      <div className="space-y-2">
+                    <div className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                      expandedCategories.bodyHair ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+                    }`}>
+                      <div className="space-y-2 pt-1">
                         {filterOptions.bodyHair.map((option) => (
                           <label
                             key={option.id}
@@ -462,7 +472,7 @@ const Shop = () => {
                           </label>
                         ))}
                       </div>
-                    )}
+                    </div>
                   </div>
 
                   {/* Higjene */}
@@ -472,14 +482,17 @@ const Shop = () => {
                       className="w-full flex items-center justify-between text-sm font-semibold text-[#A67856] mb-3 uppercase tracking-wide hover:text-[#8B6345] transition-colors"
                     >
                       <span>Higjene</span>
-                      {expandedCategories.hygiene ? (
-                        <ChevronUp size={18} className="text-[#A67856]" />
-                      ) : (
-                        <ChevronDown size={18} className="text-[#A67856]" />
-                      )}
+                      <ChevronDown 
+                        size={18} 
+                        className={`text-[#A67856] transition-transform duration-300 ease-in-out ${
+                          expandedCategories.hygiene ? 'rotate-180' : 'rotate-0'
+                        }`}
+                      />
                     </button>
-                    {expandedCategories.hygiene && (
-                      <div className="space-y-2">
+                    <div className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                      expandedCategories.hygiene ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+                    }`}>
+                      <div className="space-y-2 pt-1">
                         {filterOptions.hygiene.map((option) => (
                           <label
                             key={option.id}
@@ -498,7 +511,7 @@ const Shop = () => {
                           </label>
                         ))}
                       </div>
-                    )}
+                    </div>
                   </div>
 
                   {/* Nena & Fëmijë */}
@@ -508,14 +521,17 @@ const Shop = () => {
                       className="w-full flex items-center justify-between text-sm font-semibold text-[#A67856] mb-3 uppercase tracking-wide hover:text-[#8B6345] transition-colors"
                     >
                       <span>Nena & Fëmijë</span>
-                      {expandedCategories.motherChild ? (
-                        <ChevronUp size={18} className="text-[#A67856]" />
-                      ) : (
-                        <ChevronDown size={18} className="text-[#A67856]" />
-                      )}
+                      <ChevronDown 
+                        size={18} 
+                        className={`text-[#A67856] transition-transform duration-300 ease-in-out ${
+                          expandedCategories.motherChild ? 'rotate-180' : 'rotate-0'
+                        }`}
+                      />
                     </button>
-                    {expandedCategories.motherChild && (
-                      <div className="space-y-2">
+                    <div className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                      expandedCategories.motherChild ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+                    }`}>
+                      <div className="space-y-2 pt-1">
                         {filterOptions.motherChild.map((option) => (
                           <label
                             key={option.id}
@@ -534,7 +550,7 @@ const Shop = () => {
                           </label>
                         ))}
                       </div>
-                    )}
+                    </div>
                   </div>
 
                   {/* Shendeti Seksual */}
@@ -544,14 +560,17 @@ const Shop = () => {
                       className="w-full flex items-center justify-between text-sm font-semibold text-[#A67856] mb-3 uppercase tracking-wide hover:text-[#8B6345] transition-colors"
                     >
                       <span>Shendeti Seksual</span>
-                      {expandedCategories.sexualHealth ? (
-                        <ChevronUp size={18} className="text-[#A67856]" />
-                      ) : (
-                        <ChevronDown size={18} className="text-[#A67856]" />
-                      )}
+                      <ChevronDown 
+                        size={18} 
+                        className={`text-[#A67856] transition-transform duration-300 ease-in-out ${
+                          expandedCategories.sexualHealth ? 'rotate-180' : 'rotate-0'
+                        }`}
+                      />
                     </button>
-                    {expandedCategories.sexualHealth && (
-                      <div className="space-y-2">
+                    <div className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                      expandedCategories.sexualHealth ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+                    }`}>
+                      <div className="space-y-2 pt-1">
                         {filterOptions.sexualHealth.map((option) => (
                           <label
                             key={option.id}
@@ -570,7 +589,7 @@ const Shop = () => {
                           </label>
                         ))}
                       </div>
-                    )}
+                    </div>
                   </div>
 
                   {/* Suplemente & Vitamina */}
@@ -580,14 +599,17 @@ const Shop = () => {
                       className="w-full flex items-center justify-between text-sm font-semibold text-[#A67856] mb-3 uppercase tracking-wide hover:text-[#8B6345] transition-colors"
                     >
                       <span>Suplemente & Vitamina</span>
-                      {expandedCategories.supplements ? (
-                        <ChevronUp size={18} className="text-[#A67856]" />
-                      ) : (
-                        <ChevronDown size={18} className="text-[#A67856]" />
-                      )}
+                      <ChevronDown 
+                        size={18} 
+                        className={`text-[#A67856] transition-transform duration-300 ease-in-out ${
+                          expandedCategories.supplements ? 'rotate-180' : 'rotate-0'
+                        }`}
+                      />
                     </button>
-                    {expandedCategories.supplements && (
-                      <div className="space-y-2">
+                    <div className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                      expandedCategories.supplements ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+                    }`}>
+                      <div className="space-y-2 pt-1">
                         {filterOptions.supplements.map((option) => (
                           <label
                             key={option.id}
@@ -606,7 +628,7 @@ const Shop = () => {
                           </label>
                         ))}
                       </div>
-                    )}
+                    </div>
                   </div>
 
                   {/* Monitoruesit e Shëndetit */}
@@ -616,14 +638,17 @@ const Shop = () => {
                       className="w-full flex items-center justify-between text-sm font-semibold text-[#A67856] mb-3 uppercase tracking-wide hover:text-[#8B6345] transition-colors"
                     >
                       <span>Monitoruesit e Shëndetit</span>
-                      {expandedCategories.healthMonitors ? (
-                        <ChevronUp size={18} className="text-[#A67856]" />
-                      ) : (
-                        <ChevronDown size={18} className="text-[#A67856]" />
-                      )}
+                      <ChevronDown 
+                        size={18} 
+                        className={`text-[#A67856] transition-transform duration-300 ease-in-out ${
+                          expandedCategories.healthMonitors ? 'rotate-180' : 'rotate-0'
+                        }`}
+                      />
                     </button>
-                    {expandedCategories.healthMonitors && (
-                      <div className="space-y-2">
+                    <div className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                      expandedCategories.healthMonitors ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+                    }`}>
+                      <div className="space-y-2 pt-1">
                         {filterOptions.healthMonitors.map((option) => (
                           <label
                             key={option.id}
@@ -642,7 +667,7 @@ const Shop = () => {
                           </label>
                         ))}
                       </div>
-                    )}
+                    </div>
                   </div>
                 </div>
               </div>

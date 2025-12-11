@@ -58,7 +58,7 @@ const ShopGrid = ({
 
               {/* Add to Cart Icon - Bottom Right Overlay */}
               <button
-                className="absolute bottom-2 right-2 bg-white hover:bg-gray-100/50 text-gray-600 p-1.5 md:p-2 transition-all duration-200 flex items-center justify-center z-10"
+                className="absolute bottom-2 right-2 bg-white hover:bg-gray-100/50 text-gray-600 p-1 md:p-1.5 transition-all duration-200 flex items-center justify-center z-10"
                 onClick={(e) => {
                   e.stopPropagation();
                   addItem({
@@ -80,7 +80,7 @@ const ShopGrid = ({
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="w-3 h-3 md:w-4 md:h-4"
+                  className="w-2.5 h-2.5 md:w-3 md:h-3"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"

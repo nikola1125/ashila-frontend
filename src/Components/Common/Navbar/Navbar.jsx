@@ -200,6 +200,8 @@ const Navbar = () => {
     let lastScrollY = 0;
     let scrollTimeout = null;
     let lastState = false;
+    let stateChangeTimeout = null;
+    const isMobile = window.innerWidth < 1024; // lg breakpoint
 
     const handleScroll = () => {
       if (!ticking) {
@@ -214,13 +216,28 @@ const Navbar = () => {
               lastState = true;
             }
           } else {
-            // Only update if scroll difference is significant AND state would actually change
-            const newState = scrollY > 20;
-            if (scrollDifference > 10 && newState !== lastState) {
-              setIsScrolled(newState);
-              lastScrollY = scrollY;
-              lastState = newState;
-            } else if (scrollDifference > 10) {
+            // Use higher threshold for mobile to prevent flickering
+            const scrollThreshold = isMobile ? 30 : 20;
+            const newState = scrollY > scrollThreshold;
+            
+            // Only update if scroll difference is significant (higher threshold on mobile)
+            const minScrollDiff = isMobile ? 15 : 10;
+            
+            if (scrollDifference > minScrollDiff && newState !== lastState) {
+              // Clear any pending state change
+              if (stateChangeTimeout) {
+                clearTimeout(stateChangeTimeout);
+              }
+              
+              // Add small delay on mobile to prevent rapid toggling
+              const delay = isMobile ? 50 : 0;
+              
+              stateChangeTimeout = setTimeout(() => {
+                setIsScrolled(newState);
+                lastScrollY = scrollY;
+                lastState = newState;
+              }, delay);
+            } else if (scrollDifference > minScrollDiff) {
               lastScrollY = scrollY;
             }
           }
@@ -239,14 +256,16 @@ const Navbar = () => {
         setIsScrolled(true);
         lastState = true;
       } else {
-        const initialState = window.scrollY > 20;
+        // Use higher threshold for mobile
+        const scrollThreshold = isMobile ? 30 : 20;
+        const initialState = window.scrollY > scrollThreshold;
         setIsScrolled(initialState);
         lastState = initialState;
       }
     };
     
-    // Check after render
-    setTimeout(checkInitialScroll, 0);
+    // Check after render with slight delay to ensure accurate scroll position
+    setTimeout(checkInitialScroll, 100);
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => {
@@ -256,6 +275,9 @@ const Navbar = () => {
       }
       if (scrollTimeout) {
         clearTimeout(scrollTimeout);
+      }
+      if (stateChangeTimeout) {
+        clearTimeout(stateChangeTimeout);
       }
     };
   }, [isShopPage]);
@@ -610,17 +632,22 @@ const Navbar = () => {
                     {category.groups && category.groups.length > 0 && (
                       <ChevronDown 
                         size={18} 
-                        className={`text-gray-600 transition-transform ${
-                          mobileOpenCategoryId === category.id ? 'rotate-180' : ''
+                        className={`text-gray-600 transition-transform duration-300 ease-in-out ${
+                          mobileOpenCategoryId === category.id ? 'rotate-180' : 'rotate-0'
                         }`}
                       />
                     )}
                   </button>
 
                   {/* Groups */}
-                  {category.groups && category.groups.length > 0 && mobileOpenCategoryId === category.id && (
-                    <div className="bg-transparent overflow-hidden transition-all duration-300">
-                      {category.groups.map((group) => (
+                  {category.groups && category.groups.length > 0 && (
+                    <div className={`bg-transparent overflow-hidden transition-all duration-300 ease-in-out ${
+                      mobileOpenCategoryId === category.id 
+                        ? 'max-h-[2000px] opacity-100' 
+                        : 'max-h-0 opacity-0'
+                    }`}>
+                      <div className="py-1">
+                        {category.groups.map((group) => (
                         <div key={group.id}>
                           {group.subitems && group.subitems.length > 0 ? (
                             <>
@@ -638,18 +665,18 @@ const Navbar = () => {
                                 <span>{group.label}</span>
                                 <ChevronRight 
                                   size={16} 
-                                  className={`text-gray-400 transition-transform duration-300 ${
-                                    mobileOpenGroupId === `${category.id}-${group.id}` ? 'rotate-90' : ''
+                                  className={`text-gray-400 transition-transform duration-300 ease-in-out ${
+                                    mobileOpenGroupId === `${category.id}-${group.id}` ? 'rotate-90' : 'rotate-0'
                                   }`}
                                 />
                               </button>
                               {/* Subitems */}
-                              {mobileOpenGroupId === `${category.id}-${group.id}` && (
-                                <div className={`bg-transparent overflow-hidden transition-all duration-300 ease-out ${
-                                  mobileOpenGroupId === `${category.id}-${group.id}`
-                                    ? 'max-h-96 opacity-100'
-                                    : 'max-h-0 opacity-0'
-                                }`}>
+                              <div className={`bg-transparent overflow-hidden transition-all duration-300 ease-in-out ${
+                                mobileOpenGroupId === `${category.id}-${group.id}`
+                                  ? 'max-h-[800px] opacity-100'
+                                  : 'max-h-0 opacity-0'
+                              }`}>
+                                <div className="py-1">
                                   {group.subitems.map((subitem) => (
                                     <NavLink
                                       key={subitem.id}
@@ -665,7 +692,7 @@ const Navbar = () => {
                                     </NavLink>
                                   ))}
                                 </div>
-                              )}
+                              </div>
                             </>
                           ) : (
                             <NavLink
@@ -680,7 +707,8 @@ const Navbar = () => {
                             </NavLink>
                           )}
                         </div>
-                      ))}
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>

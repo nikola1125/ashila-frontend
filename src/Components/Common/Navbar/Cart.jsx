@@ -1,16 +1,52 @@
-import React, { useContext, useRef } from 'react';
+import React, { useContext, useRef, useEffect } from 'react';
 import { CartContext } from '../../../Context/Cart/CartContext';
 
 const Cart = ({ isScrolled = true, onCartClick, iconSize = 20 }) => {
   const { totalQuantity } = useContext(CartContext);
   const touchStartRef = useRef(null);
   const touchMovedRef = useRef(false);
+  const isScrollingRef = useRef(false);
+  const scrollTimeoutRef = useRef(null);
+
+  // Track if user is actively scrolling
+  useEffect(() => {
+    let scrollTimer = null;
+    
+    const handleScroll = () => {
+      isScrollingRef.current = true;
+      
+      // Clear existing timeout
+      if (scrollTimer) {
+        clearTimeout(scrollTimer);
+      }
+      
+      // Set scrolling to false after scroll stops
+      scrollTimer = setTimeout(() => {
+        isScrollingRef.current = false;
+      }, 150);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (scrollTimer) {
+        clearTimeout(scrollTimer);
+      }
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleTouchStart = (e) => {
+    // Prevent event from bubbling up
+    e.stopPropagation();
     touchStartRef.current = {
       x: e.touches[0].clientX,
       y: e.touches[0].clientY,
-      time: Date.now()
+      time: Date.now(),
+      scrollY: window.scrollY
     };
     touchMovedRef.current = false;
   };
@@ -19,18 +55,30 @@ const Cart = ({ isScrolled = true, onCartClick, iconSize = 20 }) => {
     if (touchStartRef.current) {
       const deltaX = Math.abs(e.touches[0].clientX - touchStartRef.current.x);
       const deltaY = Math.abs(e.touches[0].clientY - touchStartRef.current.y);
-      // If moved more than 10px, consider it a scroll, not a tap
-      if (deltaX > 10 || deltaY > 10) {
+      const scrollDelta = Math.abs(window.scrollY - touchStartRef.current.scrollY);
+      
+      // If moved more than 8px OR page scrolled, consider it a scroll, not a tap
+      if (deltaX > 8 || deltaY > 8 || scrollDelta > 5) {
         touchMovedRef.current = true;
       }
     }
   };
 
   const handleTouchEnd = (e) => {
+    // Prevent event from bubbling up
+    e.stopPropagation();
+    
     if (touchStartRef.current && !touchMovedRef.current) {
       const timeDiff = Date.now() - touchStartRef.current.time;
-      // Only trigger if it was a quick tap (less than 300ms) and minimal movement
-      if (timeDiff < 300) {
+      const scrollDelta = Math.abs(window.scrollY - touchStartRef.current.scrollY);
+      
+      // Only trigger if:
+      // 1. It was a quick tap (less than 250ms)
+      // 2. Minimal movement (already checked via touchMovedRef)
+      // 3. Page didn't scroll during the touch
+      // 4. User is not actively scrolling
+      if (timeDiff < 250 && scrollDelta < 3 && !isScrollingRef.current) {
+        e.preventDefault();
         onCartClick();
       }
     }
@@ -53,7 +101,12 @@ const Cart = ({ isScrolled = true, onCartClick, iconSize = 20 }) => {
       onTouchEnd={handleTouchEnd}
       className="relative p-1.5 hover:opacity-80 transition-opacity min-h-[44px] min-w-[44px] flex items-center justify-center"
       aria-label="Open cart"
-      style={{ touchAction: 'manipulation' }}
+      style={{ 
+        touchAction: 'manipulation',
+        WebkitTouchCallout: 'none',
+        WebkitUserSelect: 'none',
+        userSelect: 'none'
+      }}
     >
       <div className="relative">
         <svg

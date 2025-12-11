@@ -210,7 +210,7 @@ const Hero = () => {
                 const message = encodeURIComponent('Pershendetje, interesohem per te bere nje skin test.');
                 window.open(`https://wa.me/355686879292?text=${message}`, '_blank');
               }}
-              className="lux-btn-primary px-4 py-2 text-sm md:px-8 md:py-3 md:text-base shadow-lg hover:shadow-xl transform hover:scale-[1.02] hero-cta-primary"
+              className="lux-btn-primary px-3 py-1.5 text-xs md:px-8 md:py-3 md:text-base shadow-lg hover:shadow-xl transform hover:scale-[1.02] hero-cta-primary"
             >
               Rezervo skin test-in tend
             </button>
@@ -218,7 +218,7 @@ const Hero = () => {
               onClick={() => {
                 navigate('/shop');
               }}
-              className="lux-btn-outline px-4 py-2 text-sm md:px-8 md:py-3 md:text-base shadow-md hover:shadow-lg transform hover:scale-[1.01] hero-cta-secondary"
+              className="lux-btn-outline px-3 py-1.5 text-xs md:px-8 md:py-3 md:text-base shadow-md hover:shadow-lg transform hover:scale-[1.01] hero-cta-secondary"
             >
               Zbulo produktet
             </button>
