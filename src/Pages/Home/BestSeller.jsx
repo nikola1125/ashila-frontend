@@ -12,6 +12,9 @@ const ProductCard = React.memo(({ product, pricing, index, onProductClick, onAdd
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
+    // Reset visibility when component mounts
+    setIsVisible(false);
+    
     const observer = new IntersectionObserver(([entry]) => {
       if (entry.isIntersecting) {
         setIsVisible(true);
@@ -27,13 +30,13 @@ const ProductCard = React.memo(({ product, pricing, index, onProductClick, onAdd
       // Also set visible after a short delay to ensure visibility on desktop
       const timeout = setTimeout(() => {
         setIsVisible(true);
-      }, 100);
+      }, 200);
       return () => {
         clearTimeout(timeout);
         observer.disconnect();
       };
     }
-  }, []);
+  }, [product._id]); // Re-run when product changes
 
   return (
     <div
@@ -132,9 +135,7 @@ const BestSeller = () => {
         return [];
       }
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
+    staleTime: 2 * 60 * 1000, // 2 minutes - will use default refetchOnMount
     retry: 1,
   });
 
@@ -230,7 +231,6 @@ const BestSeller = () => {
       discount: product.discount || 0,
       seller: product.seller,
     };
-    console.log('Adding to cart:', cartItem);
     addItem(cartItem);
   }, [addItem]);
 

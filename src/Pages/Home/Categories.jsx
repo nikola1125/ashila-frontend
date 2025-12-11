@@ -44,14 +44,11 @@ const Categories = () => {
         // Try to fetch from API
         return await publicApi.get('/categories');
       } catch (err) {
-        console.log('API not available, using mock data');
         // Fallback to mock data if API is not available
         return mockCategories;
       }
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
+    staleTime: 2 * 60 * 1000, // 2 minutes - will use default refetchOnMount
   });
 
   // Handle API response - categories might be wrapped in an object

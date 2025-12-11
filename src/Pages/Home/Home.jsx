@@ -5,6 +5,7 @@ import { useLocation } from 'react-router-dom';
 import BestSeller from './BestSeller';
 import HydrationSection from './HydrationSection';
 import FluSection from './FluSection';
+import InteractiveProductSelector from './InteractiveProductSelector';
 import AcneCategories from './AcneCategories';
 
 const Home = memo(() => {
@@ -23,6 +24,7 @@ const Home = memo(() => {
         <BestSeller />
         <HydrationSection />
         <FluSection />
+        <InteractiveProductSelector />
         <AcneCategories />
       </div>
     </>  

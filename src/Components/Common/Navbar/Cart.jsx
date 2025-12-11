@@ -1,14 +1,59 @@
-import React, { useContext } from 'react';
+import React, { useContext, useRef } from 'react';
 import { CartContext } from '../../../Context/Cart/CartContext';
 
 const Cart = ({ isScrolled = true, onCartClick, iconSize = 20 }) => {
   const { totalQuantity } = useContext(CartContext);
+  const touchStartRef = useRef(null);
+  const touchMovedRef = useRef(false);
+
+  const handleTouchStart = (e) => {
+    touchStartRef.current = {
+      x: e.touches[0].clientX,
+      y: e.touches[0].clientY,
+      time: Date.now()
+    };
+    touchMovedRef.current = false;
+  };
+
+  const handleTouchMove = (e) => {
+    if (touchStartRef.current) {
+      const deltaX = Math.abs(e.touches[0].clientX - touchStartRef.current.x);
+      const deltaY = Math.abs(e.touches[0].clientY - touchStartRef.current.y);
+      // If moved more than 10px, consider it a scroll, not a tap
+      if (deltaX > 10 || deltaY > 10) {
+        touchMovedRef.current = true;
+      }
+    }
+  };
+
+  const handleTouchEnd = (e) => {
+    if (touchStartRef.current && !touchMovedRef.current) {
+      const timeDiff = Date.now() - touchStartRef.current.time;
+      // Only trigger if it was a quick tap (less than 300ms) and minimal movement
+      if (timeDiff < 300) {
+        onCartClick();
+      }
+    }
+    touchStartRef.current = null;
+    touchMovedRef.current = false;
+  };
+
+  const handleClick = (e) => {
+    // For mouse clicks, always allow
+    if (e.type === 'click' && !e.touches) {
+      onCartClick();
+    }
+  };
 
   return (
     <button
-      onClick={onCartClick}
+      onClick={handleClick}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
       className="relative p-1.5 hover:opacity-80 transition-opacity min-h-[44px] min-w-[44px] flex items-center justify-center"
       aria-label="Open cart"
+      style={{ touchAction: 'manipulation' }}
     >
       <div className="relative">
         <svg

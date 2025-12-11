@@ -1,7 +1,9 @@
 // Hero with full screen background video that fades on scroll
 import React, { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const Hero = () => {
+  const navigate = useNavigate();
   const bg = '/images/backg.mp4';
   const heroRef = useRef(null);
   const videoRef = useRef(null);
@@ -114,17 +116,17 @@ const Hero = () => {
           <div className="flex flex-col items-end gap-3 hero-cta-group">
             <button
               onClick={() => {
-                window.open('https://wa.me/355603119884', '_blank');
+                window.open('https://wa.me/355692429567', '_blank');
               }}
-              className="lux-btn-primary px-6 py-3 md:px-8 md:py-3 shadow-lg hover:shadow-xl transform hover:scale-[1.02] hero-cta-primary"
+              className="lux-btn-primary px-4 py-2 text-sm md:px-8 md:py-3 md:text-base shadow-lg hover:shadow-xl transform hover:scale-[1.02] hero-cta-primary"
             >
               Rezervo skin test-in tend
             </button>
             <button
               onClick={() => {
-                window.location.href = '/shop';
+                navigate('/shop');
               }}
-              className="lux-btn-outline px-6 py-3 md:px-8 md:py-3 shadow-md hover:shadow-lg transform hover:scale-[1.01] hero-cta-secondary"
+              className="lux-btn-outline px-4 py-2 text-sm md:px-8 md:py-3 md:text-base shadow-md hover:shadow-lg transform hover:scale-[1.01] hero-cta-secondary"
             >
               Zbulo produktet
             </button>

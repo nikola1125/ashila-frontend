@@ -10,7 +10,9 @@ const ProfileLinks = () => {
   const handleSignOut = () => {
     signOutUser()
       .then(() => toast.success('LogOut successful'))
-      .catch((err) => console.log(err.message));
+      .catch((err) => {
+        console.error('Logout error:', err.message);
+      });
   };
   return (
     <>

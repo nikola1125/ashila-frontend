@@ -22,9 +22,7 @@ const LatestProduct = () => {
         return [];
       }
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
+    staleTime: 2 * 60 * 1000, // 2 minutes - will use default refetchOnMount
   });
 
   const latestProducts = useMemo(() => data || [], [data]);
@@ -48,7 +46,6 @@ const LatestProduct = () => {
   const handleShopNow = useCallback(() => {
     navigate('/shop');
   }, [navigate]);
-  // console.log(latestProducts);
 
   if (isLoading) {
     return (

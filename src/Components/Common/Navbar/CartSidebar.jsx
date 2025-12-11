@@ -8,23 +8,38 @@ import { groupItemsBySeller } from '../../../utils/groupItemsBySeller';
 import { X, Plus, Minus, Trash2, Bell } from 'lucide-react';
 
 const CartSidebar = ({ isOpen, onClose }) => {
-  // Prevent body scroll when cart is open
+  // Prevent body scroll when cart is open (iOS-safe approach)
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-      // Prevent backdrop clicks from triggering multiple times
-      document.body.style.pointerEvents = 'none';
-      const sidebar = document.querySelector('[data-cart-sidebar]');
-      if (sidebar) {
-        sidebar.style.pointerEvents = 'auto';
-      }
-    } else {
-      document.body.style.overflow = 'unset';
-      document.body.style.pointerEvents = 'auto';
+    if (!isOpen) return;
+    
+    // Store original values
+    const scrollY = window.scrollY;
+    const body = document.body;
+    const html = document.documentElement;
+    
+    // Prevent backdrop clicks from triggering multiple times
+    body.style.pointerEvents = 'none';
+    const sidebar = document.querySelector('[data-cart-sidebar]');
+    if (sidebar) {
+      sidebar.style.pointerEvents = 'auto';
     }
+    
+    // iOS-safe body scroll lock
+    body.style.position = 'fixed';
+    body.style.top = `-${scrollY}px`;
+    body.style.width = '100%';
+    body.style.overflow = 'hidden';
+    html.style.overflow = 'hidden';
+    
     return () => {
-      document.body.style.overflow = 'unset';
-      document.body.style.pointerEvents = 'auto';
+      // Restore scroll position
+      body.style.position = '';
+      body.style.top = '';
+      body.style.width = '';
+      body.style.overflow = '';
+      html.style.overflow = '';
+      body.style.pointerEvents = 'auto';
+      window.scrollTo(0, scrollY);
     };
   }, [isOpen]);
 
@@ -73,6 +88,10 @@ const CartSidebar = ({ isOpen, onClose }) => {
   const handleBackdropClick = useCallback((e) => {
     // Only close if clicking directly on backdrop, not on sidebar content
     // Use refs for more reliable checking on mobile
+    // Prevent touch events from triggering clicks
+    if (e.type === 'touchstart' || e.type === 'touchmove') {
+      return;
+    }
     if (
       e.target === backdropRef.current ||
       (backdropRef.current && backdropRef.current.contains(e.target) && 
@@ -94,13 +113,8 @@ const CartSidebar = ({ isOpen, onClose }) => {
 
     window.addEventListener('keydown', handleEscape);
     
-    // Prevent body scroll and ensure cart stays stable
-    const originalOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    
     return () => {
       window.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = originalOverflow;
     };
   }, [isOpen, onClose]);
 
@@ -112,11 +126,33 @@ const CartSidebar = ({ isOpen, onClose }) => {
           ref={backdropRef}
           className="fixed inset-0 bg-black/50 z-40 transition-opacity animate-in fade-in duration-300"
           onClick={handleBackdropClick}
-          // Prevent accidental closes on mobile touch
-          onTouchMove={(e) => {
-            // Prevent closing during touch move (swiping)
+          onTouchStart={(e) => {
+            // Only handle touch if it's a tap, not a scroll
+            const touch = e.touches[0];
+            if (touch) {
+              const startY = touch.clientY;
+              const startX = touch.clientX;
+              
+              const handleTouchEnd = (endEvent) => {
+                const endTouch = endEvent.changedTouches[0];
+                if (endTouch) {
+                  const deltaY = Math.abs(endTouch.clientY - startY);
+                  const deltaX = Math.abs(endTouch.clientX - startX);
+                  // Only treat as click if movement is minimal (less than 10px)
+                  if (deltaY < 10 && deltaX < 10) {
+                    if (endEvent.target === backdropRef.current) {
+                      onClose();
+                    }
+                  }
+                }
+                document.removeEventListener('touchend', handleTouchEnd);
+              };
+              
+              document.addEventListener('touchend', handleTouchEnd, { once: true });
+            }
             e.stopPropagation();
           }}
+          style={{ touchAction: 'pan-y' }}
         />
       )}
 
@@ -124,15 +160,24 @@ const CartSidebar = ({ isOpen, onClose }) => {
       <div 
         ref={sidebarRef}
         data-cart-sidebar
-        className={`fixed right-0 top-0 h-screen w-full max-w-md bg-white shadow-2xl z-50 flex flex-col transform transition-transform duration-300 ease-in-out overflow-y-auto ${
+        className={`fixed right-0 top-0 h-screen w-full max-w-md bg-white shadow-2xl z-50 flex flex-col transform transition-transform duration-300 ease-in-out ${
           isOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
+        style={{
+          WebkitOverflowScrolling: 'touch',
+          touchAction: 'pan-y',
+          overscrollBehavior: 'contain',
+        }}
         onClick={(e) => {
           // Prevent clicks inside sidebar from closing it
           e.stopPropagation();
         }}
         onTouchStart={(e) => {
           // Stop touch events from bubbling to backdrop
+          e.stopPropagation();
+        }}
+        onTouchMove={(e) => {
+          // Allow touch scrolling within sidebar
           e.stopPropagation();
         }}
       >
@@ -156,8 +201,15 @@ const CartSidebar = ({ isOpen, onClose }) => {
           </p>
         </div>
 
-        {/* Cart Items */}
-        <div className="flex-1 px-6 py-4">
+        {/* Cart Items - Scrollable Container */}
+        <div 
+          className="flex-1 px-6 py-4 overflow-y-auto"
+          style={{
+            WebkitOverflowScrolling: 'touch',
+            touchAction: 'pan-y',
+            overscrollBehavior: 'contain',
+          }}
+        >
           {cartItems.length === 0 ? (
             <div className="flex flex-col items-center justify-center min-h-[200px] text-center">
               <p className="text-[#4A3628] mb-2 font-medium">Your cart is empty</p>

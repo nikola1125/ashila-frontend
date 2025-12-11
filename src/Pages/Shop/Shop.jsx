@@ -188,7 +188,7 @@ const Shop = () => {
   const { data, isLoading, error } = useQuery({
     queryKey: ['medicines'],
     queryFn: () => publicApi.get('/medicines'),
-    staleTime: 5 * 60 * 1000,
+    staleTime: 2 * 60 * 1000, // 2 minutes - will use default refetchOnMount
   });
 
   const allMedicines = data?.result || [];
