@@ -93,6 +93,9 @@ const InteractiveProductSelector = () => {
     }
   }, [productsData.length]);
 
+  // Calculate active product early to avoid reference errors
+  const activeProduct = productsData && productsData.length > 0 ? productsData[activeProductIndex] : null;
+
   // Retrigger animations when product changes
   useEffect(() => {
     if (activeProduct) {
@@ -109,8 +112,6 @@ const InteractiveProductSelector = () => {
   if (!productsData || productsData.length === 0) {
     return null;
   }
-
-  const activeProduct = productsData[activeProductIndex];
 
   return (
     <section className="interactive-showcase py-8 md:py-16 px-5 bg-white -mt-8 md:mt-0">
