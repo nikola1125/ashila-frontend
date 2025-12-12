@@ -29,7 +29,7 @@ const Hero = () => {
       if (!ticking) {
         rafRef.current = requestAnimationFrame(() => {
           const scrollY = window.scrollY;
-          
+      
           // Only update if scroll changed significantly (throttle updates)
           // On mobile, be more lenient to avoid glitches, especially in production
           const isMobile = window.innerWidth < 768;
@@ -134,6 +134,48 @@ const Hero = () => {
         heroElement.style.WebkitOverflowScrolling = '';
         heroElement.style.overscrollBehavior = '';
       }
+    };
+  }, [isMobile]);
+
+  // Optimize video quality on desktop
+  useEffect(() => {
+    const videoElement = videoRef.current;
+    if (!videoElement || isMobile) return;
+
+    // Improve video quality on desktop
+    const optimizeQuality = () => {
+      // Ensure video uses full quality
+      videoElement.playbackRate = 1.0;
+      
+      // Force high quality rendering
+      if (videoElement.videoWidth && videoElement.videoHeight) {
+        // Video metadata loaded, ensure quality
+        videoElement.style.imageRendering = 'smooth';
+        videoElement.style.WebkitImageRendering = 'smooth';
+      }
+    };
+
+    // Optimize when video metadata is loaded
+    const handleLoadedMetadata = () => {
+      optimizeQuality();
+    };
+
+    // Optimize when video can play
+    const handleCanPlay = () => {
+      optimizeQuality();
+    };
+
+    videoElement.addEventListener('loadedmetadata', handleLoadedMetadata);
+    videoElement.addEventListener('canplay', handleCanPlay);
+
+    // If already loaded, optimize immediately
+    if (videoElement.readyState >= 2) {
+      optimizeQuality();
+    }
+
+    return () => {
+      videoElement.removeEventListener('loadedmetadata', handleLoadedMetadata);
+      videoElement.removeEventListener('canplay', handleCanPlay);
     };
   }, [isMobile]);
 
@@ -252,6 +294,12 @@ const Hero = () => {
             e.target.play().catch(() => {});
           }
         }}
+        onLoadedMetadata={(e) => {
+          // Ensure video plays at full quality on desktop
+          if (!isMobile && e.target) {
+            e.target.playbackRate = 1.0;
+          }
+        }}
         style={{
           position: isMobile ? 'absolute' : 'fixed',
           top: 0,
@@ -269,7 +317,12 @@ const Hero = () => {
           willChange: 'opacity',
           // Production-specific fixes
           isolation: 'isolate',
-          contain: 'layout style paint'
+          contain: 'layout style paint',
+          // Improve video quality on desktop - use smooth rendering
+          imageRendering: isMobile ? 'auto' : 'smooth',
+          WebkitImageRendering: isMobile ? 'auto' : 'smooth',
+          // Force hardware acceleration for better quality
+          transformOrigin: 'center center',
         }}
       >
         <source src={bg} type="video/mp4" />
