@@ -20,6 +20,7 @@ const AcneCategories = () => {
   const navigate = useNavigate();
   const sliderRef = useRef(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [showScrollHint, setShowScrollHint] = useState(true);
 
   // Chunk items into groups of 2 for mobile
   const chunkedItems = useMemo(() => {
@@ -37,7 +38,12 @@ const AcneCategories = () => {
     const width = slider.clientWidth || 1;
     const pageIndex = Math.round(slider.scrollLeft / width);
     setCurrentPage(Math.min(chunkedItems.length, pageIndex + 1));
-  }, [chunkedItems.length]);
+    
+    // Hide scroll hint after user starts scrolling
+    if (slider.scrollLeft > 5 && showScrollHint) {
+      setShowScrollHint(false);
+    }
+  }, [chunkedItems.length, showScrollHint]);
 
   // Throttle scroll handler for better performance
   const throttledHandleScroll = useThrottle(handleScroll, 100);
@@ -52,7 +58,7 @@ const AcneCategories = () => {
   }, [handleScroll, throttledHandleScroll]);
 
   return (
-    <section className="pt-0 pb-4 md:py-16 bg-white -mt-8 md:mt-0">
+    <section className="pt-0 pb-4 md:py-16 bg-white -mt-12 md:mt-0">
       <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
         {/* Centered Title */}
         <div className="text-center mb-8 md:mb-12 fade-in">
@@ -145,19 +151,25 @@ const AcneCategories = () => {
         </div>
 
         {/* Mobile - Swipeable slider with 2 items per page */}
-        <div className="block md:hidden fade-in">
+        <div className="block md:hidden fade-in relative">
           <div
             ref={sliderRef}
-            className="flex overflow-x-auto snap-x snap-mandatory scroll-smooth [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="flex overflow-x-auto snap-x snap-mandatory scroll-smooth [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden scroll-hint-right relative"
           >
             {chunkedItems.map((group, pageIndex) => (
               <div key={`page-${pageIndex}`} className="min-w-full snap-start px-2">
                 <div className="grid grid-cols-2 gap-4">
-                  {group.map((item, itemIndex) => (
+                  {group.map((item, itemIndex) => {
+                    // Add swipe hint animation with delay
+                    const delayClass = itemIndex < 4 
+                      ? `swipe-hint-animation-delay-${Math.min(itemIndex, 3)}` 
+                      : '';
+                    
+                    return (
                     <button
                       key={item.key}
                       onClick={() => navigate(`/shop?category=${item.key}`)}
-                      className={`group flex flex-col items-center scale-in stagger-${Math.min(itemIndex + 1, 4)}`}
+                      className={`group flex flex-col items-center scale-in stagger-${Math.min(itemIndex + 1, 4)} swipe-hint-animation ${delayClass}`}
                     >
                       {/* Circular Image Frame */}
                       <div className="relative w-full aspect-square mb-3 rounded-full overflow-hidden border border-[#D9BFA9] active:border-[#A67856] shadow-sm transition-all duration-200">
@@ -189,7 +201,8 @@ const AcneCategories = () => {
                         </div>
                       </div>
                     </button>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             ))}

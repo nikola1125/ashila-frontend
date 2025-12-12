@@ -359,7 +359,7 @@ const Shop = () => {
                                 onChange={() => toggleFilter('problem', option.id)}
                                 className="w-4 h-4 text-[#A67856] border-2 border-[#A67856] focus:ring-[#A67856]"
                               />
-                              <span className="text-sm text-gray-700">{option.label}</span>
+                              <span className="text-sm text-[#A67856]">{option.label}</span>
                             </div>
                             <span className="text-xs text-gray-500">{option.count}</span>
                           </label>
@@ -398,7 +398,7 @@ const Shop = () => {
                                 onChange={() => toggleFilter('skinType', option.id)}
                                 className="w-4 h-4 text-[#A67856] border-2 border-[#A67856] focus:ring-[#A67856]"
                               />
-                              <span className="text-sm text-gray-700">{option.label}</span>
+                              <span className="text-sm text-[#A67856]">{option.label}</span>
                             </div>
                             <span className="text-xs text-gray-500">{option.count}</span>
                           </label>
@@ -437,7 +437,7 @@ const Shop = () => {
                                 onChange={() => toggleFilter('productType', option.id)}
                                 className="w-4 h-4 text-[#A67856] border-2 border-[#A67856] focus:ring-[#A67856]"
                               />
-                              <span className="text-sm text-gray-700">{option.label}</span>
+                              <span className="text-sm text-[#A67856]">{option.label}</span>
                             </div>
                             <span className="text-xs text-gray-500">{option.count}</span>
                           </label>
@@ -476,7 +476,7 @@ const Shop = () => {
                                 onChange={() => toggleFilter('bodyHair', option.id)}
                                 className="w-4 h-4 text-[#A67856] border-2 border-[#A67856] focus:ring-[#A67856]"
                               />
-                              <span className="text-sm text-gray-700">{option.label}</span>
+                              <span className="text-sm text-[#A67856]">{option.label}</span>
                             </div>
                             <span className="text-xs text-gray-500">{option.count}</span>
                           </label>
@@ -515,7 +515,7 @@ const Shop = () => {
                                 onChange={() => toggleFilter('hygiene', option.id)}
                                 className="w-4 h-4 text-[#A67856] border-2 border-[#A67856] focus:ring-[#A67856]"
                               />
-                              <span className="text-sm text-gray-700">{option.label}</span>
+                              <span className="text-sm text-[#A67856]">{option.label}</span>
                             </div>
                             <span className="text-xs text-gray-500">{option.count}</span>
                           </label>
@@ -554,7 +554,7 @@ const Shop = () => {
                                 onChange={() => toggleFilter('motherChild', option.id)}
                                 className="w-4 h-4 text-[#A67856] border-2 border-[#A67856] focus:ring-[#A67856]"
                               />
-                              <span className="text-sm text-gray-700">{option.label}</span>
+                              <span className="text-sm text-[#A67856]">{option.label}</span>
                             </div>
                             <span className="text-xs text-gray-500">{option.count}</span>
                           </label>
@@ -593,7 +593,7 @@ const Shop = () => {
                                 onChange={() => toggleFilter('sexualHealth', option.id)}
                                 className="w-4 h-4 text-[#A67856] border-2 border-[#A67856] focus:ring-[#A67856]"
                               />
-                              <span className="text-sm text-gray-700">{option.label}</span>
+                              <span className="text-sm text-[#A67856]">{option.label}</span>
                             </div>
                             <span className="text-xs text-gray-500">{option.count}</span>
                           </label>
@@ -632,7 +632,7 @@ const Shop = () => {
                                 onChange={() => toggleFilter('supplements', option.id)}
                                 className="w-4 h-4 text-[#A67856] border-2 border-[#A67856] focus:ring-[#A67856]"
                               />
-                              <span className="text-sm text-gray-700">{option.label}</span>
+                              <span className="text-sm text-[#A67856]">{option.label}</span>
                             </div>
                             <span className="text-xs text-gray-500">{option.count}</span>
                           </label>
@@ -671,7 +671,7 @@ const Shop = () => {
                                 onChange={() => toggleFilter('healthMonitors', option.id)}
                                 className="w-4 h-4 text-[#A67856] border-2 border-[#A67856] focus:ring-[#A67856]"
                               />
-                              <span className="text-sm text-gray-700">{option.label}</span>
+                              <span className="text-sm text-[#A67856]">{option.label}</span>
                             </div>
                             <span className="text-xs text-gray-500">{option.count}</span>
                           </label>

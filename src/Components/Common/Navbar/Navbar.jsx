@@ -286,6 +286,27 @@ const Navbar = () => {
   // Ref to track last scroll position for mobile menu
   const mobileMenuLastScrollY = React.useRef(window.scrollY);
 
+  // Handle scroll for mobile menu - defined at component level
+  const handleMobileMenuScroll = useCallback(() => {
+    if (!mobileMenuOpen) return;
+    
+    const currentScrollY = window.scrollY;
+    const lastScrollY = mobileMenuLastScrollY.current;
+
+    // iPhone fix: require real scroll, ignore minor Safari bounce (0–5px)
+    if (Math.abs(currentScrollY - lastScrollY) < 10) return;
+
+    // Only close when user scrolls DOWN at least 10px
+    if (currentScrollY > lastScrollY) {
+      setMobileMenuOpen(false);
+    }
+
+    mobileMenuLastScrollY.current = currentScrollY;
+  }, [mobileMenuOpen]);
+
+  // Throttle scroll handler for better performance - called at component level
+  const throttledHandleMobileMenuScroll = useThrottle(handleMobileMenuScroll, 100);
+
   // Close mobile menu when clicking outside, scrolling, or on route change
   useEffect(() => {
     if (!mobileMenuOpen) return;
@@ -304,32 +325,14 @@ const Navbar = () => {
       }
     };
 
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      const lastScrollY = mobileMenuLastScrollY.current;
-
-      // iPhone fix: require real scroll, ignore minor Safari bounce (0–5px)
-      if (Math.abs(currentScrollY - lastScrollY) < 10) return;
-
-      // Only close when user scrolls DOWN at least 10px
-      if (currentScrollY > lastScrollY) {
-        setMobileMenuOpen(false);
-      }
-
-      mobileMenuLastScrollY.current = currentScrollY;
-    };
-
-    // Throttle scroll handler for better performance
-    const throttledHandleScroll = useThrottle(handleScroll, 100);
-
-    window.addEventListener("scroll", throttledHandleScroll, { passive: true });
+    window.addEventListener("scroll", throttledHandleMobileMenuScroll, { passive: true });
     document.addEventListener("click", handleClickOutside);
 
     return () => {
-      window.removeEventListener("scroll", throttledHandleScroll);
+      window.removeEventListener("scroll", throttledHandleMobileMenuScroll);
       document.removeEventListener("click", handleClickOutside);
     };
-}, [mobileMenuOpen]);
+}, [mobileMenuOpen, throttledHandleMobileMenuScroll]);
 
   // Close mobile menu on route change
   useEffect(() => {
@@ -401,9 +404,7 @@ const Navbar = () => {
                     window.scrollTo({ top: 0, behavior: 'instant' });
                   }
                 }}
-                className={`font-medium transition-colors text-[10px] xl:text-xs uppercase tracking-wide whitespace-nowrap py-1 ${
-                  isScrolled || isAuthPage ? 'text-black hover:text-gray-700' : 'text-white hover:text-gray-200'
-                }`}
+                className="font-medium transition-colors text-[10px] xl:text-xs uppercase tracking-wide whitespace-nowrap py-1 text-[#5A3F2A] hover:text-[#4A3320]"
               >
                 Kreu
               </NavLink>
@@ -419,14 +420,12 @@ const Navbar = () => {
                     setActiveGroup(null);
                   }}
                 >
-                  <button className={`flex items-center gap-1 font-medium transition-colors text-[10px] xl:text-xs uppercase tracking-wide py-1 whitespace-nowrap ${
-                    isScrolled || isAuthPage ? 'text-black hover:text-gray-700' : 'text-white hover:text-gray-200'
-                  }`}>
+                  <button className="flex items-center gap-1 font-medium transition-colors text-[10px] xl:text-xs uppercase tracking-wide py-1 whitespace-nowrap text-[#5A3F2A] hover:text-[#4A3320]">
                     {category.label}
                     {category.groups && category.groups.length > 0 && (
                       <ChevronDown 
                         size={10} 
-                        className={isScrolled || isAuthPage ? 'text-gray-700' : 'text-white/80'} 
+                        className="text-[#5A3F2A]" 
                       />
                     )}
                   </button>
@@ -446,9 +445,9 @@ const Navbar = () => {
                         >
                           {group.subitems && group.subitems.length > 0 ? (
                             <>
-                              <button className="flex items-center justify-between w-full px-4 py-2 text-sm text-black hover:bg-gray-100 transition-colors duration-150">
+                              <button className="flex items-center justify-between w-full px-4 py-2 text-sm text-[#5A3F2A] hover:bg-gray-100 transition-colors duration-150">
                                 {group.label}
-                                <ChevronRight size={14} className="text-gray-600" />
+                                <ChevronRight size={14} className="text-[#5A3F2A]" />
                               </button>
                               {/* Second Level: Subitems */}
                               <div className={`absolute left-full top-0 ml-1 w-48 bg-white shadow-md border border-gray-200 py-1 z-20 transition-all duration-300 ease-out ${
@@ -464,7 +463,7 @@ const Navbar = () => {
                                       setActiveGroup(null);
                                       setOpenCategoryId(null);
                                     }}
-                                    className="block px-4 py-2 text-sm text-black hover:bg-gray-100 transition-all duration-150"
+                                    className="block px-4 py-2 text-sm text-[#5A3F2A] hover:bg-gray-100 transition-all duration-150"
                                   >
                                     {subitem.label}
                                   </NavLink>
@@ -478,7 +477,7 @@ const Navbar = () => {
                                 setActiveGroup(null);
                                 setOpenCategoryId(null);
                               }}
-                              className="flex items-center justify-between w-full px-4 py-2 text-sm text-black hover:bg-gray-100 transition-colors duration-150"
+                              className="flex items-center justify-between w-full px-4 py-2 text-sm text-[#5A3F2A] hover:bg-gray-100 transition-colors duration-150"
                             >
                               {group.label}
                             </NavLink>
@@ -499,16 +498,12 @@ const Navbar = () => {
                 >
                   <button 
                     onClick={() => setAccountDropdownOpen(!accountDropdownOpen)}
-                    className={`flex items-center gap-1 font-medium transition-colors text-[10px] xl:text-xs uppercase tracking-wide whitespace-nowrap py-1 ${
-                      isScrolled || isAuthPage ? 'text-black hover:text-gray-700' : 'text-white hover:text-gray-200'
-                    }`}
+                    className="flex items-center gap-1 font-medium transition-colors text-[10px] xl:text-xs uppercase tracking-wide whitespace-nowrap py-1 text-[#5A3F2A] hover:text-[#4A3320]"
                   >
                     Account
                     <ChevronDown 
                       size={10} 
-                      className={`transition-transform ${accountDropdownOpen ? 'rotate-180' : ''} ${
-                        isScrolled || isAuthPage ? 'text-gray-600' : 'text-white/80'
-                      }`}
+                      className={`transition-transform ${accountDropdownOpen ? 'rotate-180' : ''} text-[#5A3F2A]`}
                     />
                   </button>
                   
@@ -546,9 +541,7 @@ const Navbar = () => {
               ) : (
                 <NavLink 
                   to="/sign-up" 
-                  className={`hidden lg:block font-medium transition-colors text-[10px] xl:text-xs uppercase tracking-wide whitespace-nowrap py-1 ml-8 ${
-                    isScrolled || isAuthPage ? 'text-black hover:text-gray-700' : 'text-white hover:text-gray-200'
-                  }`}
+                  className="hidden lg:block font-medium transition-colors text-[10px] xl:text-xs uppercase tracking-wide whitespace-nowrap py-1 ml-8 text-[#5A3F2A] hover:text-[#4A3320]"
                 >
                   Account
                 </NavLink>
@@ -617,7 +610,7 @@ const Navbar = () => {
                     window.scrollTo({ top: 0, behavior: 'instant' });
                   }
                 }}
-                className="text-black font-medium text-sm uppercase tracking-wide hover:bg-gray-100 transition-colors px-4 py-3 border-b border-gray-200"
+                className="text-[#5A3F2A] font-medium text-sm uppercase tracking-wide hover:bg-gray-100 transition-colors px-4 py-3 border-b border-gray-200"
               >
                 Kreu
               </NavLink>
@@ -633,13 +626,13 @@ const Navbar = () => {
                       );
                       setMobileOpenGroupId(null);
                     }}
-                    className="w-full flex items-center justify-between text-black font-medium text-sm uppercase tracking-wide hover:bg-gray-100 transition-colors px-4 py-3"
+                    className="w-full flex items-center justify-between text-[#5A3F2A] font-medium text-sm uppercase tracking-wide hover:bg-gray-100 transition-colors px-4 py-3"
                   >
                     <span>{category.label}</span>
                     {category.groups && category.groups.length > 0 && (
                       <ChevronDown 
                         size={18} 
-                        className={`text-gray-600 transition-transform duration-300 ease-in-out ${
+                        className={`text-[#5A3F2A] transition-transform duration-300 ease-in-out ${
                           mobileOpenCategoryId === category.id ? 'rotate-180' : 'rotate-0'
                         }`}
                       />
@@ -667,12 +660,12 @@ const Navbar = () => {
                                       : `${category.id}-${group.id}`
                                   );
                                 }}
-                                className="w-full flex items-center justify-between text-black font-medium text-sm hover:bg-gray-100 transition-colors px-6 py-2.5"
+                                className="w-full flex items-center justify-between text-[#5A3F2A] font-medium text-sm hover:bg-gray-100 transition-colors px-6 py-2.5"
                               >
                                 <span>{group.label}</span>
                                 <ChevronRight 
                                   size={16} 
-                                  className={`text-gray-400 transition-transform duration-300 ease-in-out ${
+                                  className={`text-[#5A3F2A] transition-transform duration-300 ease-in-out ${
                                     mobileOpenGroupId === `${category.id}-${group.id}` ? 'rotate-90' : 'rotate-0'
                                   }`}
                                 />
@@ -693,7 +686,7 @@ const Navbar = () => {
                                         setMobileOpenGroupId(null);
                                         setMobileOpenCategoryId(null);
                                       }}
-                                      className="block text-black text-sm hover:bg-gray-100 transition-colors px-8 py-2"
+                                      className="block text-[#5A3F2A] text-sm hover:bg-gray-100 transition-colors px-8 py-2"
                                     >
                                       {subitem.label}
                                     </NavLink>
@@ -708,7 +701,7 @@ const Navbar = () => {
                                 setMobileMenuOpen(false);
                                 setMobileOpenCategoryId(null);
                               }}
-                              className="block text-black font-medium text-sm hover:bg-gray-100 transition-colors px-6 py-2.5"
+                              className="block text-[#5A3F2A] font-medium text-sm hover:bg-gray-100 transition-colors px-6 py-2.5"
                             >
                               {group.label}
                             </NavLink>
@@ -750,7 +743,7 @@ const Navbar = () => {
                 <NavLink 
                   to="/sign-up" 
                   onClick={() => setMobileMenuOpen(false)}
-                  className="text-black font-medium text-sm uppercase tracking-wide hover:bg-gray-100 transition-colors px-4 py-3 border-b border-gray-200"
+                  className="text-[#5A3F2A] font-medium text-sm uppercase tracking-wide hover:bg-gray-100 transition-colors px-4 py-3 border-b border-gray-200"
                 >
                   Sign Up
                 </NavLink>

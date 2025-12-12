@@ -214,7 +214,22 @@ const Hero = () => {
     // Ensure video is playing on load
     const handleLoadedData = () => {
       videoElement.loop = true;
+      videoElement.setAttribute('loop', 'true');
+      // Force play immediately when data is loaded
+      videoElement.play().catch(err => {
+        console.warn('Video autoplay on loadeddata prevented:', err);
+      });
       ensurePlaying();
+    };
+    
+    // Handle canplay event for better mobile support
+    const handleCanPlayLoop = () => {
+      videoElement.loop = true;
+      videoElement.setAttribute('loop', 'true');
+      // Force play when video can start playing
+      videoElement.play().catch(err => {
+        console.warn('Video autoplay on canplay prevented:', err);
+      });
     };
 
     // Ensure video continues playing
@@ -229,6 +244,7 @@ const Hero = () => {
     videoElement.addEventListener('ended', handleEnded);
     videoElement.addEventListener('pause', handlePause);
     videoElement.addEventListener('loadeddata', handleLoadedData);
+    videoElement.addEventListener('canplay', handleCanPlayLoop);
     videoElement.addEventListener('timeupdate', handleTimeUpdate);
 
     // Set loop attribute programmatically
@@ -247,6 +263,7 @@ const Hero = () => {
       videoElement.removeEventListener('ended', handleEnded);
       videoElement.removeEventListener('pause', handlePause);
       videoElement.removeEventListener('loadeddata', handleLoadedData);
+      videoElement.removeEventListener('canplay', handleCanPlayLoop);
       videoElement.removeEventListener('timeupdate', handleTimeUpdate);
       clearInterval(playInterval);
     };
@@ -299,6 +316,22 @@ const Hero = () => {
           if (!isMobile && e.target) {
             e.target.playbackRate = 1.0;
           }
+          // Auto play when metadata is loaded
+          e.target.play().catch(err => {
+            console.warn('Video autoplay on metadata load prevented:', err);
+          });
+        }}
+        onLoadedData={(e) => {
+          // Auto play when video data is loaded (for mobile compatibility)
+          e.target.play().catch(err => {
+            console.warn('Video autoplay on data load prevented:', err);
+          });
+        }}
+        onCanPlay={(e) => {
+          // Auto play when video can start playing
+          e.target.play().catch(err => {
+            console.warn('Video autoplay on canplay prevented:', err);
+          });
         }}
         style={{
           position: isMobile ? 'absolute' : 'fixed',

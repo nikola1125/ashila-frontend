@@ -52,7 +52,7 @@ const ProductCard = React.memo(({ product, pricing, index, onProductClick, onAdd
         ease: [0.4, 0, 0.2, 1],
       }}
       whileHover={{ y: -5, transition: { duration: 0.2 } }}
-      className="w-[160px] md:w-full md:max-w-[280px] flex-shrink-0 border border-gray-200 overflow-hidden bg-white text-center pb-2 md:pb-4 flex flex-col h-full"
+      className="w-[160px] md:w-full md:max-w-[280px] flex-shrink-0 border border-gray-200 overflow-hidden bg-white text-center pb-2 md:pb-4 flex flex-col h-full swipe-hint-animation"
     >
       {/* Product Image Container */}
       <motion.div 
@@ -136,6 +136,7 @@ const BestSeller = () => {
   const [showRightArrow, setShowRightArrow] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [showScrollHint, setShowScrollHint] = useState(true);
 
   const { data: products = [], isLoading: loading, error } = useQuery({
     queryKey: ['bestsellers', 'skincare'],
@@ -164,6 +165,11 @@ const BestSeller = () => {
 
     setShowLeftArrow(!isAtStart);
     setShowRightArrow(!isAtEnd);
+    
+    // Hide scroll hint after user starts scrolling
+    if (scrollLeft > 5 && showScrollHint) {
+      setShowScrollHint(false);
+    }
 
     // Calculate current page for mobile (2 items per page on mobile)
     if (window.innerWidth < 768) {
@@ -176,7 +182,7 @@ const BestSeller = () => {
       setCurrentPage(currentPageNum);
       setTotalPages(totalPagesNum);
     }
-  }, [products.length]);
+    }, [products.length, showScrollHint]);
 
   // Throttle scroll handler for better performance (100ms throttle for smooth scrolling)
   const throttledCheckScrollPosition = useThrottle(checkScrollPosition, 100);
@@ -309,7 +315,7 @@ const BestSeller = () => {
 
                   <div
                     ref={scrollContainerRef}
-                    className="flex md:grid md:grid-cols-4 gap-5 md:gap-5 overflow-x-auto scroll-smooth pb-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] md:overflow-x-visible md:justify-items-center"
+                    className="flex md:grid md:grid-cols-4 gap-5 md:gap-5 overflow-x-auto scroll-smooth pb-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] md:overflow-x-visible md:justify-items-center scroll-hint-right relative"
                     style={{
                       scrollBehavior: 'smooth',
                       WebkitOverflowScrolling: 'touch',
@@ -320,15 +326,21 @@ const BestSeller = () => {
                       if (!p || !p._id) return null;
                       const pricing = calculatePrice(p.price, p.discount);
                       
+                      // Add delay class based on index for staggered animation
+                      const delayClass = index < 4 
+                        ? `swipe-hint-animation-delay-${Math.min(index, 3)}` 
+                        : '';
+                      
                       return (
-                        <ProductCard
-                          key={p._id}
-                          product={p}
-                          pricing={pricing}
-                          index={index}
-                          onProductClick={handleProductClick}
-                          onAddToCart={handleAddToCart}
-                        />
+                        <div key={p._id} className={`swipe-hint-animation ${delayClass}`}>
+                          <ProductCard
+                            product={p}
+                            pricing={pricing}
+                            index={index}
+                            onProductClick={handleProductClick}
+                            onAddToCart={handleAddToCart}
+                          />
+                        </div>
                       );
                     })}
                   </div>
