@@ -61,7 +61,8 @@ const ShopGrid = ({
               <div className="px-2.5 pt-4 flex flex-col flex-grow">
                 {/* Medicine Name */}
                 <h3 
-                  className="text-base mb-2.5 text-gray-800 min-h-[40px] line-clamp-2 cursor-pointer hover:text-gray-600 transition-colors"
+                  className="text-sm md:text-base mb-2.5 text-gray-800 min-h-[40px] line-clamp-2 cursor-pointer hover:text-gray-600 transition-colors font-sans"
+                  style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}
                   onClick={() => {
                     window.scrollTo({ top: 0, behavior: 'instant' });
                     navigate(`/product/${medicine._id}`);
@@ -74,15 +75,15 @@ const ShopGrid = ({
                 <div className="flex items-center justify-center gap-2.5 mt-auto">
                   {medicine.discount > 0 ? (
                     <>
-                      <span className="text-lg font-bold text-black">
+                      <span className="text-base md:text-lg font-bold text-black font-sans" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
                         {(Number(medicine.price) * (1 - Number(medicine.discount) / 100)).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
                       </span>
-                      <span className="text-sm text-gray-400 line-through">
+                      <span className="text-xs md:text-sm text-gray-400 line-through font-sans" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
                         {Number(medicine.price).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
                       </span>
                     </>
                   ) : (
-                    <span className="text-lg font-bold text-black">
+                    <span className="text-base md:text-lg font-bold text-black font-sans" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
                       {Number(medicine.price).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
                     </span>
                   )}

@@ -96,15 +96,16 @@ const InteractiveProductSelector = () => {
   // Calculate active product early to avoid reference errors
   const activeProduct = productsData && productsData.length > 0 ? productsData[activeProductIndex] : null;
 
-  // Retrigger animations when product changes
+  // Retrigger image animation when product changes
   useEffect(() => {
     if (activeProduct) {
-      // Force reflow to retrigger CSS animations
-      const panel = document.querySelector('.product-info-panel');
-      if (panel) {
-        panel.classList.remove('product-panel-enter');
-        void panel.offsetWidth; // Force reflow
-        panel.classList.add('product-panel-enter');
+      // Force reflow to retrigger image animation only
+      const image = document.querySelector('.product-image-animated');
+      if (image) {
+        // Remove and re-add animation to retrigger
+        image.style.animation = 'none';
+        void image.offsetWidth; // Force reflow
+        image.style.animation = '';
       }
     }
   }, [activeProductIndex, activeProduct]);
@@ -182,12 +183,9 @@ const InteractiveProductSelector = () => {
 
         {/* Product Information Panel */}
         {activeProduct && (
-          <div
-            key={activeProductIndex}
-            className="product-info-panel flex-1 max-w-[500px] w-full p-10 bg-white rounded-[20px] shadow-[0_10px_30px_rgba(0,0,0,0.08)] product-panel-enter"
-          >
-            {/* Product Image */}
-            <div className="flex items-center justify-center mb-6 product-image-container visible">
+          <div className="product-info-panel flex-1 max-w-[500px] w-full p-10 bg-white rounded-[20px] shadow-[0_10px_30px_rgba(0,0,0,0.08)]">
+            {/* Product Image - Animated on change */}
+            <div className="flex items-center justify-center mb-6">
               <div 
                 className="relative w-full overflow-hidden bg-[#f9f9f9] h-[200px] md:h-[250px]"
                 style={{ 
@@ -198,14 +196,8 @@ const InteractiveProductSelector = () => {
                   key={activeProduct._id}
                   src={getProductImage(activeProduct.image, activeProduct._id || activeProductIndex)}
                   alt={activeProduct.itemName}
-                  className="w-full h-full object-contain p-5 product-image"
+                  className="w-full h-full object-contain p-5 product-image-animated"
                   loading="lazy"
-                  onLoad={(e) => {
-                    // Ensure image animation triggers
-                    e.target.style.opacity = '1';
-                    e.target.style.transform = 'translate3d(0, 0, 0) scale(1)';
-                    e.target.style.webkitTransform = 'translate3d(0, 0, 0) scale(1)';
-                  }}
                   onError={(e) => {
                     e.target.src = getProductImage(null, activeProduct._id || activeProductIndex);
                   }}
@@ -224,15 +216,12 @@ const InteractiveProductSelector = () => {
             </div>
 
             {/* Product Name */}
-            <h2
-              key={`name-${activeProductIndex}`}
-              className="product-name text-[32px] md:text-[32px] text-[#4A3628] mb-8 font-semibold text-center md:text-left product-name-text"
-            >
+            <h2 className="product-name text-[32px] md:text-[32px] text-[#4A3628] mb-8 font-semibold text-center md:text-left font-sans" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
               {activeProduct.itemName}
             </h2>
 
-            {/* Buttons */}
-            <div className="flex flex-col gap-3 product-buttons">
+            {/* Buttons - Static, no animation */}
+            <div className="flex flex-col gap-3">
               <button
                 onClick={handleViewProduct}
                 className="lux-btn-outline w-full product-button"

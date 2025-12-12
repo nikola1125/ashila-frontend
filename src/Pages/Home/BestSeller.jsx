@@ -98,7 +98,8 @@ const ProductCard = React.memo(({ product, pricing, index, onProductClick, onAdd
       {/* Product Info */}
       <div className="px-2.5 pt-4 flex flex-col flex-grow">
         <h3 
-          className="text-base mb-2.5 text-gray-800 min-h-[40px] line-clamp-2 cursor-pointer hover:text-gray-600 transition-colors"
+          className="text-sm md:text-base mb-2.5 text-gray-800 min-h-[40px] line-clamp-2 cursor-pointer hover:text-gray-600 transition-colors font-sans"
+          style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}
           onClick={() => onProductClick(product._id)}
         >
           {product.itemName}
@@ -108,15 +109,15 @@ const ProductCard = React.memo(({ product, pricing, index, onProductClick, onAdd
         <div className="flex items-center justify-center gap-2.5 mt-auto">
           {pricing.discounted ? (
             <>
-              <span className="text-lg font-bold text-black">
+              <span className="text-base md:text-lg font-bold text-black font-sans" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
                 {pricing.discounted.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
               </span>
-              <span className="text-sm text-gray-400 line-through">
+              <span className="text-xs md:text-sm text-gray-400 line-through font-sans" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
                 {pricing.original.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
               </span>
             </>
           ) : (
-            <span className="text-lg font-bold text-black">
+            <span className="text-base md:text-lg font-bold text-black font-sans" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
               {pricing.original.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
             </span>
           )}
@@ -260,7 +261,6 @@ const BestSeller = () => {
       <div className="lux-section-inner">
         {/* Centered Title */}
         <div className="text-center mb-10 md:mb-12 space-y-3 fade-in">
-          <p className="lux-heading">Koleksioni i përzgjedhur</p>
           <h2 className="lux-title">Best sellers</h2>
           <p className="lux-subtitle mx-auto">
             Produktet më të preferuara nga klientët tanë, të kuruara për rezultate të dukshme dhe të qëndrueshme.
@@ -342,7 +342,7 @@ const BestSeller = () => {
               </div>
               
               {/* Page numbers for mobile */}
-              <div className="block md:hidden mt-6 text-center text-sm text-[#4A3628] font-semibold">
+              <div className="block md:hidden mt-6 text-center text-sm text-[#4A3628] font-semibold font-sans" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
                 {currentPage} / {totalPages}
               </div>
             </>

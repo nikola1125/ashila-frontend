@@ -129,12 +129,12 @@ const ProductDetail = () => {
             <p className="text-sm text-gray-500 mb-2 font-light">Ashila</p>
 
             {/* Product Title */}
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#4A3628] mb-2 break-words">{product.itemName}</h1>
+            <h1 className="text-lg sm:text-2xl md:text-3xl font-bold text-[#4A3628] mb-2 break-words font-sans" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>{product.itemName}</h1>
             <div className="w-16 h-0.5 bg-[#A67856] mb-4"></div>
 
             {/* Price */}
             <div className="mb-4 sm:mb-6">
-              <span className="text-lg sm:text-xl md:text-2xl font-semibold text-[#4A3628]">
+              <span className="text-base sm:text-xl md:text-2xl font-semibold text-[#4A3628] font-sans" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
                 {discountedPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ALL
               </span>
             </div>
@@ -334,21 +334,21 @@ const ProductDetail = () => {
 
                     {/* Product Info */}
                     <div className="px-2.5 pt-4 flex flex-col flex-grow">
-                      <h3 className="text-base mb-2.5 text-gray-800 min-h-[40px] line-clamp-2">
+                      <h3 className="text-sm md:text-base mb-2.5 text-gray-800 min-h-[40px] line-clamp-2 font-sans" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
                         {relatedProduct.itemName}
                       </h3>
                       <div className="flex items-center justify-center gap-2.5 mt-auto">
                         {relatedProduct.discount > 0 ? (
                           <>
-                            <span className="text-lg font-bold text-black">
+                            <span className="text-base md:text-lg font-bold text-black font-sans" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
                               {relatedDiscountedPrice.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
                             </span>
-                            <span className="text-sm text-gray-400 line-through">
+                            <span className="text-xs md:text-sm text-gray-400 line-through font-sans" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
                               {Number(relatedProduct.price).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
                             </span>
                           </>
                         ) : (
-                          <span className="text-lg font-bold text-black">
+                          <span className="text-base md:text-lg font-bold text-black font-sans" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
                             {Number(relatedProduct.price).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
                           </span>
                         )}

@@ -41,6 +41,26 @@ p {
   line-height: 1.8;
 }
 
+/* Product names and numbers use Inter font to match rest of page */
+.product-title,
+.product-name,
+h3[class*="product"],
+[class*="product-name"],
+[class*="product-title"] {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif !important;
+}
+
+/* Price numbers use Inter font */
+.product-price,
+[class*="product-price"],
+span[class*="price"] {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif !important;
+}
+
 /* Hero text specific styles for cross-browser compatibility */
 .hero-text {
   word-break: normal !important;
