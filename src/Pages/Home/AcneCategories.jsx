@@ -52,7 +52,7 @@ const AcneCategories = () => {
   }, [handleScroll, throttledHandleScroll]);
 
   return (
-    <section className="py-8 md:py-16 bg-white">
+    <section className="pt-0 pb-4 md:py-16 bg-white -mt-8 md:mt-0">
       <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
         {/* Centered Title */}
         <div className="text-center mb-8 md:mb-12 fade-in">

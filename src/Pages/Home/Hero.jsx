@@ -340,14 +340,14 @@ const Hero = () => {
       
       {/* Hero Content Overlay - CTAs positioned bottom-right, slightly higher */}
       <div className="absolute inset-0 z-10 flex items-end justify-end">
-        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-4 pb-20 sm:pb-24 md:pb-28 flex justify-end">
-          <div className="flex flex-col items-end gap-3 hero-cta-group">
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-4 pb-10 sm:pb-24 md:pb-28 flex justify-end">
+          <div className="flex flex-col items-end gap-2 md:gap-3 hero-cta-group">
             <button
               onClick={() => {
                 const message = encodeURIComponent('Pershendetje, interesohem per te bere nje skin test.');
                 window.open(`https://wa.me/355686879292?text=${message}`, '_blank');
               }}
-              className="lux-btn-primary px-3 py-1.5 text-xs md:px-8 md:py-3 md:text-base shadow-lg hover:shadow-xl transform hover:scale-[1.02] hero-cta-primary"
+              className="lux-btn-primary px-2 py-1 text-[10px] md:px-8 md:py-3 md:text-base shadow-lg hover:shadow-xl transform hover:scale-[1.02] hero-cta-primary"
             >
               Rezervo skin test-in tend
             </button>
@@ -355,7 +355,7 @@ const Hero = () => {
               onClick={() => {
                 navigate('/shop');
               }}
-              className="lux-btn-outline px-3 py-1.5 text-xs md:px-8 md:py-3 md:text-base shadow-md hover:shadow-lg transform hover:scale-[1.01] hero-cta-secondary"
+              className="lux-btn-outline px-2 py-1 text-[10px] md:px-8 md:py-3 md:text-base shadow-md hover:shadow-lg transform hover:scale-[1.01] hero-cta-secondary"
             >
               Zbulo produktet
             </button>

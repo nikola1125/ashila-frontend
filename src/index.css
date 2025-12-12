@@ -682,10 +682,19 @@ button > div[class*="rounded-full"] {
 
 /* Desktop optimizations */
 @media (min-width: 1025px) {
-  /* Smooth scrolling handled by Lenis - disable native smooth scroll */
-  html {
-    scroll-behavior: auto; /* Lenis handles smooth scrolling */
+/* Smooth scrolling handled by Lenis - disable native smooth scroll */
+html {
+  scroll-behavior: auto; /* Lenis handles smooth scrolling */
+}
+
+/* Smooth scrolling for Best Seller horizontal scroll on mobile */
+@media (max-width: 767px) {
+  [class*="overflow-x-auto"] {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
   }
+}
 }
 
 /* Responsive images */

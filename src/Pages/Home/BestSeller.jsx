@@ -52,11 +52,11 @@ const ProductCard = React.memo(({ product, pricing, index, onProductClick, onAdd
         ease: [0.4, 0, 0.2, 1],
       }}
       whileHover={{ y: -5, transition: { duration: 0.2 } }}
-      className="w-[200px] md:w-full md:max-w-[280px] flex-shrink-0 border border-gray-200 overflow-hidden bg-white text-center pb-4 flex flex-col h-full"
+      className="w-[160px] md:w-full md:max-w-[280px] flex-shrink-0 border border-gray-200 overflow-hidden bg-white text-center pb-2 md:pb-4 flex flex-col h-full"
     >
       {/* Product Image Container */}
       <motion.div 
-        className="relative w-full overflow-hidden bg-[#f9f9f9] cursor-pointer h-[200px] md:h-[250px]"
+        className="relative w-full overflow-hidden bg-[#f9f9f9] cursor-pointer h-[160px] md:h-[250px]"
         onClick={() => onProductClick(product._id)}
         whileHover={{ scale: 1.02 }}
         transition={{ duration: 0.2 }}
@@ -65,7 +65,7 @@ const ProductCard = React.memo(({ product, pricing, index, onProductClick, onAdd
           src={getProductImage(product.image, product._id || index)}
           alt={product.itemName}
           loading="lazy"
-          className="w-full h-full object-contain p-5"
+          className="w-full h-full object-contain p-3 md:p-5"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.3, delay: index * 0.1 + 0.2 }}
@@ -78,7 +78,7 @@ const ProductCard = React.memo(({ product, pricing, index, onProductClick, onAdd
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: index * 0.1 + 0.3 }}
-            className="absolute top-2.5 right-2.5 bg-red-500 text-white px-2.5 py-1.5 text-sm font-bold"
+            className="absolute top-1.5 md:top-2.5 right-1.5 md:right-2.5 bg-red-500 text-white px-1.5 md:px-2.5 py-1 md:py-1.5 text-xs md:text-sm font-bold"
           >
             Save {pricing.discountPercent}%
           </motion.div>
@@ -88,7 +88,7 @@ const ProductCard = React.memo(({ product, pricing, index, onProductClick, onAdd
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: index * 0.1 + 0.3 }}
-            className="absolute top-2.5 left-2.5 bg-red-500 text-white px-2.5 py-1.5 text-sm font-bold"
+            className="absolute top-1.5 md:top-2.5 left-1.5 md:left-2.5 bg-red-500 text-white px-1.5 md:px-2.5 py-1 md:py-1.5 text-xs md:text-sm font-bold"
           >
             Sold Out
           </motion.div>
@@ -96,9 +96,9 @@ const ProductCard = React.memo(({ product, pricing, index, onProductClick, onAdd
       </motion.div>
 
       {/* Product Info */}
-      <div className="px-2.5 pt-4 flex flex-col flex-grow">
+      <div className="px-1.5 md:px-2.5 pt-2 md:pt-4 flex flex-col flex-grow">
         <h3 
-          className="text-sm md:text-base mb-2.5 text-gray-800 min-h-[40px] line-clamp-2 cursor-pointer hover:text-gray-600 transition-colors font-sans"
+          className="text-xs md:text-base mb-1.5 md:mb-2.5 text-gray-800 min-h-[32px] md:min-h-[40px] line-clamp-2 cursor-pointer hover:text-gray-600 transition-colors font-sans"
           style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}
           onClick={() => onProductClick(product._id)}
         >
@@ -106,18 +106,18 @@ const ProductCard = React.memo(({ product, pricing, index, onProductClick, onAdd
         </h3>
 
         {/* Price */}
-        <div className="flex items-center justify-center gap-2.5 mt-auto">
+        <div className="flex items-center justify-center gap-1.5 md:gap-2.5 mt-auto">
           {pricing.discounted ? (
             <>
-              <span className="text-base md:text-lg font-bold text-black font-sans" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
+              <span className="text-sm md:text-lg font-bold text-black font-sans" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
                 {pricing.discounted.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
               </span>
-              <span className="text-xs md:text-sm text-gray-400 line-through font-sans" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
+              <span className="text-[10px] md:text-sm text-gray-400 line-through font-sans" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
                 {pricing.original.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
               </span>
             </>
           ) : (
-            <span className="text-base md:text-lg font-bold text-black font-sans" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
+            <span className="text-sm md:text-lg font-bold text-black font-sans" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
               {pricing.original.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
             </span>
           )}
@@ -167,8 +167,8 @@ const BestSeller = () => {
 
     // Calculate current page for mobile (2 items per page on mobile)
     if (window.innerWidth < 768) {
-      const itemWidth = 160; // w-40 = 160px on mobile
-      const gap = 24; // gap-6 = 24px
+      const itemWidth = 160; // w-[160px] = 160px on mobile
+      const gap = 20; // gap-5 = 20px
       const itemsPerPage = 2;
       const pageWidth = (itemWidth + gap) * itemsPerPage;
       const currentPageNum = Math.round(scrollLeft / pageWidth) + 1;
@@ -257,7 +257,7 @@ const BestSeller = () => {
   }, [navigate]);
 
   return (
-    <section className="mt-0 bg-white lux-section pt-8 md:pt-[5.5rem] -mt-8 md:mt-0">
+    <section className="mt-0 bg-white lux-section pt-4 md:pt-[5.5rem] -mt-4 md:mt-0">
       <div className="lux-section-inner">
         {/* Centered Title */}
         <div className="text-center mb-10 md:mb-12 space-y-3 fade-in">
@@ -309,7 +309,12 @@ const BestSeller = () => {
 
                   <div
                     ref={scrollContainerRef}
-                    className="flex md:grid md:grid-cols-4 gap-5 overflow-x-auto scroll-smooth pb-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] md:overflow-x-visible md:justify-items-center"
+                    className="flex md:grid md:grid-cols-4 gap-5 md:gap-5 overflow-x-auto scroll-smooth pb-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] md:overflow-x-visible md:justify-items-center"
+                    style={{
+                      scrollBehavior: 'smooth',
+                      WebkitOverflowScrolling: 'touch',
+                      overscrollBehavior: 'contain',
+                    }}
                   >
                     {products.map((p, index) => {
                       if (!p || !p._id) return null;

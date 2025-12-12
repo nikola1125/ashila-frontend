@@ -22,10 +22,10 @@ const Home = memo(() => {
       
       <div className="relative z-10 bg-white">
         <BestSeller />
+        <AcneCategories />
         <HydrationSection />
         <FluSection />
         <InteractiveProductSelector />
-        <AcneCategories />
       </div>
     </>  
   );
