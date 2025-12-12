@@ -269,8 +269,8 @@ const Shop = () => {
       <Helmet key={location.pathname}>
         <title>Shop</title>
       </Helmet>
-      <section className="min-h-[80vh] pt-24 pb-4 sm:pt-24 sm:pb-8 bg-white">
-        <div className="max-w-full mx-auto px-4 md:px-4 lg:px-6">
+      <section className="min-h-[80vh] pt-24 pb-4 sm:pt-24 sm:pb-8 bg-white relative overflow-x-hidden">
+        <div className="max-w-full mx-auto px-4 md:px-4 lg:px-6 relative">
           {/* Header */}
           <div className="mb-8 sm:mb-12 text-center space-y-3">
             <p className="lux-heading">Koleksioni</p>
@@ -290,9 +290,19 @@ const Shop = () => {
             <aside className={`${
               showFilters 
                 ? 'fixed lg:relative inset-y-0 left-0 lg:inset-auto w-80 lg:w-72 z-[10002] lg:z-auto translate-x-0' 
-                : 'fixed lg:block lg:relative lg:inset-auto lg:w-72 -translate-x-full lg:translate-x-0'
-            } transition-transform duration-300 ease-in-out overflow-hidden flex-shrink-0`}>
-              <div className="bg-white h-full flex flex-col lg:sticky lg:top-20">
+                : 'fixed lg:block lg:relative lg:inset-auto lg:w-72 -translate-x-full lg:translate-x-0 pointer-events-none lg:pointer-events-auto'
+            } transition-transform duration-300 ease-in-out overflow-hidden flex-shrink-0`} style={{
+              ...(showFilters ? {} : { 
+                opacity: 0, 
+                visibility: 'hidden',
+                transform: 'translateX(-100%)',
+                WebkitTransform: 'translateX(-100%)',
+                // Prevent white line on mobile by ensuring it's completely off-screen
+                left: showFilters ? undefined : '-100%',
+                width: showFilters ? undefined : '0px'
+              })
+            }}>
+              <div className="bg-white h-full flex flex-col lg:sticky lg:top-20 pointer-events-auto" style={{ maxHeight: '100vh', overflow: 'hidden' }}>
                 <div className="p-6 overflow-y-auto flex-1">
                   {/* Mobile Close Button */}
                   <div className="flex items-center justify-between mb-4 lg:hidden">

@@ -703,6 +703,20 @@ html, body {
   width: 100%;
 }
 
+/* Fix white line issue on mobile shop page */
+@media (max-width: 1023px) {
+  body {
+    background-color: #ffffff;
+  }
+  
+  /* Ensure fixed sidebars don't create visual artifacts */
+  aside[class*="fixed"] {
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+}
+
 /* Better form inputs on mobile */
 input[type="text"],
 input[type="email"],

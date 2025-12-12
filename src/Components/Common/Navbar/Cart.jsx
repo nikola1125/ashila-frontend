@@ -8,13 +8,16 @@ const Cart = ({ isScrolled = true, onCartClick, iconSize = 20 }) => {
   const touchMovedRef = useRef(false);
   const isScrollingRef = useRef(false);
   const scrollTimeoutRef = useRef(null);
+  const lastScrollYRef = useRef(window.scrollY);
 
   // Track if user is actively scrolling - longer timeout to prevent accidental opens
   const handleScroll = useCallback(() => {
-    let scrollTimer = null;
     const currentScrollY = window.scrollY;
-    const lastScrollY = window.scrollY;
+    const lastScrollY = lastScrollYRef.current;
     const scrollDelta = Math.abs(currentScrollY - lastScrollY);
+    
+    // Update last scroll position
+    lastScrollYRef.current = currentScrollY;
     
     // If scroll is significant, mark as scrolling
     if (scrollDelta > 1) {
@@ -26,9 +29,10 @@ const Cart = ({ isScrolled = true, onCartClick, iconSize = 20 }) => {
       }
       
       // Set scrolling to false after scroll stops (longer delay to prevent accidental opens)
+      // Increased delay to prevent cart from opening during navbar color transition
       scrollTimeoutRef.current = setTimeout(() => {
         isScrollingRef.current = false;
-      }, 300);
+      }, 500); // Increased from 300ms to 500ms
     }
   }, []);
 
@@ -51,7 +55,16 @@ const Cart = ({ isScrolled = true, onCartClick, iconSize = 20 }) => {
     e.stopPropagation();
     
     // Don't start touch handling if user is actively scrolling
+    // This prevents cart from opening when navbar changes color during scroll
     if (isScrollingRef.current) {
+      touchStartRef.current = null;
+      return;
+    }
+    
+    // Additional check: if scroll timeout is active, don't allow touch
+    // This prevents opening during the delay period after scrolling stops
+    if (scrollTimeoutRef.current) {
+      touchStartRef.current = null;
       return;
     }
     
@@ -94,12 +107,14 @@ const Cart = ({ isScrolled = true, onCartClick, iconSize = 20 }) => {
       const finalDeltaX = Math.abs(e.changedTouches[0].clientX - touchStartRef.current.x);
       const finalDeltaY = Math.abs(e.changedTouches[0].clientY - touchStartRef.current.y);
       
+      // More strict conditions to prevent opening during scroll/navbar transitions
       if (
         timeDiff < 200 && 
         scrollDelta === 0 && 
         !isScrollingRef.current &&
         finalDeltaX < 2 &&
-        finalDeltaY < 2
+        finalDeltaY < 2 &&
+        !scrollTimeoutRef.current // Don't open if scroll timeout is still active
       ) {
         e.preventDefault();
         onCartClick();
