@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useState, useEffect, useCallback } from 'react';
 import { AuthContext } from '../../../Context/Auth/AuthContext';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import Cart from './Cart';
@@ -7,6 +7,7 @@ import userLogo from '../../../assets/userLogo.png';
 import Logo from '../Logo/Logo';
 import { Search, ChevronDown, Menu, X, ChevronRight } from 'lucide-react';
 import useAxiosSecure from '../../../hooks/useAxiosSecure';
+import { useThrottle } from '../../../hooks/useThrottle';
 
 
 // Static navigation hierarchy for desktop & mobile menus
@@ -282,12 +283,14 @@ const Navbar = () => {
     };
   }, [isShopPage]);
 
+  // Ref to track last scroll position for mobile menu
+  const mobileMenuLastScrollY = React.useRef(window.scrollY);
+
   // Close mobile menu when clicking outside, scrolling, or on route change
   useEffect(() => {
     if (!mobileMenuOpen) return;
 
-    let lastScrollY = window.scrollY;
-    let scrollTimeout = null;
+    mobileMenuLastScrollY.current = window.scrollY;
 
     const handleClickOutside = (event) => {
       // Don't close mobile menu if clicking on cart sidebar
@@ -303,6 +306,7 @@ const Navbar = () => {
 
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
+      const lastScrollY = mobileMenuLastScrollY.current;
 
       // iPhone fix: require real scroll, ignore minor Safari bounce (0–5px)
       if (Math.abs(currentScrollY - lastScrollY) < 10) return;
@@ -312,14 +316,17 @@ const Navbar = () => {
         setMobileMenuOpen(false);
       }
 
-      lastScrollY = currentScrollY;
+      mobileMenuLastScrollY.current = currentScrollY;
     };
 
-    window.addEventListener("scroll", handleScroll, { passive: true });
+    // Throttle scroll handler for better performance
+    const throttledHandleScroll = useThrottle(handleScroll, 100);
+
+    window.addEventListener("scroll", throttledHandleScroll, { passive: true });
     document.addEventListener("click", handleClickOutside);
 
     return () => {
-      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("scroll", throttledHandleScroll);
       document.removeEventListener("click", handleClickOutside);
     };
 }, [mobileMenuOpen]);

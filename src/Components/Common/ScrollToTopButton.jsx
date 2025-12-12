@@ -1,35 +1,54 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { ChevronUp } from 'lucide-react';
+import { useThrottle } from '../../hooks/useThrottle';
+import { useSmoothScroll } from '../../Context/SmoothScroll/SmoothScrollProvider';
 
 const ScrollToTopButton = () => {
   const [isVisible, setIsVisible] = useState(false);
+  const { scrollToTop, getScroll, lenis } = useSmoothScroll();
+
+  const toggleVisibility = useCallback(() => {
+    // Show button when user scrolls down 300px
+    const scrollY = getScroll ? getScroll() : window.scrollY;
+    if (scrollY > 300) {
+      setIsVisible(true);
+    } else {
+      setIsVisible(false);
+    }
+  }, [getScroll]);
+
+  // Throttle scroll handler for better performance
+  const throttledToggleVisibility = useThrottle(toggleVisibility, 100);
 
   useEffect(() => {
-    const toggleVisibility = () => {
-      // Show button when user scrolls down 300px
-      if (window.scrollY > 300) {
-        setIsVisible(true);
-      } else {
-        setIsVisible(false);
-      }
-    };
-
-    // Listen to scroll events
-    window.addEventListener('scroll', toggleVisibility, { passive: true });
-
     // Check initial scroll position
     toggleVisibility();
 
-    return () => {
-      window.removeEventListener('scroll', toggleVisibility);
-    };
-  }, []);
+    // Listen to Lenis scroll events if available, otherwise use window scroll
+    if (lenis) {
+      lenis.on('scroll', throttledToggleVisibility);
+      return () => {
+        lenis.off('scroll', throttledToggleVisibility);
+      };
+    } else {
+      // Fallback to window scroll
+      window.addEventListener('scroll', throttledToggleVisibility, { passive: true });
+      return () => {
+        window.removeEventListener('scroll', throttledToggleVisibility);
+      };
+    }
+  }, [toggleVisibility, throttledToggleVisibility, lenis]);
 
-  const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
+  const handleScrollToTop = () => {
+    if (scrollToTop) {
+      scrollToTop({ immediate: false });
+    } else {
+      // Fallback to native scroll
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    }
   };
 
   if (!isVisible) {
@@ -38,7 +57,7 @@ const ScrollToTopButton = () => {
 
   return (
     <button
-      onClick={scrollToTop}
+      onClick={handleScrollToTop}
       className="fixed bottom-6 right-6 md:bottom-8 md:right-8 z-50 bg-transparent hover:bg-black/10 text-black p-3 md:p-4 rounded-full transition-all duration-300 transform hover:scale-110 hover:-translate-y-1 active:scale-95 flex items-center justify-center min-h-[44px] min-w-[44px] md:min-h-[50px] md:min-w-[50px] shadow-md hover:shadow-lg"
       aria-label="Scroll to top"
       style={{ aspectRatio: '1/1' }}

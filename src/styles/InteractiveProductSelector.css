@@ -1,7 +1,13 @@
 /* Interactive Showcase Styles */
 .interactive-showcase {
-  padding: 60px 20px;
+  padding: 30px 20px;
   background: #ffffff;
+}
+
+@media (min-width: 768px) {
+  .interactive-showcase {
+    padding: 60px 20px;
+  }
 }
 
 .showcase-container {
@@ -22,6 +28,9 @@
   width: 100%;
   border-radius: 20px !important;
   box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  will-change: auto;
 }
 
 .product-info-panel {
@@ -69,89 +78,238 @@
   margin-bottom: 30px;
 }
 
-/* Hotspot Styling */
-.hotspot {
+/* Hotspot Styling - Override global square edges rule */
+.interactive-showcase .hotspot,
+.interactive-showcase button.hotspot {
   position: absolute;
   width: 50px;
   height: 50px;
   border: none;
   background: transparent;
   cursor: pointer;
-  transform: translate(-50%, -50%);
+  transform: translate3d(-50%, -50%, 0);
   z-index: 10;
+  border-radius: 50% !important;
+  overflow: visible !important;
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  contain: layout style paint;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.hotspot-dot {
+/* Hotspot hover and active states - GPU accelerated */
+.interactive-showcase .hotspot:hover {
+  transform: translate3d(-50%, -50%, 0) scale(1.1);
+  -webkit-transform: translate3d(-50%, -50%, 0) scale(1.1);
+}
+
+.interactive-showcase .hotspot:active {
+  transform: translate3d(-50%, -50%, 0) scale(0.95);
+  -webkit-transform: translate3d(-50%, -50%, 0) scale(0.95);
+}
+
+.interactive-showcase .hotspot-dot,
+.interactive-showcase .hotspot span.hotspot-dot {
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translate3d(-50%, -50%, 0) scale(1);
+  -webkit-transform: translate3d(-50%, -50%, 0) scale(1);
   width: 20px;
   height: 20px;
   background: #A67856;
-  border-radius: 50%;
+  border-radius: 50% !important;
   border: 3px solid white;
   box-shadow: 0 0 0 3px rgba(166, 120, 86, 0.3);
   z-index: 2;
-  transition: all 0.3s ease;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+              opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+              background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform, opacity, background-color;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
-.hotspot-dot.active {
+.interactive-showcase .hotspot-dot.active,
+.interactive-showcase .hotspot span.hotspot-dot.active {
   background: #8B6345;
   box-shadow: 0 0 0 4px rgba(139, 99, 69, 0.3);
+  border-radius: 50% !important;
+  transform: translate3d(-50%, -50%, 0) scale(1.2);
+  -webkit-transform: translate3d(-50%, -50%, 0) scale(1.2);
 }
 
-/* Pulsing Animation */
-.hotspot-pulse {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 40px;
-  height: 40px;
-  background: rgba(166, 120, 86, 0.6);
-  border-radius: 50%;
+/* Pulsing Animation - CSS keyframes with GPU acceleration */
+.interactive-showcase .hotspot-pulse {
   animation: pulse 2s infinite;
-  z-index: 1;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 @keyframes pulse {
   0% {
-    transform: translate(-50%, -50%) scale(0.8);
+    transform: translate3d(-50%, -50%, 0) scale(0.8);
+    -webkit-transform: translate3d(-50%, -50%, 0) scale(0.8);
     opacity: 0.8;
   }
   70% {
-    transform: translate(-50%, -50%) scale(1.2);
+    transform: translate3d(-50%, -50%, 0) scale(1.2);
+    -webkit-transform: translate3d(-50%, -50%, 0) scale(1.2);
     opacity: 0;
   }
   100% {
-    transform: translate(-50%, -50%) scale(0.8);
+    transform: translate3d(-50%, -50%, 0) scale(0.8);
+    -webkit-transform: translate3d(-50%, -50%, 0) scale(0.8);
     opacity: 0;
   }
 }
 
-/* Product Details */
-.product-details {
-  display: none;
+/* Product Panel Animations - CSS transitions with GPU acceleration */
+.product-info-panel {
+  transform: translate3d(0, 0, 0);
+  -webkit-transform: translate3d(0, 0, 0);
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
-.product-details.active {
-  display: block;
-  animation: fadeIn 0.5s ease;
+.product-panel-enter {
+  animation: panelFadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
-@keyframes fadeIn {
+@keyframes panelFadeIn {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translate3d(0, 20px, 0) scale(0.95);
+    -webkit-transform: translate3d(0, 20px, 0) scale(0.95);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0) scale(1);
+    -webkit-transform: translate3d(0, 0, 0) scale(1);
   }
 }
 
-/* Mobile Responsive */
+/* Product Image Container Animation */
+.product-image-container {
+  opacity: 0;
+  transform: translate3d(0, 0, 0) scale(0.9);
+  -webkit-transform: translate3d(0, 0, 0) scale(0.9);
+  animation: imageFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0.1s forwards;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+@keyframes imageFadeIn {
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+    -webkit-transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+/* Product Image Animation */
+.product-image {
+  opacity: 0;
+  transform: translate3d(0, 0, 0) scale(0.9);
+  -webkit-transform: translate3d(0, 0, 0) scale(0.9);
+  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.product-image-container.visible .product-image,
+.product-image[src] {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1);
+  -webkit-transform: translate3d(0, 0, 0) scale(1);
+}
+
+/* Product Badge Animation */
+.product-badge {
+  opacity: 0;
+  transform: translate3d(0, 0, 0) scale(0.8);
+  -webkit-transform: translate3d(0, 0, 0) scale(0.8);
+  animation: badgeFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0.2s forwards;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+@keyframes badgeFadeIn {
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+    -webkit-transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+/* Product Name Animation */
+.product-name-text {
+  opacity: 0;
+  transform: translate3d(0, 10px, 0);
+  -webkit-transform: translate3d(0, 10px, 0);
+  animation: textFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0.2s forwards;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+@keyframes textFadeIn {
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+    -webkit-transform: translate3d(0, 0, 0);
+  }
+}
+
+/* Product Buttons Animation */
+.product-buttons {
+  opacity: 0;
+  transform: translate3d(0, 10px, 0);
+  -webkit-transform: translate3d(0, 10px, 0);
+  animation: buttonsFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0.3s forwards;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+@keyframes buttonsFadeIn {
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+    -webkit-transform: translate3d(0, 0, 0);
+  }
+}
+
+/* Product Button Hover/Tap - GPU accelerated */
+.product-button {
+  transform: translate3d(0, 0, 0);
+  -webkit-transform: translate3d(0, 0, 0);
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.product-button:hover {
+  transform: translate3d(0, -2px, 0) scale(1.02);
+  -webkit-transform: translate3d(0, -2px, 0) scale(1.02);
+}
+
+.product-button:active {
+  transform: translate3d(0, 0, 0) scale(0.98);
+  -webkit-transform: translate3d(0, 0, 0) scale(0.98);
+}
+
+/* Mobile Responsive - Optimized for smooth scrolling */
 @media (max-width: 768px) {
   .showcase-container {
     flex-direction: column;
@@ -172,14 +330,37 @@
     font-size: 24px;
   }
 
-  .hotspot {
+  .interactive-showcase .hotspot,
+  .interactive-showcase button.hotspot {
     width: 40px;
     height: 40px;
+    border-radius: 50% !important;
+    /* Optimize for mobile scrolling */
+    transform: translate3d(-50%, -50%, 0);
+    will-change: transform;
+    -webkit-transform: translate3d(-50%, -50%, 0);
   }
 
-  .hotspot-dot {
+  .interactive-showcase .hotspot-dot,
+  .interactive-showcase .hotspot span.hotspot-dot {
     width: 16px;
     height: 16px;
+    border-radius: 50% !important;
+    transform: translate3d(-50%, -50%, 0);
+    -webkit-transform: translate3d(-50%, -50%, 0);
+  }
+
+  /* Mobile pulse size */
+  .interactive-showcase .hotspot-pulse {
+    width: 32px;
+    height: 32px;
+  }
+
+  /* Optimize product info panel transitions */
+  .product-info-panel {
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    will-change: transform, opacity;
   }
 }
 

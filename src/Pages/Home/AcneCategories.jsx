@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import papulesImage from '../../assets/papules.png';
 import pustulesImage from '../../assets/pustules.png';
@@ -6,6 +6,7 @@ import blackHeadsImage from '../../assets/blackHeads.jpg';
 import cystImage from '../../assets/cyst.png';
 import backAcneImage from '../../assets/backAcne.png';
 import { getProductImage } from '../../utils/productImages';
+import { useThrottle } from '../../hooks/useThrottle';
 
 const items = [
   { key: 'papules', title: 'Papules', image: papulesImage },
@@ -30,20 +31,25 @@ const AcneCategories = () => {
   }, []);
 
   // Track scroll position for page numbers
+  const handleScroll = useCallback(() => {
+    const slider = sliderRef.current;
+    if (!slider) return;
+    const width = slider.clientWidth || 1;
+    const pageIndex = Math.round(slider.scrollLeft / width);
+    setCurrentPage(Math.min(chunkedItems.length, pageIndex + 1));
+  }, [chunkedItems.length]);
+
+  // Throttle scroll handler for better performance
+  const throttledHandleScroll = useThrottle(handleScroll, 100);
+
   useEffect(() => {
     const slider = sliderRef.current;
     if (!slider) return;
 
-    const handleScroll = () => {
-      const width = slider.clientWidth || 1;
-      const pageIndex = Math.round(slider.scrollLeft / width);
-      setCurrentPage(Math.min(chunkedItems.length, pageIndex + 1));
-    };
-
     handleScroll();
-    slider.addEventListener('scroll', handleScroll);
-    return () => slider.removeEventListener('scroll', handleScroll);
-  }, [chunkedItems.length]);
+    slider.addEventListener('scroll', throttledHandleScroll, { passive: true });
+    return () => slider.removeEventListener('scroll', throttledHandleScroll);
+  }, [handleScroll, throttledHandleScroll]);
 
   return (
     <section className="py-8 md:py-16 bg-white">

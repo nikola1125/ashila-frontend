@@ -1,5 +1,6 @@
-import React, { useContext, useRef, useEffect } from 'react';
+import React, { useContext, useRef, useEffect, useCallback } from 'react';
 import { CartContext } from '../../../Context/Cart/CartContext';
+import { useThrottle } from '../../../hooks/useThrottle';
 
 const Cart = ({ isScrolled = true, onCartClick, iconSize = 20 }) => {
   const { totalQuantity } = useContext(CartContext);
@@ -9,43 +10,41 @@ const Cart = ({ isScrolled = true, onCartClick, iconSize = 20 }) => {
   const scrollTimeoutRef = useRef(null);
 
   // Track if user is actively scrolling - longer timeout to prevent accidental opens
-  useEffect(() => {
+  const handleScroll = useCallback(() => {
     let scrollTimer = null;
-    let lastScrollY = window.scrollY;
+    const currentScrollY = window.scrollY;
+    const lastScrollY = window.scrollY;
+    const scrollDelta = Math.abs(currentScrollY - lastScrollY);
     
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      const scrollDelta = Math.abs(currentScrollY - lastScrollY);
-      lastScrollY = currentScrollY;
+    // If scroll is significant, mark as scrolling
+    if (scrollDelta > 1) {
+      isScrollingRef.current = true;
       
-      // If scroll is significant, mark as scrolling
-      if (scrollDelta > 1) {
-        isScrollingRef.current = true;
-        
-        // Clear existing timeout
-        if (scrollTimer) {
-          clearTimeout(scrollTimer);
-        }
-        
-        // Set scrolling to false after scroll stops (longer delay to prevent accidental opens)
-        scrollTimer = setTimeout(() => {
-          isScrollingRef.current = false;
-        }, 300);
+      // Clear existing timeout
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
       }
-    };
+      
+      // Set scrolling to false after scroll stops (longer delay to prevent accidental opens)
+      scrollTimeoutRef.current = setTimeout(() => {
+        isScrollingRef.current = false;
+      }, 300);
+    }
+  }, []);
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
+  // Throttle scroll handler for better performance
+  const throttledHandleScroll = useThrottle(handleScroll, 50);
+
+  useEffect(() => {
+    window.addEventListener('scroll', throttledHandleScroll, { passive: true });
     
     return () => {
-      window.removeEventListener('scroll', handleScroll);
-      if (scrollTimer) {
-        clearTimeout(scrollTimer);
-      }
+      window.removeEventListener('scroll', throttledHandleScroll);
       if (scrollTimeoutRef.current) {
         clearTimeout(scrollTimeoutRef.current);
       }
     };
-  }, []);
+  }, [throttledHandleScroll]);
 
   const handleTouchStart = (e) => {
     // Prevent event from bubbling up

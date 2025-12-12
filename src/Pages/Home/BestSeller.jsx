@@ -1,11 +1,13 @@
 import React, { useRef, useContext, useCallback, useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import useAxiosSecure from '../../hooks/useAxiosSecure';
 import DataLoading from '../../Components/Common/Loaders/DataLoading';
 import { ChevronLeft, ChevronRight, ShoppingBag } from 'lucide-react';
 import { CartContext } from '../../Context/Cart/CartContext';
 import { getProductImage } from '../../utils/productImages';
+import { useThrottle } from '../../hooks/useThrottle';
 
 // Product Card Component with animation
 const ProductCard = React.memo(({ product, pricing, index, onProductClick, onAddToCart }) => {
@@ -40,35 +42,58 @@ const ProductCard = React.memo(({ product, pricing, index, onProductClick, onAdd
   }, [product._id]); // Re-run when product changes
 
   return (
-    <div
+    <motion.div
       ref={productRef}
-      className={`w-[200px] md:w-full md:max-w-[280px] flex-shrink-0 border border-gray-200 overflow-hidden bg-white text-center pb-4 flex flex-col h-full ${isVisible ? 'visible' : ''} stagger-${Math.min(index + 1, 4)}`}
+      initial={{ opacity: 0, y: 30, scale: 0.95 }}
+      animate={isVisible ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 30, scale: 0.95 }}
+      transition={{
+        duration: 0.5,
+        delay: index * 0.1,
+        ease: [0.4, 0, 0.2, 1],
+      }}
+      whileHover={{ y: -5, transition: { duration: 0.2 } }}
+      className="w-[200px] md:w-full md:max-w-[280px] flex-shrink-0 border border-gray-200 overflow-hidden bg-white text-center pb-4 flex flex-col h-full"
     >
       {/* Product Image Container */}
-      <div 
+      <motion.div 
         className="relative w-full overflow-hidden bg-[#f9f9f9] cursor-pointer h-[200px] md:h-[250px]"
         onClick={() => onProductClick(product._id)}
+        whileHover={{ scale: 1.02 }}
+        transition={{ duration: 0.2 }}
       >
-        <img
+        <motion.img
           src={getProductImage(product.image, product._id || index)}
           alt={product.itemName}
           loading="lazy"
           className="w-full h-full object-contain p-5"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3, delay: index * 0.1 + 0.2 }}
           onError={(e) => {
             e.target.src = getProductImage(null, product._id || index);
           }}
         />
         {pricing.discountPercent > 0 && (
-          <div className="absolute top-2.5 right-2.5 bg-red-500 text-white px-2.5 py-1.5 text-sm font-bold">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: index * 0.1 + 0.3 }}
+            className="absolute top-2.5 right-2.5 bg-red-500 text-white px-2.5 py-1.5 text-sm font-bold"
+          >
             Save {pricing.discountPercent}%
-          </div>
+          </motion.div>
         )}
         {product.stock === 0 && (
-          <div className="absolute top-2.5 left-2.5 bg-red-500 text-white px-2.5 py-1.5 text-sm font-bold">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: index * 0.1 + 0.3 }}
+            className="absolute top-2.5 left-2.5 bg-red-500 text-white px-2.5 py-1.5 text-sm font-bold"
+          >
             Sold Out
-          </div>
+          </motion.div>
         )}
-      </div>
+      </motion.div>
 
       {/* Product Info */}
       <div className="px-2.5 pt-4 flex flex-col flex-grow">
@@ -97,7 +122,7 @@ const ProductCard = React.memo(({ product, pricing, index, onProductClick, onAdd
           )}
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 });
 
@@ -152,6 +177,9 @@ const BestSeller = () => {
     }
   }, [products.length]);
 
+  // Throttle scroll handler for better performance (100ms throttle for smooth scrolling)
+  const throttledCheckScrollPosition = useThrottle(checkScrollPosition, 100);
+
   // Update arrow visibility on scroll and when products change
   useEffect(() => {
     const container = scrollContainerRef.current;
@@ -164,20 +192,20 @@ const BestSeller = () => {
     // Check initial position
     checkScrollPosition();
 
-    // Listen to scroll events
-    container.addEventListener('scroll', checkScrollPosition);
+    // Listen to scroll events with throttling
+    container.addEventListener('scroll', throttledCheckScrollPosition, { passive: true });
     
-    // Also check on resize
+    // Also check on resize (debounced)
     const handleResize = () => {
       setTimeout(checkScrollPosition, 100); // Small delay to ensure layout is updated
     };
-    window.addEventListener('resize', handleResize);
+    window.addEventListener('resize', handleResize, { passive: true });
 
     return () => {
-      container.removeEventListener('scroll', checkScrollPosition);
+      container.removeEventListener('scroll', throttledCheckScrollPosition);
       window.removeEventListener('resize', handleResize);
     };
-  }, [products, checkScrollPosition]);
+  }, [products, checkScrollPosition, throttledCheckScrollPosition]);
 
   const scroll = useCallback((direction) => {
     if (scrollContainerRef.current) {
@@ -228,7 +256,7 @@ const BestSeller = () => {
   }, [navigate]);
 
   return (
-    <section className="mt-0 bg-white lux-section">
+    <section className="mt-0 bg-white lux-section pt-8 md:pt-[5.5rem] -mt-8 md:mt-0">
       <div className="lux-section-inner">
         {/* Centered Title */}
         <div className="text-center mb-10 md:mb-12 space-y-3 fade-in">

@@ -137,6 +137,79 @@ const Hero = () => {
     };
   }, [isMobile]);
 
+  // Ensure video loops forever and never stops
+  useEffect(() => {
+    const videoElement = videoRef.current;
+    if (!videoElement) return;
+
+    // Force video to play and loop continuously
+    const ensurePlaying = () => {
+      if (videoElement.paused) {
+        videoElement.play().catch(err => {
+          console.warn('Video autoplay prevented:', err);
+        });
+      }
+    };
+
+    // Handle video end - restart immediately
+    const handleEnded = () => {
+      videoElement.currentTime = 0;
+      videoElement.play().catch(err => {
+        console.warn('Video restart failed:', err);
+      });
+    };
+
+    // Handle video pause - resume immediately
+    const handlePause = () => {
+      if (videoElement.ended) {
+        videoElement.currentTime = 0;
+      }
+      videoElement.play().catch(err => {
+        console.warn('Video resume failed:', err);
+      });
+    };
+
+    // Ensure video is playing on load
+    const handleLoadedData = () => {
+      videoElement.loop = true;
+      ensurePlaying();
+    };
+
+    // Ensure video continues playing
+    const handleTimeUpdate = () => {
+      // If video is near the end, ensure it loops
+      if (videoElement.currentTime >= videoElement.duration - 0.1) {
+        videoElement.currentTime = 0;
+      }
+    };
+
+    // Add event listeners
+    videoElement.addEventListener('ended', handleEnded);
+    videoElement.addEventListener('pause', handlePause);
+    videoElement.addEventListener('loadeddata', handleLoadedData);
+    videoElement.addEventListener('timeupdate', handleTimeUpdate);
+
+    // Set loop attribute programmatically
+    videoElement.loop = true;
+    videoElement.setAttribute('loop', 'true');
+
+    // Ensure video starts playing
+    ensurePlaying();
+
+    // Periodic check to ensure video is playing (fallback)
+    const playInterval = setInterval(() => {
+      ensurePlaying();
+    }, 1000);
+
+    return () => {
+      videoElement.removeEventListener('ended', handleEnded);
+      videoElement.removeEventListener('pause', handlePause);
+      videoElement.removeEventListener('loadeddata', handleLoadedData);
+      videoElement.removeEventListener('timeupdate', handleTimeUpdate);
+      clearInterval(playInterval);
+    };
+  }, []);
+
   return (
     <section
       ref={heroRef}
@@ -168,6 +241,17 @@ const Hero = () => {
         webkit-playsinline="true"
         x5-playsinline="true"
         className="absolute inset-0 w-full h-full object-cover z-0"
+        onEnded={(e) => {
+          // Force restart if loop fails
+          e.target.currentTime = 0;
+          e.target.play().catch(() => {});
+        }}
+        onPause={(e) => {
+          // Prevent pausing - resume immediately
+          if (!e.target.ended) {
+            e.target.play().catch(() => {});
+          }
+        }}
         style={{
           position: isMobile ? 'absolute' : 'fixed',
           top: 0,
