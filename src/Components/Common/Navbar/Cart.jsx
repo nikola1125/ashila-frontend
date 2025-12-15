@@ -2,13 +2,13 @@ import React, { useContext, useRef, useEffect, useCallback } from 'react';
 import { CartContext } from '../../../Context/Cart/CartContext';
 import { useThrottle } from '../../../hooks/useThrottle';
 
-const Cart = ({ isScrolled = true, onCartClick, iconSize = 20, useNavColors = false }) => {
+const Cart = ({ isScrolled = true, onCartClick, iconSize = 20, useNavColors = false, disabled = false }) => {
   const { totalQuantity } = useContext(CartContext);
-  const touchStartRef = useRef(null);
-  const touchMovedRef = useRef(false);
   const isScrollingRef = useRef(false);
   const scrollTimeoutRef = useRef(null);
   const lastScrollYRef = useRef(window.scrollY);
+  const touchStartScrollY = useRef(0);
+  const shouldBlockClick = useRef(false);
 
   // Track if user is actively scrolling - longer timeout to prevent accidental opens
   const handleScroll = useCallback(() => {
@@ -50,85 +50,50 @@ const Cart = ({ isScrolled = true, onCartClick, iconSize = 20, useNavColors = fa
     };
   }, [throttledHandleScroll]);
 
-  const handleTouchStart = (e) => {
-    // Prevent event from bubbling up
-    e.stopPropagation();
-    
-    // Don't start touch handling if user is actively scrolling
-    // This prevents cart from opening when navbar changes color during scroll
-    if (isScrollingRef.current) {
-      touchStartRef.current = null;
-      return;
-    }
-    
-    // Additional check: if scroll timeout is active, don't allow touch
-    // This prevents opening during the delay period after scrolling stops
-    if (scrollTimeoutRef.current) {
-      touchStartRef.current = null;
-      return;
-    }
-    
-    touchStartRef.current = {
-      x: e.touches[0].clientX,
-      y: e.touches[0].clientY,
-      time: Date.now(),
-      scrollY: window.scrollY
-    };
-    touchMovedRef.current = false;
+  const handleTouchStart = () => {
+    touchStartScrollY.current = window.scrollY;
+    shouldBlockClick.current = false;
   };
 
-  const handleTouchMove = (e) => {
-    if (touchStartRef.current) {
-      const deltaX = Math.abs(e.touches[0].clientX - touchStartRef.current.x);
-      const deltaY = Math.abs(e.touches[0].clientY - touchStartRef.current.y);
-      const scrollDelta = Math.abs(window.scrollY - touchStartRef.current.scrollY);
-      
-      // Much stricter: if moved more than 5px OR page scrolled at all, consider it a scroll, not a tap
-      if (deltaX > 5 || deltaY > 5 || scrollDelta > 1) {
-        touchMovedRef.current = true;
-      }
-    }
+  const handleTouchMove = () => {
+    // If finger moves on the screen (swiping), block the click
+    shouldBlockClick.current = true;
   };
 
-  const handleTouchEnd = (e) => {
-    // Prevent event from bubbling up
-    e.stopPropagation();
-    
-    if (touchStartRef.current && !touchMovedRef.current) {
-      const timeDiff = Date.now() - touchStartRef.current.time;
-      const scrollDelta = Math.abs(window.scrollY - touchStartRef.current.scrollY);
-      
-      // Very strict conditions - only trigger if:
-      // 1. It was a very quick tap (less than 200ms)
-      // 2. Absolutely no movement (already checked via touchMovedRef)
-      // 3. Page didn't scroll at all during the touch (scrollDelta must be 0)
-      // 4. User is not actively scrolling (with extra check)
-      // 5. Final touch position matches start position (within 2px tolerance)
-      const finalDeltaX = Math.abs(e.changedTouches[0].clientX - touchStartRef.current.x);
-      const finalDeltaY = Math.abs(e.changedTouches[0].clientY - touchStartRef.current.y);
-      
-      // More strict conditions to prevent opening during scroll/navbar transitions
-      if (
-        timeDiff < 200 && 
-        scrollDelta === 0 && 
-        !isScrollingRef.current &&
-        finalDeltaX < 2 &&
-        finalDeltaY < 2 &&
-        !scrollTimeoutRef.current // Don't open if scroll timeout is still active
-      ) {
-        e.preventDefault();
-        onCartClick();
-      }
+  const handleTouchEnd = () => {
+    // If scroll position changed during the touch (page scrolled), block the click
+    if (Math.abs(window.scrollY - touchStartScrollY.current) > 2) {
+      shouldBlockClick.current = true;
     }
-    touchStartRef.current = null;
-    touchMovedRef.current = false;
   };
 
   const handleClick = (e) => {
-    // For mouse clicks, always allow
-    if (e.type === 'click' && !e.touches) {
-      onCartClick();
+    // Prevent default behavior to avoid double-firing
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // 0. Check if disabled (e.g., during navbar transition)
+    if (disabled) {
+      return;
     }
+    
+    // 1. Check if we detected scroll or movement during the specific touch interaction
+    if (shouldBlockClick.current) {
+      shouldBlockClick.current = false;
+      return;
+    }
+
+    // 2. Don't open if user is actively scrolling
+    if (isScrollingRef.current) {
+      return;
+    }
+    
+    // 3. Don't open if scroll timeout is active (just finished scrolling)
+    if (scrollTimeoutRef.current) {
+      return;
+    }
+
+    onCartClick();
   };
 
   return (
@@ -141,9 +106,7 @@ const Cart = ({ isScrolled = true, onCartClick, iconSize = 20, useNavColors = fa
       aria-label="Open cart"
       style={{ 
         touchAction: 'manipulation',
-        WebkitTouchCallout: 'none',
-        WebkitUserSelect: 'none',
-        userSelect: 'none'
+        WebkitTapHighlightColor: 'transparent'
       }}
     >
       <div className="relative">

@@ -155,12 +155,13 @@ const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [categories, setCategories] = useState([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
-  const [activeGroup, setActiveGroup] = useState(null);
+  // Desktop hover state for mega menu
   const [openCategoryId, setOpenCategoryId] = useState(null);
   const [cartOpen, setCartOpen] = useState(false);
   const [mobileOpenCategoryId, setMobileOpenCategoryId] = useState(null);
   const [mobileOpenGroupId, setMobileOpenGroupId] = useState(null);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
   const [accountDropdownOpen, setAccountDropdownOpen] = useState(false);
 
   // Check if we're on shop page, product detail page, cart page, or sign-up page
@@ -225,9 +226,17 @@ const Navbar = () => {
               const delay = isMobile ? 10 : 0;
               
               stateChangeTimeout = setTimeout(() => {
+                // Start transition lock
+                setIsTransitioning(true);
+                
                 setIsScrolled(newState);
                 lastScrollY = scrollY;
                 lastState = newState;
+
+                // Release transition lock after CSS duration (150ms) + small buffer
+                setTimeout(() => {
+                  setIsTransitioning(false);
+                }, 200);
               }, delay);
             } else if (scrollDifference > minScrollDiff) {
               lastScrollY = scrollY;
@@ -408,6 +417,7 @@ const Navbar = () => {
                 isScrolled={isScrolled || isShopPage || isAuthPage}
                 onCartClick={() => setCartOpen(true)}
                 iconSize={18}
+                disabled={isTransitioning}
               />
             </div>
 
@@ -426,17 +436,82 @@ const Navbar = () => {
                   Kreu
                 </NavLink>
 
-                {NAV_CATEGORIES.map((category) => (
-                  <button
-                    key={category.id}
-                    onClick={() => {
-                      navigate('/shop');
-                    }}
-                    className="font-medium transition-colors text-[10px] xl:text-xs uppercase tracking-wide whitespace-nowrap py-1 text-[#5A3F2A] hover:text-[#4A3320]"
-                  >
-                    {category.label}
-                  </button>
-                ))}
+                {/* Desktop categories with hover mega-menu */}
+                {NAV_CATEGORIES.map((category) => {
+                  // Default click: go to first group with a path or to /shop
+                  const defaultPath =
+                    category.groups?.find((g) => g.path)?.path ||
+                    category.groups?.find((g) => g.subitems?.[0]?.path)?.subitems[0].path ||
+                    '/shop';
+
+                  return (
+                    <div
+                      key={category.id}
+                      className="relative group"
+                      onMouseEnter={() => setOpenCategoryId(category.id)}
+                      onMouseLeave={() => setOpenCategoryId((prev) => (prev === category.id ? null : prev))}
+                    >
+                      <button
+                        onClick={() => navigate(defaultPath)}
+                        className="flex items-center gap-1 font-medium transition-colors text-[10px] xl:text-xs uppercase tracking-wide whitespace-nowrap py-1 text-[#5A3F2A] hover:text-[#4A3320]"
+                      >
+                        {category.label}
+                        <ChevronDown className="w-3 h-3" />
+                      </button>
+
+                      {/* Mega dropdown */}
+                      {category.groups && category.groups.length > 0 && (
+                        <div
+                          className={`absolute left-0 mt-2 w-[320px] xl:w-[420px] bg-white rounded-lg shadow-xl border border-gray-100 py-3 px-4 z-[120] transform transition-opacity duration-150 ${
+                            openCategoryId === category.id ? 'opacity-100 visible' : 'opacity-0 invisible'
+                          }`}
+                        >
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {category.groups.map((group) => (
+                              <div key={group.id} className="space-y-1">
+                                <p className="text-[11px] font-semibold uppercase tracking-wide text-[#5A3F2A] mb-1">
+                                  {group.label}
+                                </p>
+
+                                {/* Groups with subitems */}
+                                {group.subitems && group.subitems.length > 0 && (
+                                  <ul className="space-y-1">
+                                    {group.subitems.map((item) => (
+                                      <li key={item.id}>
+                                        <button
+                                          onClick={() => {
+                                            navigate(item.path || '/shop');
+                                            setOpenCategoryId(null);
+                                          }}
+                                          className="text-[11px] text-gray-700 hover:text-[#5A3F2A] w-full text-left"
+                                        >
+                                          {item.label}
+                                        </button>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                )}
+
+                                {/* Single-link groups (no subitems) */}
+                                {!group.subitems && group.path && (
+                                  <button
+                                    onClick={() => {
+                                      navigate(group.path);
+                                      setOpenCategoryId(null);
+                                    }}
+                                    className="text-[11px] text-gray-700 hover:text-[#5A3F2A] w-full text-left"
+                                  >
+                                    {group.label}
+                                  </button>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
 
               <div className="flex items-center">
@@ -452,7 +527,7 @@ const Navbar = () => {
                   </button>
                 )}
 
-                <Cart useNavColors onCartClick={() => setCartOpen(true)} iconSize={18} />
+                <Cart useNavColors onCartClick={() => setCartOpen(true)} iconSize={18} disabled={isTransitioning} />
               </div>
             </div>
           </div>
@@ -486,78 +561,110 @@ const Navbar = () => {
             Kreu
           </NavLink>
 
+          {/* Mobile categories accordion */}
           {NAV_CATEGORIES.map((category) => (
             <div key={category.id} className="border-b border-gray-100">
               <button
-                onClick={() => {
-                  if (mobileOpenCategoryId === category.id) {
-                    setMobileOpenCategoryId(null);
-                  } else {
-                    setMobileOpenCategoryId(category.id);
-                  }
-                }}
+                onClick={() =>
+                  setMobileOpenCategoryId((prev) => (prev === category.id ? null : category.id))
+                }
                 className="w-full text-left text-[#5A3F2A] font-medium text-sm uppercase tracking-wide hover:bg-gray-100 transition-colors px-4 py-3 flex items-center justify-between"
               >
-                {category.label}
+                <span>{category.label}</span>
                 <ChevronRight
                   className={`w-4 h-4 transition-transform ${
                     mobileOpenCategoryId === category.id ? 'rotate-90' : ''
                   }`}
                 />
               </button>
-              {mobileOpenCategoryId === category.id && (
-                <div className="bg-gray-50">
+
+              {mobileOpenCategoryId === category.id && category.groups && (
+                <div className="bg-gray-50 border-t border-gray-100">
                   {category.groups.map((group) => (
-                    <NavLink
-                      key={group.id}
-                      to={group.path}
-                      onClick={() => {
-                        setMobileMenuOpen(false);
-                        setMobileOpenCategoryId(null);
-                      }}
-                      className="block text-[#5A3F2A] text-sm hover:bg-gray-100 transition-colors px-6 py-2.5"
-                    >
-                      {group.label}
-                    </NavLink>
+                    <div key={group.id} className="px-4 py-2 border-b border-gray-100">
+                      <p className="text-[12px] font-semibold uppercase tracking-wide text-[#5A3F2A] mb-1">
+                        {group.label}
+                      </p>
+
+                      {group.subitems && (
+                        <ul className="space-y-1 pb-1">
+                          {group.subitems.map((item) => (
+                            <li key={item.id}>
+                              <button
+                                onClick={() => {
+                                  navigate(item.path || '/shop');
+                                  setMobileMenuOpen(false);
+                                  setMobileOpenCategoryId(null);
+                                }}
+                                className="w-full text-left text-[13px] text-gray-700 py-1"
+                              >
+                                {item.label}
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+
+                      {!group.subitems && group.path && (
+                        <button
+                          onClick={() => {
+                            navigate(group.path);
+                            setMobileMenuOpen(false);
+                            setMobileOpenCategoryId(null);
+                          }}
+                          className="w-full text-left text-[13px] text-gray-700 py-1"
+                        >
+                          {group.label}
+                        </button>
+                      )}
+                    </div>
                   ))}
                 </div>
               )}
             </div>
           ))}
 
-          {user ? (
-            <>
+          {/* Mobile auth/account links */}
+          <div className="mt-2 border-t border-gray-200">
+            {user ? (
+              <>
+                <NavLink
+                  to="/dashboard"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-2 text-black font-medium text-sm uppercase tracking-wide hover:bg-gray-100 transition-colors px-4 py-3 border-b border-gray-200"
+                >
+                  <img
+                    src={user.photoURL || userLogo}
+                    alt="Account"
+                    className="w-6 h-6 rounded-full object-cover"
+                  />
+                  Account
+                </NavLink>
+                <button
+                  onClick={async () => {
+                    try {
+                      await signOutUser();
+                      setMobileMenuOpen(false);
+                      navigate('/');
+                    } catch (error) {
+                      console.error('Logout error:', error);
+                    }
+                  }}
+                  className="w-full text-left text-black font-medium text-sm uppercase tracking-wide hover:bg-gray-100 transition-colors px-4 py-3 border-b border-gray-200"
+                >
+                  Log out
+                </button>
+              </>
+            ) : (
               <NavLink
-                to="/dashboard"
+                to="/sign-up"
                 onClick={() => setMobileMenuOpen(false)}
-                className="text-black font-medium text-sm uppercase tracking-wide hover:bg-gray-100 transition-colors px-4 py-3 border-b border-gray-200"
+                className="block text-[#5A3F2A] font-medium text-sm uppercase tracking-wide hover:bg-gray-100 transition-colors px-4 py-3 border-b border-gray-200"
               >
-                Account
+                Sign Up
               </NavLink>
-              <button
-                onClick={async () => {
-                  try {
-                    await signOutUser();
-                    setMobileMenuOpen(false);
-                    navigate('/');
-                  } catch (error) {
-                    console.error('Logout error:', error);
-                  }
-                }}
-                className="w-full text-left text-black font-medium text-sm uppercase tracking-wide hover:bg-gray-100 transition-colors px-4 py-3 border-b border-gray-200"
-              >
-                Log out
-              </button>
-            </>
-          ) : (
-            <NavLink
-              to="/sign-up"
-              onClick={() => setMobileMenuOpen(false)}
-              className="text-[#5A3F2A] font-medium text-sm uppercase tracking-wide hover:bg-gray-100 transition-colors px-4 py-3 border-b border-gray-200"
-            >
-              Sign Up
-            </NavLink>
-          )}
+            )}
+          </div>
         </div>
       </div>
 
