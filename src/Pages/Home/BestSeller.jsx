@@ -98,8 +98,7 @@ const ProductCard = React.memo(({ product, pricing, index, onProductClick, onAdd
       {/* Product Info */}
       <div className="px-1.5 md:px-2.5 pt-2 md:pt-4 flex flex-col flex-grow">
         <h3 
-          className="text-xs md:text-base mb-1.5 md:mb-2.5 text-gray-800 min-h-[32px] md:min-h-[40px] line-clamp-2 cursor-pointer hover:text-gray-600 transition-colors font-sans"
-          style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}
+          className="lux-serif-text text-[11px] md:text-base mb-1.5 md:mb-2.5 text-gray-800 min-h-[32px] md:min-h-[40px] line-clamp-2 cursor-pointer hover:text-gray-600 transition-colors"
           onClick={() => onProductClick(product._id)}
         >
           {product.itemName}
@@ -109,15 +108,15 @@ const ProductCard = React.memo(({ product, pricing, index, onProductClick, onAdd
         <div className="flex items-center justify-center gap-1.5 md:gap-2.5 mt-auto">
           {pricing.discounted ? (
             <>
-              <span className="text-sm md:text-lg font-bold text-black font-sans" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
+              <span className="lux-serif-text text-sm md:text-lg font-medium text-black">
                 {pricing.discounted.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
               </span>
-              <span className="text-[10px] md:text-sm text-gray-400 line-through font-sans" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
+              <span className="lux-serif-text text-[10px] md:text-sm text-gray-400 line-through">
                 {pricing.original.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
               </span>
             </>
           ) : (
-            <span className="text-sm md:text-lg font-bold text-black font-sans" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
+            <span className="lux-serif-text text-sm md:text-lg font-medium text-black">
               {pricing.original.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
             </span>
           )}
@@ -302,20 +301,41 @@ const BestSeller = () => {
                     maxWidth: '968px'
                   }}
                 >
+                  {/* Mobile Arrows - show on mobile when scrollable */}
+                  {showLeftArrow && (
+                    <button
+                      onClick={() => scroll('left')}
+                      className="absolute left-1 top-1/2 -translate-y-1/2 z-10 carousel-arrow p-1.5 shadow-md border border-[#E0CBB5] md:hidden"
+                      aria-label="Scroll left"
+                    >
+                      <ChevronLeft size={18} className="text-[#A67856]" />
+                    </button>
+                  )}
+
+                  {showRightArrow && (
+                    <button
+                      onClick={() => scroll('right')}
+                      className="absolute right-1 top-1/2 -translate-y-1/2 z-10 carousel-arrow p-1.5 shadow-md border border-[#E0CBB5] md:hidden"
+                      aria-label="Scroll right"
+                    >
+                      <ChevronRight size={18} className="text-[#A67856]" />
+                    </button>
+                  )}
+
                   {/* Left Arrow - Only show when scrolled, hidden on mobile */}
                   {showLeftArrow && (
                     <button
                       onClick={() => scroll('left')}
-                      className="hidden md:block absolute left-0 top-1/2 -translate-y-1/2 -translate-x-12 z-10 bg-white rounded-full p-2 shadow-lg hover:bg-gray-50 transition-all"
+                      className="hidden md:block absolute left-0 top-1/2 -translate-y-1/2 -translate-x-12 z-10 carousel-arrow p-2 shadow-lg border border-[#E0CBB5]"
                       aria-label="Scroll left"
                     >
-                      <ChevronLeft size={24} className="text-gray-700" />
+                      <ChevronLeft size={24} className="text-[#A67856]" />
                     </button>
                   )}
 
                   <div
                     ref={scrollContainerRef}
-                    className="flex md:grid md:grid-cols-4 gap-5 md:gap-5 overflow-x-auto scroll-smooth pb-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] md:overflow-x-visible md:justify-items-center scroll-hint-right relative"
+                    className={`flex md:grid md:grid-cols-4 gap-5 md:gap-5 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] md:overflow-x-visible md:justify-items-center ${showScrollHint ? 'scroll-hint-right' : ''} relative`}
                     style={{
                       scrollBehavior: 'smooth',
                       WebkitOverflowScrolling: 'touch',
@@ -332,7 +352,7 @@ const BestSeller = () => {
                         : '';
                       
                       return (
-                        <div key={p._id} className={`swipe-hint-animation ${delayClass}`}>
+                        <div key={p._id} className={`swipe-hint-animation ${delayClass} snap-start`}>
                           <ProductCard
                             product={p}
                             pricing={pricing}
@@ -349,7 +369,7 @@ const BestSeller = () => {
                   {showRightArrow && (
                     <button
                       onClick={() => scroll('right')}
-                      className="hidden md:block absolute right-0 top-1/2 -translate-y-1/2 translate-x-12 z-10 bg-white p-2 shadow-lg hover:bg-[#EBD8C8] transition-all border-2 border-[#D9BFA9]"
+                      className="hidden md:block absolute right-0 top-1/2 -translate-y-1/2 translate-x-12 z-10 carousel-arrow p-2 shadow-lg border border-[#E0CBB5]"
                       aria-label="Scroll right"
                     >
                       <ChevronRight size={24} className="text-[#A67856]" />

@@ -123,15 +123,6 @@ const NAV_CATEGORIES = [
     ],
   },
   {
-    id: 'sexual-health',
-    label: 'Shendeti seksual',
-    groups: [
-      { id: 'condoms', label: 'Perzervativ', path: '/shop?subcategory=perzervativ' },
-      { id: 'lubricants', label: 'Lubrifikante', path: '/shop?subcategory=lubrifikante' },
-      { id: 'tests', label: 'Test shtatezanie/fertiliteti', path: '/shop?subcategory=test-shtatezanie-fertiliteti' },
-    ],
-  },
-  {
     id: 'supplements',
     label: 'Suplemente & vitamina',
     groups: [
@@ -350,11 +341,11 @@ const Navbar = () => {
   };
 
   return (
-    <header 
+    <header
       className={`w-full fixed top-0 left-0 right-0 z-[100] transition-all duration-150 ${
         isScrolled || isShopPage || isAuthPage ? 'bg-white shadow-md' : 'bg-transparent'
       }`}
-      style={{ 
+      style={{
         position: 'fixed',
         top: 0,
         left: 0,
@@ -364,22 +355,26 @@ const Navbar = () => {
         WebkitBackfaceVisibility: 'hidden',
         backfaceVisibility: 'hidden',
         willChange: 'auto',
-        WebkitOverflowScrolling: 'touch'
+        WebkitOverflowScrolling: 'touch',
       }}
     >
-      {/* Main Navbar */}
-      <nav className={`relative border-b transition-all duration-150 ${
-        isScrolled || isShopPage || isAuthPage ? 'border-gray-200 bg-white' : 'border-transparent bg-transparent'
-      }`}>
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="py-2 sm:py-2.5 lg:py-2 flex items-center justify-between gap-2 lg:gap-3">
-            {/* Mobile Menu Button - Left Side */}
-            <button 
+      {/* Main navbar wrapper - match original size/behavior */}
+      <div
+        className={`relative border-b transition-all duration-150 ${
+          isScrolled || isShopPage || isAuthPage
+            ? 'border-gray-200 bg-white'
+            : 'border-transparent bg-transparent'
+        }`}
+      >
+        {/* Navbar content: fixed height 64px mobile, 80px desktop */}
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="h-[64px] lg:h-[80px] flex items-center justify-between gap-2 lg:gap-3">
+            {/* Mobile: left menu button */}
+            <button
               onClick={(e) => {
                 e.stopPropagation();
                 setMobileMenuOpen(!mobileMenuOpen);
-              }} 
+              }}
               className={`lg:hidden transition-colors z-50 min-h-[44px] min-w-[44px] flex items-center justify-center ${
                 isScrolled || isAuthPage ? 'text-black hover:text-gray-700' : 'text-white hover:text-gray-200'
               }`}
@@ -388,370 +383,183 @@ const Navbar = () => {
               {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
 
-            {/* Logo - Mobile: Centered, Desktop: Left */}
+            {/* Logo - centered on mobile, left on desktop */}
             <div className="flex-shrink-0 flex-1 lg:flex-none flex justify-center lg:justify-start items-center absolute left-1/2 lg:relative lg:left-0 lg:transform-none transform -translate-x-1/2 z-10 lg:-ml-20">
               <div className="scale-75 lg:scale-75">
                 <Logo />
               </div>
             </div>
 
-            {/* Desktop Menu - Left aligned */}
-            <div className="hidden lg:flex items-center gap-1 xl:gap-2 justify-start flex-1 -ml-12">
-              <NavLink 
-                to="/" 
-                onClick={() => {
-                  if (location.pathname === '/') {
-                    window.scrollTo({ top: 0, behavior: 'instant' });
-                  }
-                }}
-                className="font-medium transition-colors text-[10px] xl:text-xs uppercase tracking-wide whitespace-nowrap py-1 text-[#5A3F2A] hover:text-[#4A3320]"
-              >
-                Kreu
-              </NavLink>
-
-              {/* Static Categories with 3-level hierarchy */}
-              {NAV_CATEGORIES.map((category) => (
-                <div
-                  key={category.id}
-                  className="relative group"
-                  onMouseEnter={() => setOpenCategoryId(category.id)}
-                  onMouseLeave={() => {
-                    setOpenCategoryId(null);
-                    setActiveGroup(null);
-                  }}
-                >
-                  <button className="flex items-center gap-1 font-medium transition-colors text-[10px] xl:text-xs uppercase tracking-wide py-1 whitespace-nowrap text-[#5A3F2A] hover:text-[#4A3320]">
-                    {category.label}
-                    {category.groups && category.groups.length > 0 && (
-                      <ChevronDown 
-                        size={10} 
-                        className="text-[#5A3F2A]" 
-                      />
-                    )}
-                  </button>
-
-                  {/* First Level: Groups */}
-                  {category.groups && category.groups.length > 0 && (
-                    <div className={`absolute left-0 top-full mt-1 w-56 bg-white shadow-md border border-gray-200 py-1 rounded-sm z-20 transition-all duration-300 ease-out ${
-                      openCategoryId === category.id 
-                        ? 'opacity-100 translate-y-0 visible' 
-                        : 'opacity-0 -translate-y-2 invisible'
-                    }`}>
-                      {category.groups.map((group) => (
-                        <div
-                          key={group.id}
-                          className="relative group/submenu"
-                          onMouseEnter={() => setActiveGroup(`${category.id}-${group.id}`)}
-                        >
-                          {group.subitems && group.subitems.length > 0 ? (
-                            <>
-                              <button className="flex items-center justify-between w-full px-4 py-2 text-sm text-[#5A3F2A] hover:bg-gray-100 transition-colors duration-150">
-                                {group.label}
-                                <ChevronRight size={14} className="text-[#5A3F2A]" />
-                              </button>
-                              {/* Second Level: Subitems */}
-                              <div className={`absolute left-full top-0 ml-1 w-48 bg-white shadow-md border border-gray-200 py-1 z-20 transition-all duration-300 ease-out ${
-                                activeGroup === `${category.id}-${group.id}` 
-                                  ? 'opacity-100 translate-x-0 visible' 
-                                  : 'opacity-0 -translate-x-2 invisible'
-                              }`}>
-                                {group.subitems.map((subitem) => (
-                                  <NavLink
-                                    key={subitem.id}
-                                    to={subitem.path}
-                                    onClick={() => {
-                                      setActiveGroup(null);
-                                      setOpenCategoryId(null);
-                                    }}
-                                    className="block px-4 py-2 text-sm text-[#5A3F2A] hover:bg-gray-100 transition-all duration-150"
-                                  >
-                                    {subitem.label}
-                                  </NavLink>
-                                ))}
-                              </div>
-                            </>
-                          ) : (
-                            <NavLink
-                              to={group.path}
-                              onClick={() => {
-                                setActiveGroup(null);
-                                setOpenCategoryId(null);
-                              }}
-                              className="flex items-center justify-between w-full px-4 py-2 text-sm text-[#5A3F2A] hover:bg-gray-100 transition-colors duration-150"
-                            >
-                              {group.label}
-                            </NavLink>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
-
-              {/* Account Dropdown - Desktop Only, Part of centered menu */}
-              {user ? (
-                <div 
-                  className="hidden lg:block relative ml-8"
-                  onMouseEnter={() => setAccountDropdownOpen(true)}
-                  onMouseLeave={() => setAccountDropdownOpen(false)}
-                >
-                  <button 
-                    onClick={() => setAccountDropdownOpen(!accountDropdownOpen)}
-                    className="flex items-center gap-1 font-medium transition-colors text-[10px] xl:text-xs uppercase tracking-wide whitespace-nowrap py-1 text-[#5A3F2A] hover:text-[#4A3320]"
-                  >
-                    Account
-                    <ChevronDown 
-                      size={10} 
-                      className={`transition-transform ${accountDropdownOpen ? 'rotate-180' : ''} text-[#5A3F2A]`}
-                    />
-                  </button>
-                  
-                  {/* Account Dropdown Menu */}
-                  {accountDropdownOpen && (
-                    <div 
-                      className="absolute right-0 top-full pt-1 w-48 z-20"
-                    >
-                      <div className="bg-white shadow-md border border-gray-200 py-1 rounded-sm">
-                        <NavLink
-                          to="/dashboard"
-                          onClick={() => setAccountDropdownOpen(false)}
-                          className="block px-4 py-2 text-sm text-black hover:bg-gray-50 transition-colors duration-150"
-                        >
-                          Account
-                        </NavLink>
-                        <button 
-                          onClick={async () => {
-                            try {
-                              await signOutUser();
-                              setAccountDropdownOpen(false);
-                              navigate('/');
-                            } catch (error) {
-                              console.error('Logout error:', error);
-                            }
-                          }}
-                          className="w-full text-left px-4 py-2 text-sm text-black hover:bg-gray-50 transition-colors duration-150"
-                        >
-                          Log out
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <NavLink 
-                  to="/sign-up" 
-                  className="hidden lg:block font-medium transition-colors text-[10px] xl:text-xs uppercase tracking-wide whitespace-nowrap py-1 ml-8 text-[#5A3F2A] hover:text-[#4A3320]"
-                >
-                  Account
-                </NavLink>
-              )}
-
-              {/* Desktop Search Icon - Part of centered menu */}
-              {!isShopPage && (
+            {/* Mobile: right search + cart */}
+            <div className="flex items-center gap-2 lg:hidden">
               <button
-                  onClick={() => {
-                    navigate('/shop');
-                  }}
-                  className={`hidden lg:block transition-colors min-h-[36px] min-w-[36px] flex items-center justify-center ml-8 ${
-                    isScrolled || isAuthPage ? 'text-black hover:text-gray-700' : 'text-white hover:text-gray-200'
-                  }`}
+                onClick={() => {
+                  navigate('/shop');
+                }}
+                className={`transition-colors min-h-[32px] min-w-[32px] flex items-center justify-center ${
+                  isScrolled || isAuthPage ? 'text-black hover:text-gray-700' : 'text-white hover:text-gray-200'
+                }`}
                 aria-label="Search"
               >
                 <Search size={18} />
               </button>
-              )}
 
-              {/* Cart - Part of centered menu on desktop */}
-              <div className="hidden lg:block ml-2">
-                <Cart isScrolled={isScrolled || isAuthPage} onCartClick={() => setCartOpen(true)} iconSize={18} />
-              </div>
+              <Cart
+                isScrolled={isScrolled || isShopPage || isAuthPage}
+                onCartClick={() => setCartOpen(true)}
+                iconSize={18}
+              />
             </div>
 
-            {/* Mobile Right Section: Search and Cart - Very close together */}
-            <div className="flex items-center gap-0 lg:hidden ml-auto">
-              {/* Mobile Search Icon - Right Side */}
-              {!isShopPage && (
-                <button
-                  onClick={() => navigate('/shop')}
-                  className={`transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center -mr-3 ${
-                    isScrolled || isShopPage || isAuthPage ? 'text-black hover:text-gray-700' : 'text-white hover:text-gray-200'
-                  }`}
-                  aria-label="Search"
+            {/* Desktop: main nav + desktop search/cart */}
+            <div className="hidden lg:flex items-center justify-between flex-1 ml-4">
+              <div className="flex items-center gap-3 xl:gap-4">
+                <NavLink
+                  to="/"
+                  onClick={() => {
+                    if (location.pathname === '/') {
+                      window.scrollTo({ top: 0, behavior: 'instant' });
+                    }
+                  }}
+                  className="font-medium transition-colors text-[10px] xl:text-xs uppercase tracking-wide whitespace-nowrap py-1 text-[#5A3F2A] hover:text-[#4A3320]"
                 >
-                  <Search size={18} />
-                </button>
-              )}
-
-              {/* Cart - Mobile */}
-              <Cart isScrolled={isScrolled || isShopPage || isAuthPage} onCartClick={() => setCartOpen(true)} iconSize={18} />
-            </div>
-          </div>
-
-          {/* Mobile Menu with Animation */}
-          <div 
-            className={`lg:hidden fixed top-full left-0 right-0 border-t border-gray-200 bg-white overflow-hidden z-40 shadow-lg transition-all duration-300 ease-out ${
-              mobileMenuOpen 
-                ? 'opacity-100 translate-y-0 max-h-[calc(100vh-120px)] visible' 
-                : 'opacity-0 -translate-y-8 max-h-0 invisible pointer-events-none'
-            }`}
-            style={{ top: '100%' }}
-          >
-            <div className={`py-4 flex flex-col gap-0 max-h-[calc(100vh-140px)] overflow-y-auto ${
-              mobileMenuOpen ? 'opacity-100' : 'opacity-0'
-            }`}>
-
-              {/* Mobile Navigation Links */}
-              <NavLink 
-                to="/" 
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  if (location.pathname === '/') {
-                    window.scrollTo({ top: 0, behavior: 'instant' });
-                  }
-                }}
-                className="text-[#5A3F2A] font-medium text-sm uppercase tracking-wide hover:bg-gray-100 transition-colors px-4 py-3 border-b border-gray-200"
-              >
-                Kreu
-              </NavLink>
-
-              {/* Mobile Categories with Expandable Structure */}
-              {NAV_CATEGORIES.map((category) => (
-                <div key={category.id} className="border-b border-gray-100">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setMobileOpenCategoryId(
-                        mobileOpenCategoryId === category.id ? null : category.id
-                      );
-                      setMobileOpenGroupId(null);
-                    }}
-                    className="w-full flex items-center justify-between text-[#5A3F2A] font-medium text-sm uppercase tracking-wide hover:bg-gray-100 transition-colors px-4 py-3"
-                  >
-                    <span>{category.label}</span>
-                    {category.groups && category.groups.length > 0 && (
-                      <ChevronDown 
-                        size={18} 
-                        className={`text-[#5A3F2A] transition-transform duration-300 ease-in-out ${
-                          mobileOpenCategoryId === category.id ? 'rotate-180' : 'rotate-0'
-                        }`}
-                      />
-                    )}
-                  </button>
-
-                  {/* Groups */}
-                  {category.groups && category.groups.length > 0 && (
-                    <div className={`bg-transparent overflow-hidden transition-all duration-300 ease-in-out ${
-                      mobileOpenCategoryId === category.id 
-                        ? 'max-h-[2000px] opacity-100' 
-                        : 'max-h-0 opacity-0'
-                    }`}>
-                      <div className="py-1">
-                        {category.groups.map((group) => (
-                        <div key={group.id}>
-                          {group.subitems && group.subitems.length > 0 ? (
-                            <>
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setMobileOpenGroupId(
-                                    mobileOpenGroupId === `${category.id}-${group.id}` 
-                                      ? null 
-                                      : `${category.id}-${group.id}`
-                                  );
-                                }}
-                                className="w-full flex items-center justify-between text-[#5A3F2A] font-medium text-sm hover:bg-gray-100 transition-colors px-6 py-2.5"
-                              >
-                                <span>{group.label}</span>
-                                <ChevronRight 
-                                  size={16} 
-                                  className={`text-[#5A3F2A] transition-transform duration-300 ease-in-out ${
-                                    mobileOpenGroupId === `${category.id}-${group.id}` ? 'rotate-90' : 'rotate-0'
-                                  }`}
-                                />
-                              </button>
-                              {/* Subitems */}
-                              <div className={`bg-transparent overflow-hidden transition-all duration-300 ease-in-out ${
-                                mobileOpenGroupId === `${category.id}-${group.id}`
-                                  ? 'max-h-[800px] opacity-100'
-                                  : 'max-h-0 opacity-0'
-                              }`}>
-                                <div className="py-1">
-                                  {group.subitems.map((subitem) => (
-                                    <NavLink
-                                      key={subitem.id}
-                                      to={subitem.path}
-                                      onClick={() => {
-                                        setMobileMenuOpen(false);
-                                        setMobileOpenGroupId(null);
-                                        setMobileOpenCategoryId(null);
-                                      }}
-                                      className="block text-[#5A3F2A] text-sm hover:bg-gray-100 transition-colors px-8 py-2"
-                                    >
-                                      {subitem.label}
-                                    </NavLink>
-                                  ))}
-                                </div>
-                              </div>
-                            </>
-                          ) : (
-                            <NavLink
-                              to={group.path}
-                              onClick={() => {
-                                setMobileMenuOpen(false);
-                                setMobileOpenCategoryId(null);
-                              }}
-                              className="block text-[#5A3F2A] font-medium text-sm hover:bg-gray-100 transition-colors px-6 py-2.5"
-                            >
-                              {group.label}
-                            </NavLink>
-                          )}
-                        </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
-
-              {/* Account in Mobile Menu */}
-              {user ? (
-                <>
-                  <NavLink 
-                    to="/dashboard" 
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="text-black font-medium text-sm uppercase tracking-wide hover:bg-gray-100 transition-colors px-4 py-3 border-b border-gray-200"
-                  >
-                    Account
-                  </NavLink>
-                  <button
-                    onClick={async () => {
-                      try {
-                        await signOutUser();
-                        setMobileMenuOpen(false);
-                        navigate('/');
-                      } catch (error) {
-                        console.error('Logout error:', error);
-                      }
-                    }}
-                    className="w-full text-left text-black font-medium text-sm uppercase tracking-wide hover:bg-gray-100 transition-colors px-4 py-3 border-b border-gray-200"
-                  >
-                    Log out
-                  </button>
-                </>
-              ) : (
-                <NavLink 
-                  to="/sign-up" 
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="text-[#5A3F2A] font-medium text-sm uppercase tracking-wide hover:bg-gray-100 transition-colors px-4 py-3 border-b border-gray-200"
-                >
-                  Sign Up
+                  Kreu
                 </NavLink>
-              )}
+
+                {NAV_CATEGORIES.map((category) => (
+                  <button
+                    key={category.id}
+                    onClick={() => {
+                      navigate('/shop');
+                    }}
+                    className="font-medium transition-colors text-[10px] xl:text-xs uppercase tracking-wide whitespace-nowrap py-1 text-[#5A3F2A] hover:text-[#4A3320]"
+                  >
+                    {category.label}
+                  </button>
+                ))}
+              </div>
+
+              <div className="flex items-center">
+                {!isShopPage && (
+                  <button
+                    onClick={() => {
+                      navigate('/shop');
+                    }}
+                    className="transition-colors min-h-[36px] min-w-[36px] flex items-center justify-center mr-3 text-[#5A3F2A] hover:text-[#4A3320]"
+                    aria-label="Search"
+                  >
+                    <Search size={18} />
+                  </button>
+                )}
+
+                <Cart useNavColors onCartClick={() => setCartOpen(true)} iconSize={18} />
+              </div>
             </div>
           </div>
         </div>
-      </nav>
+      </div>
+
+      {/* Mobile slide-down menu */}
+      <div
+        className={`lg:hidden fixed top-full left-0 right-0 border-t border-gray-200 bg-white overflow-hidden z-40 shadow-lg transition-all duration-300 ease-out ${
+          mobileMenuOpen
+            ? 'opacity-100 translate-y-0 max-h-[calc(100vh-120px)] visible'
+            : 'opacity-0 -translate-y-8 max-h-0 invisible pointer-events-none'
+        }`}
+        style={{ top: '100%' }}
+      >
+        <div
+          className={`py-4 flex flex-col gap-0 max-h-[calc(100vh-140px)] overflow-y-auto ${
+            mobileMenuOpen ? 'opacity-100' : 'opacity-0'
+          }`}
+        >
+          <NavLink
+            to="/"
+            onClick={() => {
+              setMobileMenuOpen(false);
+              if (location.pathname === '/') {
+                window.scrollTo({ top: 0, behavior: 'instant' });
+              }
+            }}
+            className="text-[#5A3F2A] font-medium text-sm uppercase tracking-wide hover:bg-gray-100 transition-colors px-4 py-3 border-b border-gray-200"
+          >
+            Kreu
+          </NavLink>
+
+          {NAV_CATEGORIES.map((category) => (
+            <div key={category.id} className="border-b border-gray-100">
+              <button
+                onClick={() => {
+                  if (mobileOpenCategoryId === category.id) {
+                    setMobileOpenCategoryId(null);
+                  } else {
+                    setMobileOpenCategoryId(category.id);
+                  }
+                }}
+                className="w-full text-left text-[#5A3F2A] font-medium text-sm uppercase tracking-wide hover:bg-gray-100 transition-colors px-4 py-3 flex items-center justify-between"
+              >
+                {category.label}
+                <ChevronRight
+                  className={`w-4 h-4 transition-transform ${
+                    mobileOpenCategoryId === category.id ? 'rotate-90' : ''
+                  }`}
+                />
+              </button>
+              {mobileOpenCategoryId === category.id && (
+                <div className="bg-gray-50">
+                  {category.groups.map((group) => (
+                    <NavLink
+                      key={group.id}
+                      to={group.path}
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        setMobileOpenCategoryId(null);
+                      }}
+                      className="block text-[#5A3F2A] text-sm hover:bg-gray-100 transition-colors px-6 py-2.5"
+                    >
+                      {group.label}
+                    </NavLink>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+
+          {user ? (
+            <>
+              <NavLink
+                to="/dashboard"
+                onClick={() => setMobileMenuOpen(false)}
+                className="text-black font-medium text-sm uppercase tracking-wide hover:bg-gray-100 transition-colors px-4 py-3 border-b border-gray-200"
+              >
+                Account
+              </NavLink>
+              <button
+                onClick={async () => {
+                  try {
+                    await signOutUser();
+                    setMobileMenuOpen(false);
+                    navigate('/');
+                  } catch (error) {
+                    console.error('Logout error:', error);
+                  }
+                }}
+                className="w-full text-left text-black font-medium text-sm uppercase tracking-wide hover:bg-gray-100 transition-colors px-4 py-3 border-b border-gray-200"
+              >
+                Log out
+              </button>
+            </>
+          ) : (
+            <NavLink
+              to="/sign-up"
+              onClick={() => setMobileMenuOpen(false)}
+              className="text-[#5A3F2A] font-medium text-sm uppercase tracking-wide hover:bg-gray-100 transition-colors px-4 py-3 border-b border-gray-200"
+            >
+              Sign Up
+            </NavLink>
+          )}
+        </div>
+      </div>
 
       {/* Cart Sidebar */}
       <CartSidebar isOpen={cartOpen} onClose={() => setCartOpen(false)} />

@@ -34,6 +34,11 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--primary, #1a1a1a);
 }
 
+.lux-serif-text {
+  font-family: 'Playfair Display', 'Cormorant Garamond', serif;
+  letter-spacing: 0.03em;
+}
+
 /* Refined typography for luxury feel */
 p {
   font-weight: 300;
@@ -644,6 +649,15 @@ button > div[class*="rounded-full"] {
 
 .acne-category-grid > button {
   width: 100%;
+}
+
+.carousel-arrow {
+  border-radius: 9999px !important;
+  background-color: rgba(247, 238, 230, 0.55);
+}
+
+.carousel-arrow:hover {
+  background-color: rgba(235, 216, 200, 0.8);
 }
 
 /* Mobile-first responsive utilities */

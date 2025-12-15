@@ -1,13 +1,14 @@
-import React, { useState, useContext, useCallback, useEffect } from 'react';
+import React, { useState, useContext, useCallback, useEffect, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import useAxiosSecure from '../../hooks/useAxiosSecure';
 import { CartContext } from '../../Context/Cart/CartContext';
 import { Helmet } from 'react-helmet-async';
-import { ShoppingBag, Minus, Plus, Facebook, Twitter, Mail } from 'lucide-react';
+import { ShoppingBag, Minus, Plus, Facebook, Twitter, Mail, ChevronLeft, ChevronRight } from 'lucide-react';
 import DataLoading from '../../Components/Common/Loaders/DataLoading';
 import LoadingError from '../../Components/Common/States/LoadingError';
 import { getProductImage } from '../../utils/productImages';
+import { useThrottle } from '../../hooks/useThrottle';
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -16,6 +17,12 @@ const ProductDetail = () => {
   const { addItem } = useContext(CartContext);
   const [quantity, setQuantity] = useState(1);
   const [selectedSize, setSelectedSize] = useState('90GR'); // Default size
+  const relatedScrollRef = useRef(null);
+  const [showLeftRelatedArrow, setShowLeftRelatedArrow] = useState(false);
+  const [showRightRelatedArrow, setShowRightRelatedArrow] = useState(false);
+  const [relatedCurrentPage, setRelatedCurrentPage] = useState(1);
+  const [relatedTotalPages, setRelatedTotalPages] = useState(1);
+  const [relatedShowScrollHint, setRelatedShowScrollHint] = useState(true);
 
   // Scroll to top when component mounts or product ID changes
   useEffect(() => {
@@ -56,6 +63,71 @@ const ProductDetail = () => {
     },
     enabled: !!product && !!product.category,
   });
+
+  // Handle scroll state for related products carousel
+  const checkRelatedScroll = useCallback(() => {
+    const container = relatedScrollRef.current;
+    if (!container || relatedProducts.length === 0) {
+      setShowLeftRelatedArrow(false);
+      setShowRightRelatedArrow(false);
+      setRelatedCurrentPage(1);
+      setRelatedTotalPages(1);
+      return;
+    }
+
+    const { scrollLeft, scrollWidth, clientWidth } = container;
+    const isAtStart = scrollLeft <= 10;
+    const isAtEnd = scrollLeft + clientWidth >= scrollWidth - 10;
+
+    setShowLeftRelatedArrow(!isAtStart);
+    setShowRightRelatedArrow(!isAtEnd);
+
+    if (scrollLeft > 5 && relatedShowScrollHint) {
+      setRelatedShowScrollHint(false);
+    }
+
+    // Page calculation
+    const pageWidth = clientWidth || 1;
+    const currentPageNum = Math.round(scrollLeft / pageWidth) + 1;
+    const totalPagesNum = Math.max(1, Math.ceil(scrollWidth / pageWidth));
+    setRelatedCurrentPage(Math.min(currentPageNum, totalPagesNum));
+    setRelatedTotalPages(totalPagesNum);
+  }, [relatedProducts.length, relatedShowScrollHint]);
+
+  const throttledCheckRelatedScroll = useThrottle(checkRelatedScroll, 100);
+
+  useEffect(() => {
+    const container = relatedScrollRef.current;
+    if (!container || relatedProducts.length === 0) {
+      setShowLeftRelatedArrow(false);
+      setShowRightRelatedArrow(false);
+      return;
+    }
+
+    checkRelatedScroll();
+    container.addEventListener('scroll', throttledCheckRelatedScroll, { passive: true });
+
+    const handleResize = () => {
+      setTimeout(checkRelatedScroll, 100);
+    };
+    window.addEventListener('resize', handleResize, { passive: true });
+
+    return () => {
+      container.removeEventListener('scroll', throttledCheckRelatedScroll);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [relatedProducts, checkRelatedScroll, throttledCheckRelatedScroll]);
+
+  const scrollRelated = useCallback((direction) => {
+    const container = relatedScrollRef.current;
+    if (!container) return;
+
+    const scrollAmount = 240; // scroll roughly one card at a time
+    container.scrollBy({
+      left: direction === 'left' ? -scrollAmount : scrollAmount,
+      behavior: 'smooth',
+    });
+  }, []);
 
   const handleQuantityChange = useCallback((delta) => {
     setQuantity((prev) => Math.max(1, prev + delta));
@@ -124,17 +196,17 @@ const ProductDetail = () => {
           </div>
 
           {/* Right Column - Product Details */}
-          <div className="flex flex-col">
+          <div className="flex flex-col lux-serif-text">
             {/* Shop Name */}
             <p className="text-sm text-gray-500 mb-2 font-light">Ashila</p>
 
             {/* Product Title */}
-            <h1 className="text-lg sm:text-2xl md:text-3xl font-bold text-[#4A3628] mb-2 break-words font-sans" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>{product.itemName}</h1>
+            <h1 className="lux-serif-text text-lg sm:text-2xl md:text-3xl font-bold text-[#4A3628] mb-2 break-words">{product.itemName}</h1>
             <div className="w-16 h-0.5 bg-[#A67856] mb-4"></div>
 
             {/* Price */}
             <div className="mb-4 sm:mb-6">
-              <span className="text-base sm:text-xl md:text-2xl font-semibold text-[#4A3628] font-sans" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
+              <span className="lux-serif-text text-base sm:text-xl md:text-2xl font-medium text-[#4A3628]">
                 {discountedPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ALL
               </span>
             </div>
@@ -258,8 +330,8 @@ const ProductDetail = () => {
 
         {/* Product Description */}
         <div className="border-t border-[#D9BFA9] pt-8 mb-8">
-          <h2 className="text-xl font-semibold text-[#4A3628] mb-4">Description</h2>
-          <div className="prose max-w-none text-[#4A3628] leading-relaxed">
+          <h2 className="lux-serif-text text-xl font-semibold text-[#4A3628] mb-4">Description</h2>
+          <div className="prose max-w-none text-[#4A3628] leading-relaxed lux-serif-text">
             {product.description ? (
               <p>{product.description}</p>
             ) : (
@@ -291,73 +363,132 @@ const ProductDetail = () => {
 
         {/* Related Products Section */}
         {relatedProducts.length > 0 && (
-          <div className="mt-12">
+          <div className="mt-12 lux-serif-text">
             <h2 className="text-2xl font-semibold text-[#4A3628] mb-8 text-center">Sugjerime</h2>
-            <div className="flex sm:grid sm:grid-cols-3 lg:grid-cols-4 gap-5 overflow-x-auto scroll-smooth pb-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] sm:overflow-x-visible sm:justify-items-center">
-              {relatedProducts.map((relatedProduct, index) => {
-                const relatedDiscountedPrice = relatedProduct.discount > 0
-                  ? Number(relatedProduct.price) * (1 - Number(relatedProduct.discount) / 100)
-                  : Number(relatedProduct.price);
+            <div className="relative flex items-center justify-center">
+              {/* Desktop Arrows */}
+              {showLeftRelatedArrow && (
+                <button
+                  onClick={() => scrollRelated('left')}
+                  className="hidden md:block absolute left-0 top-1/2 -translate-y-1/2 -translate-x-6 z-10 carousel-arrow p-2 shadow-lg border border-[#E0CBB5]"
+                  aria-label="Scroll left"
+                >
+                  <ChevronLeft size={24} className="text-[#A67856]" />
+                </button>
+              )}
 
-                return (
-                  <div
-                    key={relatedProduct._id}
-                    className="w-[200px] sm:w-full sm:max-w-[280px] flex-shrink-0 border border-gray-200 overflow-hidden bg-white text-center pb-4 flex flex-col h-full cursor-pointer hover:shadow-lg transition-shadow"
-                    onClick={() => {
-                      window.scrollTo({ top: 0, behavior: 'instant' });
-                      navigate(`/product/${relatedProduct._id}`);
-                    }}
-                  >
-                    {/* Product Image Container */}
-                    <div 
-                      className="relative w-full overflow-hidden bg-[#f9f9f9] h-[200px] md:h-[250px]"
+              {showRightRelatedArrow && (
+                <button
+                  onClick={() => scrollRelated('right')}
+                  className="hidden md:block absolute right-0 top-1/2 -translate-y-1/2 translate-x-6 z-10 carousel-arrow p-2 shadow-lg border border-[#E0CBB5]"
+                  aria-label="Scroll right"
+                >
+                  <ChevronRight size={24} className="text-[#A67856]" />
+                </button>
+              )}
+
+              {/* Mobile Arrows */}
+              {showLeftRelatedArrow && (
+                <button
+                  onClick={() => scrollRelated('left')}
+                  className="absolute left-1 top-1/2 -translate-y-1/2 z-10 carousel-arrow p-1.5 shadow-md border border-[#E0CBB5] md:hidden"
+                  aria-label="Scroll left"
+                >
+                  <ChevronLeft size={18} className="text-[#A67856]" />
+                </button>
+              )}
+
+              {showRightRelatedArrow && (
+                <button
+                  onClick={() => scrollRelated('right')}
+                  className="absolute right-1 top-1/2 -translate-y-1/2 z-10 carousel-arrow p-1.5 shadow-md border border-[#E0CBB5] md:hidden"
+                  aria-label="Scroll right"
+                >
+                  <ChevronRight size={18} className="text-[#A67856]" />
+                </button>
+              )}
+
+              <div
+                ref={relatedScrollRef}
+                className={`flex gap-5 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${relatedShowScrollHint ? 'scroll-hint-right' : ''}`}
+                style={{
+                  scrollBehavior: 'smooth',
+                  WebkitOverflowScrolling: 'touch',
+                  overscrollBehavior: 'contain',
+                }}
+              >
+                {relatedProducts.map((relatedProduct, index) => {
+                  const relatedDiscountedPrice = relatedProduct.discount > 0
+                    ? Number(relatedProduct.price) * (1 - Number(relatedProduct.discount) / 100)
+                    : Number(relatedProduct.price);
+
+                  return (
+                    <div
+                      key={relatedProduct._id}
+                      className="swipe-hint-animation w-[200px] sm:w-full sm:max-w-[280px] flex-shrink-0 border border-gray-200 overflow-hidden bg-white text-center pb-4 flex flex-col h-full cursor-pointer hover:shadow-lg transition-shadow snap-start"
+                      onClick={() => {
+                        window.scrollTo({ top: 0, behavior: 'instant' });
+                        navigate(`/product/${relatedProduct._id}`);
+                      }}
                     >
-                      <img
-                        src={getProductImage(relatedProduct.image, relatedProduct._id || index)}
-                        alt={relatedProduct.itemName}
-                        className="w-full h-full object-contain p-5"
-                        onError={(e) => {
-                          e.target.src = getProductImage(null, relatedProduct._id || index);
-                        }}
-                      />
-                      {relatedProduct.discount > 0 && (
-                        <div className="absolute top-2.5 right-2.5 bg-red-500 text-white px-2.5 py-1.5 text-sm font-bold">
-                          Save {relatedProduct.discount}%
-                        </div>
-                      )}
-                      {relatedProduct.stock === 0 && (
-                        <div className="absolute top-2.5 left-2.5 bg-red-500 text-white px-2.5 py-1.5 text-sm font-bold">
-                          Sold Out
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Product Info */}
-                    <div className="px-2.5 pt-4 flex flex-col flex-grow">
-                      <h3 className="text-sm md:text-base mb-2.5 text-gray-800 min-h-[40px] line-clamp-2 font-sans" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
-                        {relatedProduct.itemName}
-                      </h3>
-                      <div className="flex items-center justify-center gap-2.5 mt-auto">
-                        {relatedProduct.discount > 0 ? (
-                          <>
-                            <span className="text-base md:text-lg font-bold text-black font-sans" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
-                              {relatedDiscountedPrice.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
-                            </span>
-                            <span className="text-xs md:text-sm text-gray-400 line-through font-sans" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
-                              {Number(relatedProduct.price).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
-                            </span>
-                          </>
-                        ) : (
-                          <span className="text-base md:text-lg font-bold text-black font-sans" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
-                            {Number(relatedProduct.price).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
-                          </span>
+                      {/* Product Image Container */}
+                      <div 
+                        className="relative w-full overflow-hidden bg-[#f9f9f9] h-[200px] md:h-[250px]"
+                      >
+                        <img
+                          src={getProductImage(relatedProduct.image, relatedProduct._id || index)}
+                          alt={relatedProduct.itemName}
+                          className="w-full h-full object-contain p-5"
+                          onError={(e) => {
+                            e.target.src = getProductImage(null, relatedProduct._id || index);
+                          }}
+                        />
+                        {relatedProduct.discount > 0 && (
+                          <div className="absolute top-2.5 right-2.5 bg-red-500 text-white px-2.5 py-1.5 text-sm font-bold">
+                            Save {relatedProduct.discount}%
+                          </div>
+                        )}
+                        {relatedProduct.stock === 0 && (
+                          <div className="absolute top-2.5 left-2.5 bg-red-500 text-white px-2.5 py-1.5 text-sm font-bold">
+                            Sold Out
+                          </div>
                         )}
                       </div>
+
+                      {/* Product Info */}
+                      <div className="px-2.5 pt-4 flex flex-col flex-grow">
+                        <h3 className="lux-serif-text text-sm md:text-base mb-2.5 text-gray-800 min-h-[40px] line-clamp-2">
+                          {relatedProduct.itemName}
+                        </h3>
+                        <div className="flex items-center justify-center gap-2.5 mt-auto">
+                          {relatedProduct.discount > 0 ? (
+                            <>
+                              <span className="lux-serif-text text-base md:text-lg font-medium text-black">
+                                {relatedDiscountedPrice.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
+                              </span>
+                              <span className="lux-serif-text text-xs md:text-sm text-gray-400 line-through">
+                                {Number(relatedProduct.price).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
+                              </span>
+                            </>
+                          ) : (
+                            <span className="lux-serif-text text-base md:text-lg font-medium text-black">
+                              {Number(relatedProduct.price).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
+                            </span>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
+
+            {/* Page indicator */}
+            {relatedTotalPages > 1 && (
+              <div className="mt-4 text-center text-sm text-[#4A3628]">
+                {relatedCurrentPage} / {relatedTotalPages}
+              </div>
+            )}
           </div>
         )}
       </div>

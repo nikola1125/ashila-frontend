@@ -290,16 +290,16 @@ const Shop = () => {
             <aside className={`${
               showFilters 
                 ? 'fixed lg:relative inset-y-0 left-0 lg:inset-auto w-80 lg:w-72 z-[10002] lg:z-auto translate-x-0' 
-                : 'fixed lg:block lg:relative lg:inset-auto lg:w-72 -translate-x-full lg:translate-x-0 pointer-events-none lg:pointer-events-auto'
-            } transition-transform duration-300 ease-in-out overflow-hidden flex-shrink-0`} style={{
+                : 'fixed lg:relative lg:inset-auto lg:w-72 -translate-x-full lg:translate-x-0 pointer-events-none lg:pointer-events-auto'
+            } transition-transform duration-300 ease-in-out lg:transition-none overflow-hidden flex-shrink-0`} style={{
               ...(showFilters ? {} : { 
-                opacity: 0, 
-                visibility: 'hidden',
-                transform: 'translateX(-100%)',
-                WebkitTransform: 'translateX(-100%)',
+                opacity: window.innerWidth >= 1024 ? 1 : 0, 
+                visibility: window.innerWidth >= 1024 ? 'visible' : 'hidden',
+                transform: window.innerWidth >= 1024 ? 'translateX(0)' : 'translateX(-100%)',
+                WebkitTransform: window.innerWidth >= 1024 ? 'translateX(0)' : 'translateX(-100%)',
                 // Prevent white line on mobile by ensuring it's completely off-screen
-                left: showFilters ? undefined : '-100%',
-                width: showFilters ? undefined : '0px'
+                left: window.innerWidth >= 1024 ? undefined : '-100%',
+                width: window.innerWidth >= 1024 ? undefined : '0px'
               })
             }}>
               <div className="bg-white h-full flex flex-col lg:sticky lg:top-20 pointer-events-auto" style={{ maxHeight: '100vh', overflow: 'hidden' }}>
