@@ -2,7 +2,14 @@ import React, { useContext, useRef, useEffect, useCallback } from 'react';
 import { CartContext } from '../../../Context/Cart/CartContext';
 import { useThrottle } from '../../../hooks/useThrottle';
 
-const Cart = ({ isScrolled = true, onCartClick, iconSize = 20, useNavColors = false, disabled = false }) => {
+const Cart = ({
+  isScrolled = true,
+  onCartClick,
+  iconSize = 20,
+  useNavColors = false,
+  disabled = false,
+  forceBlack = false,
+}) => {
   const { totalQuantity } = useContext(CartContext);
   const isScrollingRef = useRef(false);
   const scrollTimeoutRef = useRef(null);
@@ -29,9 +36,11 @@ const Cart = ({ isScrolled = true, onCartClick, iconSize = 20, useNavColors = fa
       }
       
       // Set scrolling to false after scroll stops (longer delay to prevent accidental opens)
+      // Also clear the timeout ref so clicks are allowed again
       // Increased delay to prevent cart from opening during navbar color transition
       scrollTimeoutRef.current = setTimeout(() => {
         isScrollingRef.current = false;
+        scrollTimeoutRef.current = null;
       }, 500); // Increased from 300ms to 500ms
     }
   }, []);
@@ -113,7 +122,13 @@ const Cart = ({ isScrolled = true, onCartClick, iconSize = 20, useNavColors = fa
         <svg
           xmlns="http://www.w3.org/2000/svg"
           className={`transition-colors duration-300 ease-in-out ${
-            useNavColors ? 'text-[#5A3F2A] hover:text-[#4A3320]' : (isScrolled ? 'text-[#A67856]' : 'text-white')
+            forceBlack
+              ? 'text-black hover:text-gray-800'
+              : useNavColors
+              ? 'text-[#5A3F2A] hover:text-[#4A3320]'
+              : isScrolled
+              ? 'text-[#A67856]'
+              : 'text-white'
           }`}
           fill="none"
           viewBox="0 0 24 24"

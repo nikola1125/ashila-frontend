@@ -52,11 +52,11 @@ const ProductCard = React.memo(({ product, pricing, index, onProductClick, onAdd
         ease: [0.4, 0, 0.2, 1],
       }}
       whileHover={{ y: -5, transition: { duration: 0.2 } }}
-      className="w-[160px] md:w-full md:max-w-[280px] flex-shrink-0 border border-gray-200 overflow-hidden bg-white text-center pb-2 md:pb-4 flex flex-col h-full swipe-hint-animation"
+      className="w-full md:w-full md:max-w-[260px] md:flex-shrink-0 border border-gray-200 overflow-hidden bg-white text-center pb-1.5 md:pb-4 flex flex-col h-full swipe-hint-animation"
     >
       {/* Product Image Container */}
       <motion.div 
-        className="relative w-full overflow-hidden bg-[#f9f9f9] cursor-pointer h-[160px] md:h-[250px]"
+        className="relative w-full overflow-hidden bg-[#f9f9f9] cursor-pointer h-[145px] md:h-[240px]"
         onClick={() => onProductClick(product._id)}
         whileHover={{ scale: 1.02 }}
         transition={{ duration: 0.2 }}
@@ -96,30 +96,49 @@ const ProductCard = React.memo(({ product, pricing, index, onProductClick, onAdd
       </motion.div>
 
       {/* Product Info */}
-      <div className="px-1.5 md:px-2.5 pt-2 md:pt-4 flex flex-col flex-grow">
+      <div className="px-1.5 md:px-2.5 pt-1.5 md:pt-4 flex flex-col flex-grow">
         <h3 
-          className="lux-serif-text text-[11px] md:text-base mb-1.5 md:mb-2.5 text-gray-800 min-h-[32px] md:min-h-[40px] line-clamp-2 cursor-pointer hover:text-gray-600 transition-colors"
+          className="lux-serif-text !text-[12px] md:!text-[14px] mb-1.5 md:mb-2.5 text-gray-800 leading-snug whitespace-normal break-words min-h-[24px] md:min-h-[40px] cursor-pointer hover:text-gray-600 transition-colors"
           onClick={() => onProductClick(product._id)}
         >
           {product.itemName}
         </h3>
 
-        {/* Price */}
-        <div className="flex items-center justify-center gap-1.5 md:gap-2.5 mt-auto">
-          {pricing.discounted ? (
-            <>
-              <span className="lux-serif-text text-sm md:text-lg font-medium text-black">
-                {pricing.discounted.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
-              </span>
-              <span className="lux-serif-text text-[10px] md:text-sm text-gray-400 line-through">
+        <div className="mt-auto">
+          {/* Price */}
+          <div className="flex items-center justify-center gap-1.5 md:gap-2.5 mt-0.5 md:mt-0">
+            {pricing.discounted ? (
+              <>
+                <span className="lux-serif-text text-[10px] md:text-lg font-medium text-black">
+                  {pricing.discounted.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
+                </span>
+                <span className="lux-serif-text text-[9px] md:text-sm text-gray-400 line-through">
+                  {pricing.original.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
+                </span>
+              </>
+            ) : (
+              <span className="lux-serif-text text-[10px] md:text-lg font-medium text-black">
                 {pricing.original.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
               </span>
-            </>
-          ) : (
-            <span className="lux-serif-text text-sm md:text-lg font-medium text-black">
-              {pricing.original.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
-            </span>
-          )}
+            )}
+          </div>
+
+          {/* Add to Cart */}
+          <div className="pt-1.5 md:pt-3">
+            <button
+              type="button"
+              disabled={product.stock === 0}
+              onClick={(e) => onAddToCart && onAddToCart(e, product)}
+              className={`w-full inline-flex items-center justify-center gap-1.5 px-2.5 py-1.5 md:px-3 md:py-2 text-[11px] md:text-xs font-semibold uppercase tracking-wide border ${
+                product.stock === 0
+                  ? 'bg-gray-200 border-gray-300 text-gray-500 cursor-not-allowed'
+                  : 'bg-[#8B6F47]/70 border-[#8B6F47]/70 text-white hover:bg-[#7A5F3A]/80 hover:border-[#7A5F3A]/80'
+              } transition-colors duration-150`}
+            >
+              <ShoppingBag className="w-3.5 h-3.5 md:w-4 md:h-4" />
+              {product.stock === 0 ? 'Out of stock' : 'Shto ne shporte'}
+            </button>
+          </div>
         </div>
       </div>
     </motion.div>
@@ -170,16 +189,13 @@ const BestSeller = () => {
       setShowScrollHint(false);
     }
 
-    // Calculate current page for mobile (2 items per page on mobile)
+    // Calculate current page for mobile (2 items per full-width page)
     if (window.innerWidth < 768) {
-      const itemWidth = 160; // w-[160px] = 160px on mobile
-      const gap = 20; // gap-5 = 20px
-      const itemsPerPage = 2;
-      const pageWidth = (itemWidth + gap) * itemsPerPage;
+      const pageWidth = clientWidth || 1;
       const currentPageNum = Math.round(scrollLeft / pageWidth) + 1;
-      const totalPagesNum = Math.ceil(products.length / itemsPerPage);
-      setCurrentPage(currentPageNum);
-      setTotalPages(totalPagesNum);
+      const totalPagesNum = Math.ceil((products.length || 0) / 2);
+      setCurrentPage(Math.max(1, Math.min(currentPageNum, totalPagesNum)));
+      setTotalPages(totalPagesNum || 1);
     }
     }, [products.length, showScrollHint]);
 
@@ -214,16 +230,23 @@ const BestSeller = () => {
   }, [products, checkScrollPosition, throttledCheckScrollPosition]);
 
   const scroll = useCallback((direction) => {
-    if (scrollContainerRef.current) {
-      // Calculate scroll amount: width of one product card + gap
-      // Product card is w-64 (256px) + gap-6 (24px) = 280px
-      // On desktop, we want to scroll by exactly one product width
-      const scrollAmount = 280;
-      scrollContainerRef.current.scrollBy({
-        left: direction === 'left' ? -scrollAmount : scrollAmount,
-        behavior: 'smooth'
-      });
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    let scrollAmount;
+
+    if (window.innerWidth < 768) {
+      // Mobile: scroll by one full page (the visible width that contains 2 products)
+      scrollAmount = container.clientWidth || 1;
+    } else {
+      // Desktop: scroll by approximately one product card + gap
+      scrollAmount = 280;
     }
+
+    container.scrollBy({
+      left: direction === 'left' ? -scrollAmount : scrollAmount,
+      behavior: 'smooth'
+    });
   }, []);
 
   const calculatePrice = useCallback((price, discount) => {
@@ -294,7 +317,7 @@ const BestSeller = () => {
               <div className="relative flex items-center justify-center">
                 {/* Scrollable Container - Show 4 products on desktop, centered */}
                 <div 
-                  className="relative overflow-hidden px-4 md:px-0 md:mx-auto"
+                  className="relative overflow-hidden px-0 -mx-4 md:mx-auto md:px-0"
                   style={{
                     // On desktop, limit visible width to show exactly 4 products
                     // 4 products * 224px (w-56) + 3 gaps * 24px (gap-6) = 896 + 72 = 968px
@@ -305,7 +328,7 @@ const BestSeller = () => {
                   {showLeftArrow && (
                     <button
                       onClick={() => scroll('left')}
-                      className="absolute left-1 top-1/2 -translate-y-1/2 z-10 carousel-arrow p-1.5 shadow-md border border-[#E0CBB5] md:hidden"
+                      className="absolute left-1 top-[40%] -translate-y-1/2 z-10 carousel-arrow p-1.5 shadow-md border border-[#E0CBB5] md:hidden"
                       aria-label="Scroll left"
                     >
                       <ChevronLeft size={18} className="text-[#A67856]" />
@@ -315,7 +338,7 @@ const BestSeller = () => {
                   {showRightArrow && (
                     <button
                       onClick={() => scroll('right')}
-                      className="absolute right-1 top-1/2 -translate-y-1/2 z-10 carousel-arrow p-1.5 shadow-md border border-[#E0CBB5] md:hidden"
+                      className="absolute right-1 top-[40%] -translate-y-1/2 z-10 carousel-arrow p-1.5 shadow-md border border-[#E0CBB5] md:hidden"
                       aria-label="Scroll right"
                     >
                       <ChevronRight size={18} className="text-[#A67856]" />
@@ -335,7 +358,7 @@ const BestSeller = () => {
 
                   <div
                     ref={scrollContainerRef}
-                    className={`flex md:grid md:grid-cols-4 gap-5 md:gap-5 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] md:overflow-x-visible md:justify-items-center ${showScrollHint ? 'scroll-hint-right' : ''} relative`}
+                    className={`flex md:grid md:grid-cols-4 gap-0 md:gap-5 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] md:overflow-x-visible md:justify-items-center ${showScrollHint ? 'scroll-hint-right' : ''} relative`}
                     style={{
                       scrollBehavior: 'smooth',
                       WebkitOverflowScrolling: 'touch',
@@ -352,7 +375,10 @@ const BestSeller = () => {
                         : '';
                       
                       return (
-                        <div key={p._id} className={`swipe-hint-animation ${delayClass} snap-start`}>
+                        <div
+                          key={p._id}
+                          className={`swipe-hint-animation ${delayClass} snap-start w-1/2 flex-shrink-0 px-1 md:w-auto md:px-0`}
+                        >
                           <ProductCard
                             product={p}
                             pricing={pricing}

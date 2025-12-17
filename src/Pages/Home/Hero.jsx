@@ -1,12 +1,9 @@
-// Hero with full screen background image
+// Hero with full screen background video
 import React, { useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const Hero = () => {
   const navigate = useNavigate();
-  // Random demo background image (online URL) – you can change this to any image you like
-  const bg =
-    'https://images.pexels.com/photos/3738344/pexels-photo-3738344.jpeg?auto=compress&cs=tinysrgb&w=1600';
   const heroRef = useRef(null);
 
   return (
@@ -26,10 +23,20 @@ const Hero = () => {
         right: 0,
         touchAction: 'pan-y',
         WebkitOverflowScrolling: 'touch',
-        overscrollBehavior: 'contain',
-        backgroundImage: `url(${bg})`
+        overscrollBehavior: 'contain'
       }}
     >
+      {/* Background video */}
+      <video
+        className="absolute inset-0 w-full h-full object-cover"
+        src="/images/backg.mp4"
+        autoPlay
+        loop
+        muted
+        playsInline
+        preload="auto"
+        aria-hidden="true"
+      />
       {/* Dark overlay */}
       <div 
         className="absolute inset-0 bg-black/35 z-0" 
@@ -48,7 +55,7 @@ const Hero = () => {
                 const message = encodeURIComponent('Pershendetje, interesohem per te bere nje skin test.');
                 window.open(`https://wa.me/355686879292?text=${message}`, '_blank');
               }}
-              className="lux-btn-primary px-2 py-1 text-[10px] md:px-8 md:py-3 md:text-base shadow-lg hover:shadow-xl transform hover:scale-[1.02] hero-cta-primary"
+              className="lux-btn-primary !min-h-[34px] !px-4 !py-2 md:!min-h-[44px] md:!px-8 md:!py-3 shadow-lg hover:shadow-xl transform hover:scale-[1.02] hero-cta-primary"
             >
               Rezervo skin test-in tend
             </button>
@@ -56,7 +63,7 @@ const Hero = () => {
               onClick={() => {
                 navigate('/shop');
               }}
-              className="lux-btn-outline px-2 py-1 text-[10px] md:px-8 md:py-3 md:text-base shadow-md hover:shadow-lg transform hover:scale-[1.01] hero-cta-secondary"
+              className="lux-btn-outline !min-h-[34px] !px-4 !py-2 md:!min-h-[44px] md:!px-8 md:!py-3 shadow-md hover:shadow-lg transform hover:scale-[1.01] hero-cta-secondary"
             >
               Zbulo produktet
             </button>

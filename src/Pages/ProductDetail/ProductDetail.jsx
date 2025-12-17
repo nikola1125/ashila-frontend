@@ -122,7 +122,16 @@ const ProductDetail = () => {
     const container = relatedScrollRef.current;
     if (!container) return;
 
-    const scrollAmount = 240; // scroll roughly one card at a time
+    let scrollAmount;
+
+    if (window.innerWidth < 768) {
+      // Mobile: scroll by one full "page" (the visible width that contains 2 products)
+      scrollAmount = container.clientWidth || 1;
+    } else {
+      // Desktop: scroll roughly one card at a time
+      scrollAmount = 240;
+    }
+
     container.scrollBy({
       left: direction === 'left' ? -scrollAmount : scrollAmount,
       behavior: 'smooth',
@@ -269,7 +278,7 @@ const ProductDetail = () => {
                     onClick={handleAddToCart}
                     className="w-full lux-btn-outline px-4 sm:px-6 py-3 sm:py-4 text-sm sm:text-base min-h-[44px]"
                   >
-                    Add to cart
+                    Shto ne shporte
                   </button>
                   <button
                     onClick={handleBuyNow}
@@ -408,16 +417,17 @@ const ProductDetail = () => {
                 </button>
               )}
 
-              <div
-                ref={relatedScrollRef}
-                className={`flex gap-5 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${relatedShowScrollHint ? 'scroll-hint-right' : ''}`}
-                style={{
-                  scrollBehavior: 'smooth',
-                  WebkitOverflowScrolling: 'touch',
-                  overscrollBehavior: 'contain',
-                }}
-              >
-                {relatedProducts.map((relatedProduct, index) => {
+              <div className="relative overflow-hidden px-0 -mx-4 md:mx-0 md:px-0 w-full">
+                <div
+                  ref={relatedScrollRef}
+                  className={`grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-5 pb-4 md:justify-items-center ${relatedShowScrollHint ? 'scroll-hint-right' : ''}`}
+                  style={{
+                    scrollBehavior: 'smooth',
+                    WebkitOverflowScrolling: 'touch',
+                    overscrollBehavior: 'contain',
+                  }}
+                >
+                  {relatedProducts.map((relatedProduct, index) => {
                   const relatedDiscountedPrice = relatedProduct.discount > 0
                     ? Number(relatedProduct.price) * (1 - Number(relatedProduct.discount) / 100)
                     : Number(relatedProduct.price);
@@ -425,7 +435,7 @@ const ProductDetail = () => {
                   return (
                     <div
                       key={relatedProduct._id}
-                      className="swipe-hint-animation w-[200px] sm:w-full sm:max-w-[280px] flex-shrink-0 border border-gray-200 overflow-hidden bg-white text-center pb-4 flex flex-col h-full cursor-pointer hover:shadow-lg transition-shadow snap-start"
+                      className="swipe-hint-animation w-full border border-gray-200 overflow-hidden bg-white text-center pb-4 flex flex-col h-full cursor-pointer hover:shadow-lg transition-shadow"
                       onClick={() => {
                         window.scrollTo({ top: 0, behavior: 'instant' });
                         navigate(`/product/${relatedProduct._id}`);
@@ -457,29 +467,64 @@ const ProductDetail = () => {
 
                       {/* Product Info */}
                       <div className="px-2.5 pt-4 flex flex-col flex-grow">
-                        <h3 className="lux-serif-text text-sm md:text-base mb-2.5 text-gray-800 min-h-[40px] line-clamp-2">
+                        <h3 className="lux-serif-text !text-[12px] md:!text-[14px] mb-2 text-gray-800 min-h-[24px] md:min-h-[40px] leading-snug whitespace-normal break-words">
                           {relatedProduct.itemName}
                         </h3>
-                        <div className="flex items-center justify-center gap-2.5 mt-auto">
-                          {relatedProduct.discount > 0 ? (
-                            <>
-                              <span className="lux-serif-text text-base md:text-lg font-medium text-black">
-                                {relatedDiscountedPrice.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
-                              </span>
-                              <span className="lux-serif-text text-xs md:text-sm text-gray-400 line-through">
+                        <div className="mt-auto">
+                          <div className="flex items-center justify-center gap-2.5">
+                            {relatedProduct.discount > 0 ? (
+                              <>
+                                <span className="lux-serif-text text-[11px] md:text-lg font-medium text-black">
+                                  {relatedDiscountedPrice.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
+                                </span>
+                                <span className="lux-serif-text text-[9px] md:text-sm text-gray-400 line-through">
+                                  {Number(relatedProduct.price).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
+                                </span>
+                              </>
+                            ) : (
+                              <span className="lux-serif-text text-[11px] md:text-lg font-medium text-black">
                                 {Number(relatedProduct.price).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
                               </span>
-                            </>
-                          ) : (
-                            <span className="lux-serif-text text-base md:text-lg font-medium text-black">
-                              {Number(relatedProduct.price).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
-                            </span>
-                          )}
+                            )}
+                          </div>
+
+                          {/* Add to Cart */}
+                          <div className="pt-3">
+                          <button
+                            type="button"
+                            disabled={relatedProduct.stock === 0}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              addItem({
+                                id: relatedProduct._id,
+                                name: relatedProduct.itemName,
+                                price: relatedProduct.price,
+                                discountedPrice:
+                                  relatedProduct.discount > 0
+                                    ? (Number(relatedProduct.price) * (1 - Number(relatedProduct.discount) / 100)).toFixed(2)
+                                    : null,
+                                image: relatedProduct.image,
+                                company: relatedProduct.company,
+                                genericName: relatedProduct.genericName,
+                                discount: relatedProduct.discount || 0,
+                                seller: relatedProduct.seller,
+                              });
+                            }}
+                            className={`w-full px-3 py-2 text-xs md:text-sm font-semibold uppercase tracking-wide border ${
+                              relatedProduct.stock === 0
+                                ? 'bg-gray-200 border-gray-300 text-gray-500 cursor-not-allowed'
+                                : 'bg-[#8B6F47]/70 border-[#8B6F47]/70 text-white hover:bg-[#7A5F3A]/80 hover:border-[#7A5F3A]/80'
+                            } transition-colors duration-150`}
+                          >
+                            {relatedProduct.stock === 0 ? 'Out of stock' : 'Shto ne shporte'}
+                          </button>
+                        </div>
                         </div>
                       </div>
                     </div>
                   );
                 })}
+                </div>
               </div>
             </div>
 

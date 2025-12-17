@@ -1,4 +1,3 @@
-import { Button } from '@headlessui/react';
 import React, { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CartContext } from '../../Context/Cart/CartContext';
@@ -61,7 +60,7 @@ const ShopGrid = ({
               <div className="px-2.5 pt-4 flex flex-col flex-grow">
                 {/* Medicine Name */}
                 <h3 
-                  className="lux-serif-text text-xs md:text-base mb-2.5 text-gray-800 min-h-[40px] line-clamp-2 cursor-pointer hover:text-gray-600 transition-colors"
+                  className="lux-serif-text !text-[12px] md:!text-[14px] mb-2 text-gray-800 leading-snug whitespace-normal break-words min-h-[28px] md:min-h-[40px] cursor-pointer hover:text-gray-600 transition-colors"
                   onClick={() => {
                     window.scrollTo({ top: 0, behavior: 'instant' });
                     navigate(`/product/${medicine._id}`);
@@ -70,22 +69,52 @@ const ShopGrid = ({
                   {medicine.itemName}
                 </h3>
 
-                {/* Price */}
-                <div className="flex items-center justify-center gap-2.5 mt-auto">
-                  {medicine.discount > 0 ? (
-                    <>
-                      <span className="lux-serif-text text-base md:text-lg font-medium text-black">
-                        {(Number(medicine.price) * (1 - Number(medicine.discount) / 100)).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
-                      </span>
-                      <span className="lux-serif-text text-xs md:text-sm text-gray-400 line-through">
+                <div className="mt-auto">
+                  {/* Price */}
+                  <div className="flex items-center justify-center gap-2.5">
+                    {medicine.discount > 0 ? (
+                      <>
+                        <span className="lux-serif-text text-[11px] md:text-lg font-medium text-black">
+                          {(Number(medicine.price) * (1 - Number(medicine.discount) / 100)).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
+                        </span>
+                        <span className="lux-serif-text text-[9px] md:text-sm text-gray-400 line-through">
+                          {Number(medicine.price).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
+                        </span>
+                      </>
+                    ) : (
+                      <span className="lux-serif-text text-[11px] md:text-lg font-medium text-black">
                         {Number(medicine.price).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
                       </span>
-                    </>
-                  ) : (
-                    <span className="lux-serif-text text-base md:text-lg font-medium text-black">
-                      {Number(medicine.price).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
-                    </span>
-                  )}
+                    )}
+                  </div>
+
+                  {/* Add to Cart */}
+                  <div className="pt-3">
+                    <button
+                      type="button"
+                      disabled={medicine.stock === 0}
+                      onClick={() =>
+                        addItem({
+                          id: medicine._id,
+                          name: medicine.itemName,
+                          price: Number(medicine.price),
+                          discountedPrice:
+                            medicine.discount > 0
+                              ? Number(medicine.price) * (1 - Number(medicine.discount) / 100)
+                              : null,
+                          image: medicine.image,
+                          slug: medicine._id,
+                        })
+                      }
+                      className={`w-full px-3 py-2 text-xs md:text-sm font-semibold uppercase tracking-wide border ${
+                        medicine.stock === 0
+                          ? 'bg-gray-200 border-gray-300 text-gray-500 cursor-not-allowed'
+                          : 'bg-[#8B6F47]/70 border-[#8B6F47]/70 text-white hover:bg-[#7A5F3A]/80 hover:border-[#7A5F3A]/80'
+                      } transition-colors duration-150`}
+                    >
+                      {medicine.stock === 0 ? 'Out of stock' : 'Shto ne shporte'}
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>

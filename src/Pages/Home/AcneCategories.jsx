@@ -201,8 +201,8 @@ const AcneCategories = () => {
                       src={item.image}
                       alt={item.title}
                       className="w-full h-full transition-transform duration-200 group-hover:scale-105"
-                      style={index < 2 ? { 
-                        objectFit: 'cover', 
+                      style={index < 2 ? {
+                        objectFit: 'cover',
                         objectPosition: 'center',
                         width: '100%',
                         height: '100%',
@@ -214,7 +214,7 @@ const AcneCategories = () => {
                       }}
                     />
                   </div>
-                  
+
                   {/* Title with Animated Underline */}
                   <div className="flex flex-col items-center">
                     <h3 className="text-[#4A3628] font-semibold text-base lg:text-lg mb-2 group-hover:text-[#A67856] transition-colors duration-200">
@@ -254,8 +254,8 @@ const AcneCategories = () => {
                   src={item.image}
                   alt={item.title}
                   className="w-full h-full transition-transform duration-200 group-hover:scale-105"
-                  style={index < 2 ? { 
-                    objectFit: 'cover', 
+                  style={index < 2 ? {
+                    objectFit: 'cover',
                     objectPosition: 'center',
                     width: '100%',
                     height: '100%',
@@ -267,7 +267,7 @@ const AcneCategories = () => {
                   }}
                 />
               </div>
-              
+
               {/* Title with Animated Underline */}
               <div className="flex flex-col items-center">
                 <h3 className="text-[#4A3628] font-semibold text-sm mb-2 group-hover:text-[#A67856] transition-colors duration-200">
@@ -281,84 +281,85 @@ const AcneCategories = () => {
           ))}
         </div>
 
-        {/* Mobile - Swipeable slider with 2 items per page */}
-        <div className="block md:hidden fade-in relative">
-          {/* Mobile Arrows - show on mobile when scrollable */}
-          {showLeftMobileArrow && (
-            <button
-              onClick={() => scrollMobile('left')}
-              className="absolute left-1 top-1/2 -translate-y-1/2 z-10 carousel-arrow p-1.5 shadow-md border border-[#E0CBB5]"
-              aria-label="Scroll left"
-            >
-              <ChevronLeft size={18} className="text-[#A67856]" />
-            </button>
-          )}
+        {/* Mobile Carousel Layout - 2 items per page with swipe */}
+        <div className="md:hidden relative">
+          <div className="relative">
+            {showLeftMobileArrow && (
+              <button
+                onClick={() => scrollMobile('left')}
+                className="absolute left-1 top-[45%] -translate-y-1/2 z-10 carousel-arrow p-1.5 shadow-md border border-[#E0CBB5]"
+                aria-label="Scroll left"
+              >
+                <ChevronLeft size={18} className="text-[#A67856]" />
+              </button>
+            )}
 
-          {showRightMobileArrow && (
-            <button
-              onClick={() => scrollMobile('right')}
-              className="absolute right-1 top-1/2 -translate-y-1/2 z-10 carousel-arrow p-1.5 shadow-md border border-[#E0CBB5]"
-              aria-label="Scroll right"
-            >
-              <ChevronRight size={18} className="text-[#A67856]" />
-            </button>
-          )}
+            {showRightMobileArrow && (
+              <button
+                onClick={() => scrollMobile('right')}
+                className="absolute right-1 top-[45%] -translate-y-1/2 z-10 carousel-arrow p-1.5 shadow-md border border-[#E0CBB5]"
+                aria-label="Scroll right"
+              >
+                <ChevronRight size={18} className="text-[#A67856]" />
+              </button>
+            )}
 
-          <div
-            ref={sliderRef}
-            className="flex overflow-x-auto snap-x snap-mandatory scroll-smooth [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden scroll-hint-right relative"
-          >
-            {chunkedItems.map((group, pageIndex) => (
-              <div key={`page-${pageIndex}`} className="min-w-full snap-start px-2">
-                <div className="grid grid-cols-2 gap-4">
-                  {group.map((item, itemIndex) => {
-                    // Add swipe hint animation with delay
-                    const delayClass = itemIndex < 4 
-                      ? `swipe-hint-animation-delay-${Math.min(itemIndex, 3)}` 
-                      : '';
-                    
-                    return (
-                    <button
-                      key={item.key}
-                      onClick={() => navigate(`/shop?category=${item.key}`)}
-                      className={`group flex flex-col items-center scale-in stagger-${Math.min(itemIndex + 1, 4)} swipe-hint-animation ${delayClass}`}
-                    >
-                      {/* Circular Image Frame */}
-                      <div className="relative w-full aspect-square mb-3 rounded-full overflow-hidden border border-[#D9BFA9] active:border-[#A67856] shadow-sm transition-all duration-200">
-                        <img
-                          src={item.image}
-                          alt={item.title}
-                          className="w-full h-full transition-transform duration-200 active:scale-105"
-                          style={itemIndex < 2 ? { 
-                            objectFit: 'cover', 
-                            objectPosition: 'center',
-                            width: '100%',
-                            height: '100%',
-                            transform: itemIndex < 2 ? 'scale(1.1)' : 'scale(1)'
-                          } : { objectFit: 'cover' }}
-                          loading="lazy"
-                          onError={(e) => {
-                            e.target.src = getProductImage();
-                          }}
-                        />
-                      </div>
-                      
-                      {/* Title with Animated Underline */}
-                      <div className="flex flex-col items-center w-full">
-                        <h3 className="text-[#4A3628] font-semibold text-xs mb-1.5 group-active:text-[#A67856] transition-colors duration-200">
-                          {item.title}
-                        </h3>
-                        <div className="relative w-8 h-0.5 overflow-hidden">
-                          <div className="absolute inset-0 bg-[#A67856] transform scale-x-0 group-active:scale-x-100 transition-transform duration-300 origin-center"></div>
-                        </div>
-                      </div>
-                    </button>
-                    );
-                  })}
+            <div
+              ref={sliderRef}
+              className="flex overflow-x-auto snap-x snap-mandatory scroll-smooth [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden scroll-hint-right"
+            >
+              {chunkedItems.map((group, pageIndex) => (
+                <div key={`page-${pageIndex}`} className="min-w-full snap-start px-2">
+                  <div className="grid grid-cols-2 gap-4">
+                    {group.map((item, itemIndex) => {
+                      const delayClass = itemIndex < 4
+                        ? `swipe-hint-animation-delay-${Math.min(itemIndex, 3)}`
+                        : '';
+
+                      return (
+                        <button
+                          key={item.key}
+                          onClick={() => navigate(`/shop?category=${item.key}`)}
+                          className={`group flex flex-col items-center scale-in stagger-${Math.min(itemIndex + 1, 4)} swipe-hint-animation ${delayClass}`}
+                        >
+                          {/* Circular Image Frame */}
+                          <div className="relative w-full aspect-square mb-3 rounded-full overflow-hidden border border-[#D9BFA9] active:border-[#A67856] shadow-sm transition-all duration-200">
+                            <img
+                              src={item.image}
+                              alt={item.title}
+                              className="w-full h-full transition-transform duration-200 active:scale-105"
+                              style={itemIndex < 2 ? {
+                                objectFit: 'cover',
+                                objectPosition: 'center',
+                                width: '100%',
+                                height: '100%',
+                                transform: itemIndex < 2 ? 'scale(1.1)' : 'scale(1)'
+                              } : { objectFit: 'cover' }}
+                              loading="lazy"
+                              onError={(e) => {
+                                e.target.src = getProductImage();
+                              }}
+                            />
+                          </div>
+
+                          {/* Title with Animated Underline */}
+                          <div className="flex flex-col items-center w-full">
+                            <h3 className="text-[#4A3628] font-semibold text-xs mb-1.5 group-active:text-[#A67856] transition-colors duration-200">
+                              {item.title}
+                            </h3>
+                            <div className="relative w-8 h-0.5 overflow-hidden">
+                              <div className="absolute inset-0 bg-[#A67856] transform scale-x-0 group-active:scale-x-100 transition-transform duration-300 origin-center"></div>
+                            </div>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
+
           {/* Page numbers */}
           <div className="mt-6 text-center text-sm text-[#4A3628] font-semibold">
             {currentPage} / {chunkedItems.length}

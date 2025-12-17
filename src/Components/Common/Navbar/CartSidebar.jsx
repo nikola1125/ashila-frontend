@@ -154,9 +154,12 @@ const CartSidebar = ({ isOpen, onClose }) => {
                     }}
                   >
                     <img 
-                      src={getProductImage(item.image)} 
+                      src={getProductImage(item.image, item.id)} 
                       alt={item.name} 
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      onError={(e) => {
+                        e.currentTarget.src = getProductImage(null, item.id);
+                      }}
                     />
                   </div>
 
@@ -165,7 +168,7 @@ const CartSidebar = ({ isOpen, onClose }) => {
                     <div>
                       <div className="flex justify-between items-start gap-2">
                         <h3 
-                          className="font-medium text-[#5A3F2A] line-clamp-2 leading-tight cursor-pointer hover:underline"
+                          className="text-[9px] sm:text-[12px] font-medium text-[#5A3F2A] leading-tight whitespace-normal break-words cursor-pointer hover:underline"
                           onClick={() => {
                             onClose();
                             navigate(`/product/${item.slug || item.id}`);
@@ -211,15 +214,15 @@ const CartSidebar = ({ isOpen, onClose }) => {
                       <div className="text-right">
                         {item.discountedPrice && Number(item.discountedPrice) < Number(item.price) ? (
                           <div className="flex flex-col items-end">
-                             <span className="font-semibold text-[#5A3F2A]">
+                             <span className="lux-serif-text font-semibold text-[#5A3F2A]">
                               {(Number(item.discountedPrice) * item.quantity).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} ALL
                             </span>
-                            <span className="text-xs text-gray-400 line-through">
+                            <span className="lux-serif-text text-xs text-gray-400 line-through">
                               {(Number(item.price) * item.quantity).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} ALL
                             </span>
                           </div>
                         ) : (
-                          <span className="font-semibold text-[#5A3F2A]">
+                          <span className="lux-serif-text font-semibold text-[#5A3F2A]">
                             {(Number(item.price) * item.quantity).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} ALL
                           </span>
                         )}
