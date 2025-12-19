@@ -44,7 +44,7 @@ export const SmoothScrollProvider = ({ children }) => {
 
     // Initialize Lenis on non-Windows platforms
     let lenisInstance = null;
-    import('@studio-freight/lenis').then(({ Lenis }) => {
+    import('lenis').then(({ Lenis }) => {
       lenisInstance = new Lenis({
         duration: 1.2,
         easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
