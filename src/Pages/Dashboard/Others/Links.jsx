@@ -3,17 +3,11 @@ import { NavLink } from 'react-router-dom';
 import useUserRole from '../../../hooks/useUserRole';
 import {
   LayoutDashboard,
-  Users,
-  FolderKanban,
-  CreditCard,
-  BarChart2,
-  Megaphone,
   Stethoscope,
   History,
   BadgeDollarSign,
   LogOut,
   Home,
-  Star,
 } from 'lucide-react';
 import { AuthContext } from '../../../Context/Auth/AuthContext';
 import { toast } from 'react-toastify';
@@ -61,78 +55,6 @@ const Links = () => {
         </NavLink>
       </li>
       <div className={divider}></div>
-      {role === 'admin' && (
-        <>
-          <li className={sectionHeader}>Admin Panel</li>
-          <li>
-            <NavLink
-              to="/dashboard/manage-users"
-              className={({ isActive }) =>
-                `${linkClass} ${isActive ? activeClass : ''}`
-              }
-            >
-              <Users size={22} className="text-blue-500" />
-              Manage Users
-            </NavLink>
-          </li>
-          <li>
-            <NavLink
-              to="/dashboard/manage-categories"
-              className={({ isActive }) =>
-                `${linkClass} ${isActive ? activeClass : ''}`
-              }
-            >
-              <FolderKanban size={22} className="text-blue-500" />
-              Manage Categories
-            </NavLink>
-          </li>
-          <li>
-            <NavLink
-              to="/dashboard/manage-payments"
-              className={({ isActive }) =>
-                `${linkClass} ${isActive ? activeClass : ''}`
-              }
-            >
-              <CreditCard size={22} className="text-blue-500" />
-              Payment Management
-            </NavLink>
-          </li>
-          <li>
-            <NavLink
-              to="/dashboard/sales-report"
-              className={({ isActive }) =>
-                `${linkClass} ${isActive ? activeClass : ''}`
-              }
-            >
-              <BarChart2 size={22} className="text-blue-500" />
-              Sales Report
-            </NavLink>
-          </li>
-          <li>
-            <NavLink
-              to="/dashboard/manage-ads"
-              className={({ isActive }) =>
-                `${linkClass} ${isActive ? activeClass : ''}`
-              }
-            >
-              <Megaphone size={22} className="text-blue-500" />
-              Mange Banner Advertise
-            </NavLink>
-          </li>
-          <li>
-            <NavLink
-              to="/dashboard/manage-bestsellers"
-              className={({ isActive }) =>
-                `${linkClass} ${isActive ? activeClass : ''}`
-              }
-            >
-              <Star size={22} className="text-blue-500" />
-              Manage Bestsellers
-            </NavLink>
-          </li>
-          <div className={divider}></div>
-        </>
-      )}
       {role === 'seller' && (
         <>
           <li className={sectionHeader}>Seller Panel</li>

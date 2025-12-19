@@ -80,7 +80,7 @@ const ProductCard = React.memo(({ product, pricing, index, onProductClick, onAdd
             transition={{ delay: index * 0.1 + 0.3 }}
             className="absolute top-1.5 md:top-2.5 right-1.5 md:right-2.5 bg-red-500 text-white px-1.5 md:px-2.5 py-1 md:py-1.5 text-xs md:text-sm font-bold"
           >
-            Save {pricing.discountPercent}%
+            Save <span className="lux-price-number">{pricing.discountPercent}%</span>
           </motion.div>
         )}
         {product.stock === 0 && (
@@ -109,15 +109,15 @@ const ProductCard = React.memo(({ product, pricing, index, onProductClick, onAdd
           <div className="flex items-center justify-center gap-1.5 md:gap-2.5 mt-0.5 md:mt-0">
             {pricing.discounted ? (
               <>
-                <span className="lux-serif-text text-[10px] md:text-lg font-medium text-black">
+                <span className="lux-price-number text-[10px] md:text-lg font-medium text-black">
                   {pricing.discounted.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
                 </span>
-                <span className="lux-serif-text text-[9px] md:text-sm text-gray-400 line-through">
+                <span className="lux-price-number text-[9px] md:text-sm text-gray-400 line-through">
                   {pricing.original.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
                 </span>
               </>
             ) : (
-              <span className="lux-serif-text text-[10px] md:text-lg font-medium text-black">
+              <span className="lux-price-number text-[10px] md:text-lg font-medium text-black">
                 {pricing.original.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
               </span>
             )}

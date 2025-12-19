@@ -37,8 +37,8 @@ const ManageMedicine = () => {
   const onSubmit = async (data) => {
     setLoading(true);
     try {
-      const imageUrl = await uploadImage(data.image[0]);
-      if (!imageUrl) {
+      const uploaded = await uploadImage(data.image[0], privateApi);
+      if (!uploaded?.imageUrl) {
         toast.error('Image upload failed. Please try again.');
         setLoading(false);
         return;
@@ -47,7 +47,9 @@ const ManageMedicine = () => {
         ...data,
         seller: user.email,
         created_at: new Date().toISOString(),
-        image: imageUrl,
+        imageUrl: uploaded.imageUrl,
+        imageId: uploaded.imageId,
+        image: uploaded.imageUrl,
       };
 
       await privateApi.post('/medicines', medicineInfo);

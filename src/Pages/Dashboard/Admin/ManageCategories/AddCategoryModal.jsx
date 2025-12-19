@@ -28,13 +28,13 @@ const AddCategoryModal = ({ isOpen, close, refetch }) => {
     e.preventDefault();
     setLoading(true)
     try {
-      const imgUrl = await uploadImage(categoryImage);
-      if (!imgUrl) {
+      const uploaded = await uploadImage(categoryImage, privateApi);
+      if (!uploaded?.imageUrl) {
         toast.error('Failed to upload the image');
         return;
       }
       const categoryData = {
-        categoryImage: imgUrl,
+        categoryImage: uploaded.imageUrl,
         categoryName,
         createdAt: new Date().toISOString()
       };

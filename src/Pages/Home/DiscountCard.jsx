@@ -20,7 +20,7 @@ const DiscountCard = ({ medicine }) => {
       {/* Discount Badge - Bottom Left */}
       {medicine.discount > 0 && (
         <span className="elegant-badge bg-[#F4A640] text-white px-2.5 py-1 text-xs font-semibold">
-          Save {medicine.discount}%
+          Save <span className="lux-price-number">{medicine.discount}%</span>
         </span>
       )}
 
@@ -50,10 +50,10 @@ const DiscountCard = ({ medicine }) => {
         
         {/* Price Section */}
         <div className="flex items-center justify-center gap-2 mb-2">
-          <span className="line-through text-gray-400 text-xs">
+          <span className="line-through text-gray-400 text-xs lux-price-number">
             {Number(medicine.price).toLocaleString()} ALL
           </span>
-          <span className="text-[#A67856] font-bold text-lg md:text-xl">
+          <span className="text-[#A67856] font-bold text-lg md:text-xl lux-price-number">
             {discountedPrice.toLocaleString()} ALL
           </span>
         </div>

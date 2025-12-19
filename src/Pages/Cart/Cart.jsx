@@ -6,10 +6,11 @@ import useAxiosSecure from '../../hooks/useAxiosSecure';
 import { toast } from 'react-toastify';
 import { groupItemsBySeller } from '../../utils/groupItemsBySeller';
 import { Helmet } from 'react-helmet-async';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const Cart = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const {
     items,
     totalQuantity,
@@ -24,21 +25,7 @@ const Cart = () => {
 
   const handleCheckout = async () => {
     try {
-      const sellersGroup = groupItemsBySeller(items);
-      // Use publicApi for guest checkout, privateApi if user is logged in
-      const api = user ? privateApi : publicApi;
-      const checkoutData = {
-        ...sellersGroup,
-        guestEmail: user ? undefined : null, // Will be collected during checkout if guest
-        isGuest: !user
-      };
-      const response = await api.post('/checkout', checkoutData);
-
-      if (response) {
-        window.location.href = response;
-      } else {
-        throw new Error('Invalid response from checkout API');
-      }
+      navigate('/checkout');
     } catch (error) {
       console.error('Checkout error:', error);
       toast.warn(error.message || 'An error occurred during checkout');
@@ -99,7 +86,7 @@ const Cart = () => {
                       </h3>
                       <p className="text-gray-700 text-sm">
                         Price:{' '}
-                        <span className="font-semibold">
+                        <span className="font-semibold lux-price-number">
                           {!isNaN(Number(item.price))
                             ? Number(item.price).toLocaleString()
                             : '0'} ALL
@@ -107,7 +94,7 @@ const Cart = () => {
                       </p>
                       {item.discountedPrice &&
                         Number(item.discountedPrice) < Number(item.price) && (
-                          <p className="text-stone-600 text-xs font-semibold">
+                          <p className="text-stone-600 text-xs font-semibold lux-price-number">
                             Discounted price: {Number(item.discountedPrice).toLocaleString()} ALL
                           </p>
                         )}
@@ -123,7 +110,7 @@ const Cart = () => {
                       >
                         -
                       </button>
-                      <span className="px-3 sm:px-4 py-1.5 sm:py-2 bg-white border-2 border-[#946259] text-[#946259] font-semibold shadow-sm min-w-[44px] text-center">
+                      <span className="px-3 sm:px-4 py-1.5 sm:py-2 bg-white border-2 border-[#946259] text-[#946259] font-semibold shadow-sm min-w-[44px] text-center lux-price-number">
                         {item.quantity}
                       </span>
                       <button
@@ -151,16 +138,16 @@ const Cart = () => {
                 <div className="w-full sm:w-auto">
                   <p className="text-gray-700">
                     Total Items:{' '}
-                    <span className="font-bold text-gray-900">
+                    <span className="font-bold text-gray-900 lux-price-number">
                       {items.length} items ({totalQuantity} units)
                     </span>
                   </p>
                   <p className="text-xl font-extrabold text-gray-900 mt-1">
                     Subtotal :{' '}
-                    <del className="text-red-300 text-base">
+                    <del className="text-red-300 text-base lux-price-number">
                       {Number(totalPrice).toLocaleString()} ALL
                     </del>{' '}
-                    {Number(discountedTotal).toLocaleString()} ALL
+                    <span className="lux-price-number">{Number(discountedTotal).toLocaleString()} ALL</span>
                   </p>
                 </div>
                 <button

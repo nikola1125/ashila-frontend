@@ -39,6 +39,12 @@ h1, h2, h3, h4, h5, h6 {
   letter-spacing: 0.03em;
 }
 
+.lux-price-number {
+  font-family: 'Playfair Display', 'Cormorant Garamond', serif;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.03em;
+}
+
 /* Refined typography for luxury feel */
 p {
   font-weight: 300;
@@ -60,10 +66,15 @@ h3[class*="product"],
 /* Price numbers use Inter font */
 .product-price,
 [class*="product-price"],
-span[class*="price"] {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif !important;
+span[class*="price"],
+span[class*="amount"],
+span[class*="total"],
+span[class*="qty"],
+span[class*="quantity"],
+span[class*="discount"] {
+  font-family: 'Playfair Display', 'Cormorant Garamond', serif !important;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.03em;
 }
 
 /* Hero text specific styles for cross-browser compatibility */

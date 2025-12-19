@@ -74,15 +74,15 @@ const ShopGrid = ({
                   <div className="flex items-center justify-center gap-2.5">
                     {medicine.discount > 0 ? (
                       <>
-                        <span className="lux-serif-text text-[11px] md:text-lg font-medium text-black">
+                        <span className="lux-price-number text-[11px] md:text-lg font-medium text-black">
                           {(Number(medicine.price) * (1 - Number(medicine.discount) / 100)).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
                         </span>
-                        <span className="lux-serif-text text-[9px] md:text-sm text-gray-400 line-through">
+                        <span className="lux-price-number text-[9px] md:text-sm text-gray-400 line-through">
                           {Number(medicine.price).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
                         </span>
                       </>
                     ) : (
-                      <span className="lux-serif-text text-[11px] md:text-lg font-medium text-black">
+                      <span className="lux-price-number text-[11px] md:text-lg font-medium text-black">
                         {Number(medicine.price).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
                       </span>
                     )}
@@ -145,7 +145,7 @@ const ShopGrid = ({
                 }`}
                 onClick={() => goToPage(idx + 1)}
               >
-                {idx + 1}
+                <span className="lux-price-number">{idx + 1}</span>
               </button>
             ))
           ) : (
@@ -158,7 +158,7 @@ const ShopGrid = ({
                 }`}
                 onClick={() => goToPage(1)}
               >
-                1
+                <span className="lux-price-number">1</span>
               </button>
 
               {/* Show ellipsis if there's a gap */}
@@ -177,7 +177,7 @@ const ShopGrid = ({
                     }`}
                     onClick={() => goToPage(pageNum)}
                   >
-                    {pageNum}
+                    <span className="lux-price-number">{pageNum}</span>
                   </button>
                 ))}
 
@@ -194,7 +194,7 @@ const ShopGrid = ({
                   }`}
                   onClick={() => goToPage(totalPages)}
                 >
-                  {totalPages}
+                  <span className="lux-price-number">{totalPages}</span>
                 </button>
               )}
             </>

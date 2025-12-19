@@ -157,7 +157,7 @@ const CategoryDetails = () => {
             </div>
             {searchTerm && (
               <p className="text-center text-sm text-gray-600 mt-2">
-                Found {totalFilteredItems} result
+                Found <span className="lux-price-number">{totalFilteredItems}</span> result
                 {totalFilteredItems !== 1 ? 's' : ''} for "{searchTerm}" in{' '}
                 {category}
               </p>

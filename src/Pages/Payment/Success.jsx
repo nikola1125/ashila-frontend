@@ -254,11 +254,12 @@ const Success = () => {
                             {item.price.product.metadata?.seller || 'Ashila'}
                           </p>
                           <p className="text-xs text-gray-500">
-                            Qty: {item.quantity} × {(item.price.unit_amount / 100).toLocaleString()} ALL
+                            Qty: <span className="lux-price-number">{item.quantity}</span> ×{' '}
+                            <span className="lux-price-number">{(item.price.unit_amount / 100).toLocaleString()} ALL</span>
                           </p>
                         </div>
                         <div className="text-right">
-                          <p className="text-sm font-bold text-gray-900">
+                          <p className="text-sm font-bold text-gray-900 lux-price-number">
                             {(item.amount_total / 100).toLocaleString()} ALL
                           </p>
                         </div>
@@ -271,7 +272,7 @@ const Success = () => {
                   <div className="space-y-3">
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Subtotal</span>
-                      <span className="font-medium">
+                      <span className="font-medium lux-price-number">
                         {(orderData.amount_subtotal / 100).toLocaleString()} ALL
                       </span>
                     </div>
@@ -281,7 +282,7 @@ const Success = () => {
                     </div>
                     <div className="flex justify-between text-lg font-bold border-t border-gray-200 pt-3">
                       <span>Total</span>
-                      <span className="text-emerald-600">
+                      <span className="text-emerald-600 lux-price-number">
                         {(orderData.amount_total / 100).toLocaleString()} ALL
                       </span>
                     </div>
@@ -384,7 +385,7 @@ const Success = () => {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-600">Amount</span>
-                  <span className="text-sm font-bold text-emerald-600">
+                  <span className="text-sm font-bold text-emerald-600 lux-price-number">
                     {(orderData.amount_total / 100).toLocaleString()} ALL
                   </span>
                 </div>

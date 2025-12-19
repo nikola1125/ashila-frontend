@@ -8,6 +8,7 @@ import { initScrollAnimations } from '../utils/scrollAnimations';
 
 const RootLayout = () => {
   const location = useLocation();
+  const hideNavbar = location.pathname === '/admin-login';
 
   // Initialize animations on mount and re-initialize on route changes
   useEffect(() => {
@@ -28,7 +29,7 @@ const RootLayout = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <ScrollToTop />
-      <Navbar />
+      {!hideNavbar && <Navbar />}
       <main className="flex-1 w-full pt-0">
         <Outlet />
       </main>

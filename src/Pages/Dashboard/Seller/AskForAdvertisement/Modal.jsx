@@ -31,7 +31,8 @@ const Modal = ({ isOpen, close, refetch }) => {
     e.preventDefault();
     // For now, just log the values. You can send them to an API here.
     try {
-      const imgUrl = await uploadImage(image);
+      const uploaded = await uploadImage(image, privateApi);
+      const imgUrl = uploaded?.imageUrl;
       if (!imgUrl) {
         toast.error('Failed to upload the image');
         return;

@@ -42,7 +42,8 @@ const UpdateCategoryModal = ({ isOpen, close, refetch, categoryData }) => {
 
       // Only upload new image if a file was selected
       if (categoryImage) {
-        imgUrl = await uploadImage(categoryImage);
+        const uploaded = await uploadImage(categoryImage, privateApi);
+        imgUrl = uploaded?.imageUrl;
         if (!imgUrl) {
           toast.error('Failed to upload the image');
           return;

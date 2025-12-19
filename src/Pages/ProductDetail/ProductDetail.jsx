@@ -215,7 +215,7 @@ const ProductDetail = () => {
 
             {/* Price */}
             <div className="mb-4 sm:mb-6">
-              <span className="lux-serif-text text-base sm:text-xl md:text-2xl font-medium text-[#4A3628]">
+              <span className="lux-price-number text-base sm:text-xl md:text-2xl font-medium text-[#4A3628]">
                 {discountedPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ALL
               </span>
             </div>
@@ -420,110 +420,117 @@ const ProductDetail = () => {
               <div className="relative overflow-hidden px-0 -mx-4 md:mx-0 md:px-0 w-full">
                 <div
                   ref={relatedScrollRef}
-                  className={`grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-5 pb-4 md:justify-items-center ${relatedShowScrollHint ? 'scroll-hint-right' : ''}`}
+                  className={`flex md:grid md:grid-cols-4 gap-3 md:gap-5 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] md:overflow-x-visible md:justify-items-center ${relatedShowScrollHint ? 'scroll-hint-right' : ''}`}
                   style={{
                     scrollBehavior: 'smooth',
                     WebkitOverflowScrolling: 'touch',
                     overscrollBehavior: 'contain',
                   }}
                 >
-                  {relatedProducts.map((relatedProduct, index) => {
-                  const relatedDiscountedPrice = relatedProduct.discount > 0
-                    ? Number(relatedProduct.price) * (1 - Number(relatedProduct.discount) / 100)
-                    : Number(relatedProduct.price);
-
-                  return (
+                  {Array.from(
+                    { length: Math.ceil((relatedProducts?.length || 0) / 2) },
+                    (_, slideIndex) => relatedProducts.slice(slideIndex * 2, slideIndex * 2 + 2)
+                  ).map((slideProducts, slideIndex) => (
                     <div
-                      key={relatedProduct._id}
-                      className="swipe-hint-animation w-full border border-gray-200 overflow-hidden bg-white text-center pb-4 flex flex-col h-full cursor-pointer hover:shadow-lg transition-shadow"
-                      onClick={() => {
-                        window.scrollTo({ top: 0, behavior: 'instant' });
-                        navigate(`/product/${relatedProduct._id}`);
-                      }}
+                      key={`related-slide-${slideIndex}`}
+                      className="w-full flex-shrink-0 snap-start px-1 md:w-auto md:px-0"
                     >
-                      {/* Product Image Container */}
-                      <div 
-                        className="relative w-full overflow-hidden bg-[#f9f9f9] h-[200px] md:h-[250px]"
-                      >
-                        <img
-                          src={getProductImage(relatedProduct.image, relatedProduct._id || index)}
-                          alt={relatedProduct.itemName}
-                          className="w-full h-full object-contain p-5"
-                          onError={(e) => {
-                            e.target.src = getProductImage(null, relatedProduct._id || index);
-                          }}
-                        />
-                        {relatedProduct.discount > 0 && (
-                          <div className="absolute top-2.5 right-2.5 bg-red-500 text-white px-2.5 py-1.5 text-sm font-bold">
-                            Save {relatedProduct.discount}%
-                          </div>
-                        )}
-                        {relatedProduct.stock === 0 && (
-                          <div className="absolute top-2.5 left-2.5 bg-red-500 text-white px-2.5 py-1.5 text-sm font-bold">
-                            Sold Out
-                          </div>
-                        )}
-                      </div>
+                      <div className="grid grid-cols-2 gap-3 md:contents">
+                        {slideProducts.map((relatedProduct, index) => {
+                          const relatedDiscountedPrice = relatedProduct.discount > 0
+                            ? Number(relatedProduct.price) * (1 - Number(relatedProduct.discount) / 100)
+                            : Number(relatedProduct.price);
 
-                      {/* Product Info */}
-                      <div className="px-2.5 pt-4 flex flex-col flex-grow">
-                        <h3 className="lux-serif-text !text-[12px] md:!text-[14px] mb-2 text-gray-800 min-h-[24px] md:min-h-[40px] leading-snug whitespace-normal break-words">
-                          {relatedProduct.itemName}
-                        </h3>
-                        <div className="mt-auto">
-                          <div className="flex items-center justify-center gap-2.5">
-                            {relatedProduct.discount > 0 ? (
-                              <>
-                                <span className="lux-serif-text text-[11px] md:text-lg font-medium text-black">
-                                  {relatedDiscountedPrice.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
-                                </span>
-                                <span className="lux-serif-text text-[9px] md:text-sm text-gray-400 line-through">
-                                  {Number(relatedProduct.price).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
-                                </span>
-                              </>
-                            ) : (
-                              <span className="lux-serif-text text-[11px] md:text-lg font-medium text-black">
-                                {Number(relatedProduct.price).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
-                              </span>
-                            )}
-                          </div>
+                          return (
+                            <div
+                              key={relatedProduct._id}
+                              className="swipe-hint-animation w-full border border-gray-200 overflow-hidden bg-white text-center pb-4 flex flex-col h-full cursor-pointer hover:shadow-lg transition-shadow"
+                              onClick={() => {
+                                window.scrollTo({ top: 0, behavior: 'instant' });
+                                navigate(`/product/${relatedProduct._id}`);
+                              }}
+                            >
+                              <div className="relative w-full overflow-hidden bg-[#f9f9f9] h-[200px] md:h-[250px]">
+                                <img
+                                  src={getProductImage(relatedProduct.image, relatedProduct._id || index)}
+                                  alt={relatedProduct.itemName}
+                                  className="w-full h-full object-contain p-5"
+                                  onError={(e) => {
+                                    e.target.src = getProductImage(null, relatedProduct._id || index);
+                                  }}
+                                />
+                                {relatedProduct.discount > 0 && (
+                                  <div className="absolute top-2.5 right-2.5 bg-red-500 text-white px-2.5 py-1.5 text-sm font-bold">
+                                    Save {relatedProduct.discount}%
+                                  </div>
+                                )}
+                                {relatedProduct.stock === 0 && (
+                                  <div className="absolute top-2.5 left-2.5 bg-red-500 text-white px-2.5 py-1.5 text-sm font-bold">
+                                    Sold Out
+                                  </div>
+                                )}
+                              </div>
 
-                          {/* Add to Cart */}
-                          <div className="pt-3">
-                          <button
-                            type="button"
-                            disabled={relatedProduct.stock === 0}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              addItem({
-                                id: relatedProduct._id,
-                                name: relatedProduct.itemName,
-                                price: relatedProduct.price,
-                                discountedPrice:
-                                  relatedProduct.discount > 0
-                                    ? (Number(relatedProduct.price) * (1 - Number(relatedProduct.discount) / 100)).toFixed(2)
-                                    : null,
-                                image: relatedProduct.image,
-                                company: relatedProduct.company,
-                                genericName: relatedProduct.genericName,
-                                discount: relatedProduct.discount || 0,
-                                seller: relatedProduct.seller,
-                              });
-                            }}
-                            className={`w-full px-3 py-2 text-xs md:text-sm font-semibold uppercase tracking-wide border ${
-                              relatedProduct.stock === 0
-                                ? 'bg-gray-200 border-gray-300 text-gray-500 cursor-not-allowed'
-                                : 'bg-[#8B6F47]/70 border-[#8B6F47]/70 text-white hover:bg-[#7A5F3A]/80 hover:border-[#7A5F3A]/80'
-                            } transition-colors duration-150`}
-                          >
-                            {relatedProduct.stock === 0 ? 'Out of stock' : 'Shto ne shporte'}
-                          </button>
-                        </div>
-                        </div>
+                              <div className="px-2.5 pt-4 flex flex-col flex-grow">
+                                <h3 className="lux-serif-text !text-[12px] md:!text-[14px] mb-2 text-gray-800 min-h-[24px] md:min-h-[40px] leading-snug whitespace-normal break-words">
+                                  {relatedProduct.itemName}
+                                </h3>
+                                <div className="mt-auto">
+                                  <div className="flex items-center justify-center gap-2.5">
+                                    {relatedProduct.discount > 0 ? (
+                                      <>
+                                        <span className="lux-price-number text-[11px] md:text-lg font-medium text-black">
+                                          {relatedDiscountedPrice.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
+                                        </span>
+                                        <span className="lux-price-number text-[9px] md:text-sm text-gray-400 line-through">
+                                          {Number(relatedProduct.price).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
+                                        </span>
+                                      </>
+                                    ) : (
+                                      <span className="lux-price-number text-[11px] md:text-lg font-medium text-black">
+                                        {Number(relatedProduct.price).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
+                                      </span>
+                                    )}
+                                  </div>
+
+                                  <div className="pt-3">
+                                    <button
+                                      type="button"
+                                      disabled={relatedProduct.stock === 0}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        addItem({
+                                          id: relatedProduct._id,
+                                          name: relatedProduct.itemName,
+                                          price: relatedProduct.price,
+                                          discountedPrice:
+                                            relatedProduct.discount > 0
+                                              ? (Number(relatedProduct.price) * (1 - Number(relatedProduct.discount) / 100)).toFixed(2)
+                                              : null,
+                                          image: relatedProduct.image,
+                                          company: relatedProduct.company,
+                                          genericName: relatedProduct.genericName,
+                                          discount: relatedProduct.discount || 0,
+                                          seller: relatedProduct.seller,
+                                        });
+                                      }}
+                                      className={`w-full px-3 py-2 text-xs md:text-sm font-semibold uppercase tracking-wide border ${
+                                        relatedProduct.stock === 0
+                                          ? 'bg-gray-200 border-gray-300 text-gray-500 cursor-not-allowed'
+                                          : 'bg-[#8B6F47]/70 border-[#8B6F47]/70 text-white hover:bg-[#7A5F3A]/80 hover:border-[#7A5F3A]/80'
+                                      } transition-colors duration-150`}
+                                    >
+                                      {relatedProduct.stock === 0 ? 'Out of stock' : 'Shto ne shporte'}
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
-                  );
-                })}
+                  ))}
                 </div>
               </div>
             </div>

@@ -66,18 +66,8 @@ const CartSidebar = ({ isOpen, onClose }) => {
     if (currentItems.length === 0) return;
 
     try {
-      const sellersGroup = groupItemsBySeller(currentItems);
-      const api = user ? privateApi : publicApi;
-      const checkoutData = {
-        ...sellersGroup,
-        guestEmail: user ? undefined : null,
-        isGuest: !user
-      };
-      
-      const response = await api.post('/checkout', checkoutData);
-      if (response) {
-        window.location.href = response;
-      }
+      onClose();
+      navigate('/checkout');
     } catch (error) {
       console.error('Checkout error:', error);
       toast.error('Could not initiate checkout. Please try again.');
@@ -108,7 +98,7 @@ const CartSidebar = ({ isOpen, onClose }) => {
           <div className="flex items-center gap-3">
             <ShoppingBag className="w-5 h-5 text-[#5A3F2A]" />
             <h2 className="text-lg font-semibold text-[#5A3F2A] tracking-wide">
-              Shporta ({totalQuantity})
+              Shporta (<span className="lux-price-number">{totalQuantity}</span>)
             </h2>
           </div>
           <button 
@@ -214,15 +204,15 @@ const CartSidebar = ({ isOpen, onClose }) => {
                       <div className="text-right">
                         {item.discountedPrice && Number(item.discountedPrice) < Number(item.price) ? (
                           <div className="flex flex-col items-end">
-                             <span className="lux-serif-text font-semibold text-[#5A3F2A]">
+                             <span className="lux-price-number font-semibold text-[#5A3F2A]">
                               {(Number(item.discountedPrice) * item.quantity).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} ALL
                             </span>
-                            <span className="lux-serif-text text-xs text-gray-400 line-through">
+                            <span className="lux-price-number text-xs text-gray-400 line-through">
                               {(Number(item.price) * item.quantity).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} ALL
                             </span>
                           </div>
                         ) : (
-                          <span className="lux-serif-text font-semibold text-[#5A3F2A]">
+                          <span className="lux-price-number font-semibold text-[#5A3F2A]">
                             {(Number(item.price) * item.quantity).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} ALL
                           </span>
                         )}
@@ -241,7 +231,7 @@ const CartSidebar = ({ isOpen, onClose }) => {
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm text-gray-600">
                 <span>Nentotali</span>
-                <span className="font-medium text-gray-900">
+                <span className="font-medium text-gray-900 lux-price-number">
                   {Number(discountedTotal).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} ALL
                 </span>
               </div>

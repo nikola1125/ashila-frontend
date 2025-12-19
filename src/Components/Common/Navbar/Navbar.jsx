@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect, useCallback } from 'react';
+import React, { useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { AuthContext } from '../../../Context/Auth/AuthContext';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import Cart from './Cart';
@@ -162,9 +162,26 @@ const Navbar = () => {
   const [mobileOpenGroupId, setMobileOpenGroupId] = useState(null);
   // Desktop: which group inside a category is hovered/active in the mega menu
   const [desktopOpenGroupId, setDesktopOpenGroupId] = useState(null);
+  const desktopMenuCloseTimeoutRef = useRef(null);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [accountDropdownOpen, setAccountDropdownOpen] = useState(false);
+
+  const cancelDesktopMenuClose = useCallback(() => {
+    if (desktopMenuCloseTimeoutRef.current) {
+      clearTimeout(desktopMenuCloseTimeoutRef.current);
+      desktopMenuCloseTimeoutRef.current = null;
+    }
+  }, []);
+
+  const scheduleDesktopMenuClose = useCallback(() => {
+    cancelDesktopMenuClose();
+    desktopMenuCloseTimeoutRef.current = setTimeout(() => {
+      setOpenCategoryId(null);
+      setDesktopOpenGroupId(null);
+      desktopMenuCloseTimeoutRef.current = null;
+    }, 150);
+  }, [cancelDesktopMenuClose]);
 
   // Check if we're on shop page, product detail page, cart page, or sign-up page
   const isShopPage = location.pathname === '/shop' || location.pathname.startsWith('/product/') || location.pathname === '/cart' || location.pathname === '/sign-up';
@@ -379,7 +396,7 @@ const Navbar = () => {
           }`}
         >
           {/* Navbar content: fixed height 64px mobile, 80px desktop */}
-          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 xl:px-10">
             <div className="h-[64px] lg:h-[80px] flex items-center gap-1 lg:gap-3 lg:justify-between">
             {/* Mobile: left menu button */}
             <button
@@ -396,7 +413,7 @@ const Navbar = () => {
             </button>
 
             {/* Logo - centered on mobile, left on desktop */}
-            <div className="flex-1 flex justify-end -mr-2 lg:mr-0 lg:flex-none lg:justify-start items-center">
+            <div className="flex-1 flex justify-end lg:flex-none lg:justify-start items-center">
               <div className="scale-75 lg:scale-75">
                 <Logo />
               </div>
@@ -427,158 +444,174 @@ const Navbar = () => {
 
             {/* Desktop: main nav + desktop search/cart */}
             <div className="hidden lg:flex items-center flex-1">
-              <div className="flex-1 flex items-center justify-center gap-3 xl:gap-4">
-                <NavLink
-                  to="/"
-                    onClick={() => {
-                      if (location.pathname === '/') {
-                        window.scrollTo({ top: 0, behavior: 'instant' });
-                      }
-                    }}
-                    className="font-medium transition-colors text-[10px] xl:text-xs uppercase tracking-wide whitespace-nowrap py-1 text-[#5A3F2A] hover:text-[#4A3320]"
-                  >
-                    Kreu
-                  </NavLink>
+              <div className="w-full flex items-center">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-center flex-wrap xl:flex-nowrap gap-2 xl:gap-4 xl:overflow-x-auto xl:whitespace-nowrap [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                    <NavLink
+                      to="/"
+                      onClick={() => {
+                        if (location.pathname === '/') {
+                          window.scrollTo({ top: 0, behavior: 'instant' });
+                        }
+                      }}
+                      className="font-medium transition-colors text-[10px] xl:text-xs uppercase tracking-wide whitespace-nowrap py-1 text-[#5A3F2A] hover:text-[#4A3320]"
+                    >
+                      Kreu
+                    </NavLink>
 
-                  {/* Desktop categories with hover mega-menu */}
-                  {NAV_CATEGORIES.map((category) => {
-                    // Default click: go to first group with a path or to /shop
-                    const defaultPath =
-                      category.groups?.find((g) => g.path)?.path ||
-                      category.groups?.find((g) => g.subitems?.[0]?.path)?.subitems[0].path ||
-                      '/shop';
+                    {/* Desktop categories with hover mega-menu */}
+                    {NAV_CATEGORIES.map((category) => {
+                      const defaultPath =
+                        category.groups?.find((g) => g.path)?.path ||
+                        category.groups?.find((g) => g.subitems?.[0]?.path)?.subitems[0].path ||
+                        '/shop';
 
-                    return (
-                      <div
-                        key={category.id}
-                        className="relative group"
-                        onMouseEnter={() => {
-                          setOpenCategoryId(category.id);
-                          // Don't auto-select any group - subitems only show on group hover
-                          setDesktopOpenGroupId(null);
-                        }}
-                        onMouseLeave={() => {
-                          setOpenCategoryId((prev) => (prev === category.id ? null : prev));
-                          setDesktopOpenGroupId(null);
-                        }}
-                      >
-                        <button
-                          onClick={() => navigate(defaultPath)}
-                          className="flex items-center gap-1 font-medium transition-colors text-[10px] xl:text-xs uppercase tracking-wide whitespace-nowrap py-1 text-[#5A3F2A] hover:text-[#4A3320]"
+                      return (
+                        <div
+                          key={category.id}
+                          className="relative group"
+                          onMouseEnter={() => {
+                            cancelDesktopMenuClose();
+                            setOpenCategoryId(category.id);
+                            setDesktopOpenGroupId(null);
+                          }}
+                          onMouseLeave={() => {
+                            scheduleDesktopMenuClose();
+                          }}
                         >
-                          {category.label}
-                          <ChevronDown className="w-3 h-3" />
-                        </button>
-
-                        {/* Mega dropdown with two-level hover: groups list + subitems panel */}
-                        {category.groups && category.groups.length > 0 && (
-                          <div
-                            className={`absolute left-0 mt-2 bg-white rounded-lg shadow-xl border border-gray-100 py-2 z-[120] transform transition-all duration-200 ${
-                              openCategoryId === category.id ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2'
-                            }`}
-                            onMouseEnter={() => {
-                              // Keep dropdown open when hovering over it
-                              setOpenCategoryId(category.id);
-                            }}
-                            onMouseLeave={() => {
-                              setOpenCategoryId(null);
-                              setDesktopOpenGroupId(null);
-                            }}
+                          <button
+                            onClick={() => navigate(defaultPath)}
+                            className="flex items-center gap-1 font-medium transition-colors text-[10px] xl:text-xs uppercase tracking-wide whitespace-nowrap py-1 text-[#5A3F2A] hover:text-[#4A3320]"
                           >
-                            <div className="relative">
-                              <div className="w-[260px]">
-                                {category.groups.map((group) => (
-                                  <div key={group.id} className="relative">
-                                    <button
-                                      onMouseEnter={() => {
-                                        if (group.subitems && group.subitems.length > 0) {
-                                          setDesktopOpenGroupId(group.id);
-                                        } else {
-                                          setDesktopOpenGroupId(null);
-                                        }
-                                      }}
-                                      onClick={() => {
-                                        if (group.path) {
-                                          navigate(group.path);
-                                          setOpenCategoryId(null);
-                                          setDesktopOpenGroupId(null);
-                                        } else if (!group.subitems || group.subitems.length === 0) {
-                                          setOpenCategoryId(null);
-                                          setDesktopOpenGroupId(null);
-                                        }
-                                      }}
-                                      className={`flex items-center justify-between w-full text-left text-[13px] py-2 px-4 transition-colors duration-150 ${
-                                        desktopOpenGroupId === group.id
-                                          ? 'bg-gray-50 text-[#5A3F2A]'
-                                          : 'text-gray-700 hover:bg-gray-50 hover:text-[#5A3F2A]'
-                                      }`}
-                                    >
-                                      <span>{group.label}</span>
-                                      {group.subitems && group.subitems.length > 0 && (
-                                        <ChevronRight
-                                          className={`w-4 h-4 ${
-                                            desktopOpenGroupId === group.id ? 'text-[#5A3F2A]' : 'text-gray-400'
-                                          }`}
-                                        />
-                                      )}
-                                    </button>
+                            {category.label}
+                            <ChevronDown className="w-3 h-3" />
+                          </button>
 
-                                    {/* Right flyout submenu (opens to the right, like the screenshot) */}
-                                    {group.subitems && group.subitems.length > 0 && (
-                                      <div
-                                        className={`absolute top-0 left-full ml-2 w-[320px] bg-white shadow-xl border border-gray-100 py-2 z-[130] transition-all duration-150 ${
-                                          openCategoryId === category.id && desktopOpenGroupId === group.id
-                                            ? 'opacity-100 visible'
-                                            : 'opacity-0 invisible pointer-events-none'
-                                        }`}
+                          {category.groups && category.groups.length > 0 && (
+                            <div
+                              className={`absolute left-0 mt-2 bg-white rounded-none shadow-md border border-gray-200 py-0 z-[120] transform transition-all duration-200 ${
+                                openCategoryId === category.id ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2'
+                              }`}
+                              onMouseEnter={() => {
+                                cancelDesktopMenuClose();
+                                setOpenCategoryId(category.id);
+                              }}
+                              onMouseLeave={() => {
+                                scheduleDesktopMenuClose();
+                              }}
+                            >
+                              <div className="relative">
+                                <div className="w-[260px]">
+                                  {category.groups.map((group) => (
+                                    <div key={group.id} className="relative">
+                                      <button
                                         onMouseEnter={() => {
-                                          setOpenCategoryId(category.id);
-                                          setDesktopOpenGroupId(group.id);
+                                          if (group.subitems && group.subitems.length > 0) {
+                                            setDesktopOpenGroupId(group.id);
+                                          } else {
+                                            setDesktopOpenGroupId(null);
+                                          }
                                         }}
+                                        onClick={() => {
+                                          if (group.path) {
+                                            navigate(group.path);
+                                            setOpenCategoryId(null);
+                                            setDesktopOpenGroupId(null);
+                                          } else if (!group.subitems || group.subitems.length === 0) {
+                                            setOpenCategoryId(null);
+                                            setDesktopOpenGroupId(null);
+                                          }
+                                        }}
+                                        className={`flex items-center justify-between w-full text-left text-[11px] py-2 px-5 leading-tight transition-colors duration-150 ${
+                                          desktopOpenGroupId === group.id
+                                            ? 'bg-gray-50 text-[#5A3F2A]'
+                                            : 'text-[#6B4B3A] hover:bg-gray-50 hover:text-[#5A3F2A]'
+                                        }`}
                                       >
-                                        <ul className="space-y-0">
-                                          {group.subitems.map((item) => (
-                                            <li key={item.id}>
-                                              <button
-                                                onClick={() => {
-                                                  navigate(item.path || '/shop');
-                                                  setOpenCategoryId(null);
-                                                  setDesktopOpenGroupId(null);
-                                                }}
-                                                className="text-[13px] text-gray-700 hover:text-[#5A3F2A] hover:bg-gray-50 w-full text-left py-2 px-4 transition-colors duration-150"
-                                              >
-                                                {item.label}
-                                              </button>
-                                            </li>
-                                          ))}
-                                        </ul>
-                                      </div>
-                                    )}
-                                  </div>
-                                ))}
+                                        <span>{group.label}</span>
+                                        {group.subitems && group.subitems.length > 0 && (
+                                          <ChevronRight
+                                            className={`w-4 h-4 ${
+                                              desktopOpenGroupId === group.id ? 'text-[#5A3F2A]' : 'text-gray-400'
+                                            }`}
+                                          />
+                                        )}
+                                      </button>
+
+                                      {group.subitems && group.subitems.length > 0 && (
+                                        <div
+                                          className={`absolute top-0 left-full ml-4 w-[320px] z-[130] transition-all duration-150 ${
+                                            openCategoryId === category.id && desktopOpenGroupId === group.id
+                                              ? 'opacity-100 visible'
+                                              : 'opacity-0 invisible pointer-events-none'
+                                          }`}
+                                          onMouseEnter={() => {
+                                            cancelDesktopMenuClose();
+                                            setOpenCategoryId(category.id);
+                                            setDesktopOpenGroupId(group.id);
+                                          }}
+                                          onMouseLeave={() => {
+                                            scheduleDesktopMenuClose();
+                                          }}
+                                        >
+                                          <div className="absolute top-0 -left-4 w-4 h-full" />
+                                          <div className="bg-white rounded-none shadow-md border border-gray-200 py-0">
+                                            <ul className="space-y-0">
+                                              {group.subitems.map((item) => (
+                                                <li key={item.id}>
+                                                  <button
+                                                    onClick={() => {
+                                                      navigate(item.path || '/shop');
+                                                      setOpenCategoryId(null);
+                                                      setDesktopOpenGroupId(null);
+                                                    }}
+                                                    className="text-[11px] text-[#6B4B3A] hover:text-[#5A3F2A] hover:bg-gray-50 w-full text-left py-2 px-5 leading-tight transition-colors duration-150"
+                                                  >
+                                                    {item.label}
+                                                  </button>
+                                                </li>
+                                              ))}
+                                            </ul>
+                                          </div>
+                                        </div>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
 
-                <div className="flex items-center">
-                  {!isShopPage && (
+                <div className="flex items-center ml-auto lg:mr-0 flex-shrink-0">
                     <button
                       onClick={() => {
-                        navigate('/shop');
+                        navigate(user ? '/dashboard' : '/login');
                       }}
-                      className="transition-colors min-h-[36px] min-w-[36px] flex items-center justify-center mr-3 text-[#5A3F2A] hover:text-[#4A3320]"
-                      aria-label="Search"
+                      className="font-medium transition-colors text-[10px] xl:text-xs uppercase tracking-wide whitespace-nowrap py-1 mr-4 text-[#5A3F2A] hover:text-[#4A3320]"
+                      aria-label="Account"
                     >
-                      <Search size={18} />
+                      {user ? 'Account' : 'Log in'}
                     </button>
-                  )}
 
-                  <Cart useNavColors onCartClick={() => setCartOpen(true)} iconSize={18} disabled={isTransitioning} />
+                    {!isShopPage && (
+                      <button
+                        onClick={() => {
+                          navigate('/shop');
+                        }}
+                        className="transition-colors min-h-[36px] min-w-[36px] flex items-center justify-center mr-3 text-[#5A3F2A] hover:text-[#4A3320]"
+                        aria-label="Search"
+                      >
+                        <Search size={18} />
+                      </button>
+                    )}
+
+                    <Cart useNavColors onCartClick={() => setCartOpen(true)} iconSize={18} disabled={isTransitioning} />
+                  </div>
                 </div>
               </div>
             </div>
@@ -721,13 +754,15 @@ const Navbar = () => {
                   </button>
                 </>
               ) : (
-                <NavLink
-                  to="/sign-up"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="block text-[#5A3F2A] font-medium text-sm uppercase tracking-wide hover:bg-gray-100 transition-colors px-4 py-3 border-b border-gray-200"
-                >
-                  Sign Up
-                </NavLink>
+                <>
+                  <NavLink
+                    to="/login"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block text-[#5A3F2A] font-medium text-sm uppercase tracking-wide hover:bg-gray-100 transition-colors px-4 py-3 border-b border-gray-200"
+                  >
+                    Log in
+                  </NavLink>
+                </>
               )}
             </div>
           </div>

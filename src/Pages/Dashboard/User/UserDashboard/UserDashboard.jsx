@@ -25,7 +25,8 @@ const UserDashboard = () => {
         return [];
       }
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 0,
+    refetchOnMount: 'always',
   });
 
   // Group orders by status
@@ -122,7 +123,7 @@ const UserDashboard = () => {
         <h1 className="text-3xl font-bold text-gray-900 mb-8">My Orders</h1>
 
         {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
           <div className="bg-white border border-gray-200 rounded-sm p-4 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
@@ -150,26 +151,6 @@ const UserDashboard = () => {
                 <p className="text-2xl font-bold text-blue-600">{stats.confirmedOrders}</p>
               </div>
               <Package className="w-8 h-8 text-blue-400" />
-            </div>
-          </div>
-
-          <div className="bg-white border border-gray-200 rounded-sm p-4 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 mb-1">Shipped</p>
-                <p className="text-2xl font-bold text-purple-600">{stats.shippedOrders}</p>
-              </div>
-              <Truck className="w-8 h-8 text-purple-400" />
-            </div>
-          </div>
-
-          <div className="bg-white border border-gray-200 rounded-sm p-4 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 mb-1">Delivered</p>
-                <p className="text-2xl font-bold text-green-600">{stats.deliveredOrders}</p>
-              </div>
-              <CheckCircle className="w-8 h-8 text-green-400" />
             </div>
           </div>
         </div>

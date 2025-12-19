@@ -79,16 +79,16 @@ const DetailsModal = ({ isOpen, close, medicine }) => {
                   </div>
                   <div className="flex items-center gap-3">
                     {medicine?.discount > 0 && (
-                      <span className="text-slate-500 line-through text-sm sm:text-base">
+                      <span className="text-slate-500 line-through text-sm sm:text-base lux-price-number">
                         {price.toLocaleString()} ALL
                       </span>
                     )}
-                    <span className="text-xl sm:text-2xl font-bold text-white">
+                    <span className="text-xl sm:text-2xl font-bold text-white lux-price-number">
                       {discountedPrice.toLocaleString()} ALL
                     </span>
                     {medicine?.discount > 0 && (
                       <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full font-semibold">
-                        -{medicine.discount}%
+                        -<span className="lux-price-number">{medicine.discount}%</span>
                       </span>
                     )}
                   </div>
