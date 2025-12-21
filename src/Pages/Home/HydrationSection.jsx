@@ -6,7 +6,7 @@ const HydrationSection = () => {
   const navigate = useNavigate();
 
   const handleShopClick = () => {
-    navigate('/shop?category=hydration');
+    navigate('/shop?subcategory=dehidratim');
   };
 
   return (
@@ -35,13 +35,13 @@ const HydrationSection = () => {
               <h2 className="lux-title text-[#A67856] mb-3 md:mb-4">
                 Sekreti i Lëkurës së Butë Në Dimër: Hidratoje si Duhet
               </h2>
-              
+
               {/* Elegant Underline */}
               <div className="flex items-center gap-3 mb-4 md:mb-6">
                 <div className="w-16 h-0.5 bg-[#A67856]"></div>
                 <div className="w-1.5 h-1.5 bg-[#A67856]"></div>
               </div>
-              
+
               {/* Article Text - Enhanced Typography */}
               <div className="space-y-3 md:space-y-4 mb-6 md:mb-8">
                 <p className="text-[#4A3628] text-sm md:text-base leading-[1.7] font-light lux-subtitle max-w-none">
@@ -56,10 +56,10 @@ const HydrationSection = () => {
               >
                 <span className="relative z-10 flex items-center gap-2">
                   Zbulo produktet
-                  <svg 
-                    className="w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-300" 
-                    fill="none" 
-                    stroke="currentColor" 
+                  <svg
+                    className="w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-300"
+                    fill="none"
+                    stroke="currentColor"
                     viewBox="0 0 24 24"
                   >
                     <path strokeLinecap="square" strokeLinejoin="miter" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />

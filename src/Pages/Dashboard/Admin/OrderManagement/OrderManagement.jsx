@@ -1,0 +1,156 @@
+import React, { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Package, Truck, CheckCircle, Clock, XCircle, Eye } from 'lucide-react';
+import useAxiosSecure from '../../../../hooks/useAxiosSecure';
+import DataLoading from '../../../../Components/Common/Loaders/DataLoading';
+import { toast } from 'react-toastify';
+import Swal from 'sweetalert2';
+
+const OrderManagement = () => {
+    const { privateApi } = useAxiosSecure();
+    const queryClient = useQueryClient();
+    const [statusFilter, setStatusFilter] = useState('all');
+
+    const { data: orders = [], isLoading } = useQuery({
+        queryKey: ['admin-orders'],
+        queryFn: async () => {
+            const res = await privateApi.get('/orders');
+            return res.data || res;
+        }
+    });
+
+    const updateStatusMutation = useMutation({
+        mutationFn: async ({ id, status }) => {
+            await privateApi.patch(`/orders/${id}`, { status });
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries(['admin-orders']);
+            toast.success('Order status updated');
+        },
+        onError: (err) => {
+            toast.error(err.message);
+        }
+    });
+
+    const handleStatusChange = (id, newStatus) => {
+        updateStatusMutation.mutate({ id, status: newStatus });
+    };
+
+    const getStatusColor = (status) => {
+        switch (status) {
+            case 'Pending': return 'bg-yellow-100 text-yellow-700';
+            case 'Confirmed': return 'bg-blue-100 text-blue-700';
+            case 'Shipped': return 'bg-purple-100 text-purple-700';
+            case 'Completed': return 'bg-green-100 text-green-700';
+            case 'Cancelled': return 'bg-red-100 text-red-700';
+            default: return 'bg-gray-100 text-gray-700';
+        }
+    };
+
+    const filteredOrders = statusFilter === 'all'
+        ? orders
+        : orders.filter(o => o.status === statusFilter);
+
+    // Sorting: Pending first, then by Date desc
+    const sortedOrders = [...filteredOrders].sort((a, b) => {
+        if (a.status === 'Pending' && b.status !== 'Pending') return -1;
+        if (a.status !== 'Pending' && b.status === 'Pending') return 1;
+        return new Date(b.createdAt) - new Date(a.createdAt);
+    });
+
+    if (isLoading) return <DataLoading />;
+
+    return (
+        <div className="w-full">
+            <div className="flex justify-between items-center mb-6">
+                <div>
+                    <h2 className="text-2xl font-bold text-amber-900">Orders</h2>
+                    <p className="text-amber-700 text-sm">Manage client orders and deliveries</p>
+                </div>
+            </div>
+
+            <div className="flex gap-2 overflow-x-auto pb-4 mb-2">
+                {['all', 'Pending', 'Confirmed', 'Shipped', 'Completed', 'Cancelled'].map(status => (
+                    <button
+                        key={status}
+                        onClick={() => setStatusFilter(status)}
+                        className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition ${statusFilter === status ? 'bg-amber-600 text-white shadow-md' : 'bg-white text-gray-600 border border-gray-200 hover:bg-amber-50'}`}
+                    >
+                        {status.charAt(0).toUpperCase() + status.slice(1)}
+                    </button>
+                ))}
+            </div>
+
+            <div className="bg-white rounded-xl shadow-sm border border-amber-100 overflow-hidden">
+                <table className="w-full text-left">
+                    <thead className="bg-amber-50 text-amber-900 text-sm font-semibold">
+                        <tr>
+                            <th className="p-4">Order ID</th>
+                            <th className="p-4">Customer</th>
+                            <th className="p-4">Items</th>
+                            <th className="p-4">Total</th>
+                            <th className="p-4">Date</th>
+                            <th className="p-4">Status</th>
+                            <th className="p-4 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-amber-50 text-sm">
+                        {sortedOrders.map(order => (
+                            <tr key={order._id} className="hover:bg-amber-50/50">
+                                <td className="p-4 font-mono text-gray-500">{order.orderNumber}</td>
+                                <td className="p-4">
+                                    <div className="font-medium text-gray-800">{order.buyerName || 'Guest'}</div>
+                                    <div className="text-xs text-gray-400">{order.buyerEmail}</div>
+                                </td>
+                                <td className="p-4">
+                                    <div className="flex -space-x-2">
+                                        {order.items.slice(0, 3).map((item, idx) => (
+                                            <div key={idx} className="w-8 h-8 rounded-full bg-gray-100 border-2 border-white flex items-center justify-center text-xs overflow-hidden" title={item.itemName}>
+                                                {/* Assuming item.productId populated or item has image stored? Model stores productId ref. 
+                                   Ideally store image in order item snapshot. For now just standard icon/placeholder if no image.
+                                */}
+                                                <Package size={14} className="text-gray-400" />
+                                            </div>
+                                        ))}
+                                        {order.items.length > 3 && (
+                                            <div className="w-8 h-8 rounded-full bg-gray-100 border-2 border-white flex items-center justify-center text-xs font-medium text-gray-500">
+                                                +{order.items.length - 3}
+                                            </div>
+                                        )}
+                                    </div>
+                                </td>
+                                <td className="p-4 font-bold text-gray-800">{order.finalPrice.toFixed(2)} ALL</td>
+                                <td className="p-4 text-gray-500">{new Date(order.createdAt).toLocaleDateString()}</td>
+                                <td className="p-4">
+                                    <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusColor(order.status)}`}>
+                                        {order.status}
+                                    </span>
+                                </td>
+                                <td className="p-4 text-right">
+                                    <select
+                                        value={order.status}
+                                        onChange={(e) => handleStatusChange(order._id, e.target.value)}
+                                        className="px-2 py-1 border border-gray-200 rounded text-xs bg-white focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                                    >
+                                        <option value="Pending">Pending</option>
+                                        <option value="Confirmed">Confirmed</option>
+                                        <option value="Shipped">Shipped</option>
+                                        <option value="Completed">Completed</option>
+                                        <option value="Cancelled">Cancelled</option>
+                                    </select>
+                                </td>
+                            </tr>
+                        ))}
+                        {sortedOrders.length === 0 && (
+                            <tr>
+                                <td colSpan="7" className="p-8 text-center text-gray-500">No orders found.</td>
+                            </tr>
+                        )}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    );
+};
+
+export default OrderManagement;

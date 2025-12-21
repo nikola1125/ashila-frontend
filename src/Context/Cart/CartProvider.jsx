@@ -12,67 +12,65 @@ const initialState = {
 };
 
 // Reducer function
+// Reducer function
 const cartReducer = (state, action) => {
   switch (action.type) {
     case 'ADD_ITEM': {
-      const existingItem = state.items.find(
-        (item) => item.id === action.payload.id
+      // Create a unique ID for the cart item based on product ID and variant ID
+      const newItemId = action.payload.variantId
+        ? `${action.payload.id}-${action.payload.variantId}`
+        : action.payload.id;
+
+      // Check if this specific item (product + variant) is already in cart
+      const existingItemIndex = state.items.findIndex(
+        (item) => (item.cartItemId || item.id) === newItemId
       );
 
-      if (existingItem) {
-        const updatedItems = state.items.map((item) =>
-          item.id === action.payload.id
+      let updatedItems;
+
+      if (existingItemIndex > -1) {
+        // Increment quantity for existing item
+        updatedItems = state.items.map((item, index) =>
+          index === existingItemIndex
             ? { ...item, quantity: item.quantity + 1 }
             : item
         );
-
-        const updatedTotalPrice = updatedItems.reduce(
-          (total, item) => total + Number(item.price) * item.quantity,
-          0
-        );
-        const updatedDiscountedTotal = updatedItems.reduce(
-          (total, item) => total + (item.discountedPrice ? Number(item.discountedPrice) * item.quantity : Number(item.price) * item.quantity),
-          0
-        );
-        const updatedTotalQuantity = updatedItems.reduce(
-          (qty, item) => qty + item.quantity,
-          0
-        );
-        return {
-          ...state,
-          items: updatedItems,
-          totalQuantity: updatedTotalQuantity,
-          totalPrice: updatedTotalPrice,
-          discountedTotal: updatedDiscountedTotal,
-        };
       } else {
-        const newItem = { ...action.payload, quantity: 1 };
-        const updatedItems = [...state.items, newItem];
-        const updatedTotalPrice = updatedItems.reduce(
-          (total, item) => total + Number(item.price) * item.quantity,
-          0
-        );
-        const updatedDiscountedTotal = updatedItems.reduce(
-          (total, item) => total + (item.discountedPrice ? Number(item.discountedPrice) * item.quantity : Number(item.price) * item.quantity),
-          0
-        );
-        const updatedTotalQuantity = updatedItems.reduce(
-          (qty, item) => qty + item.quantity,
-          0
-        );
-        return {
-          ...state,
-          items: updatedItems,
-          totalQuantity: updatedTotalQuantity,
-          totalPrice: updatedTotalPrice,
-          discountedTotal: updatedDiscountedTotal,
+        // Add new item with unique cartItemId
+        const newItem = {
+          ...action.payload,
+          cartItemId: newItemId,
+          quantity: 1
         };
+        updatedItems = [...state.items, newItem];
       }
+
+      // Calculate totals
+      const updatedTotalPrice = updatedItems.reduce(
+        (total, item) => total + Number(item.price) * item.quantity,
+        0
+      );
+      const updatedDiscountedTotal = updatedItems.reduce(
+        (total, item) => total + (item.discountedPrice ? Number(item.discountedPrice) * item.quantity : Number(item.price) * item.quantity),
+        0
+      );
+      const updatedTotalQuantity = updatedItems.reduce(
+        (qty, item) => qty + item.quantity,
+        0
+      );
+
+      return {
+        ...state,
+        items: updatedItems,
+        totalQuantity: updatedTotalQuantity,
+        totalPrice: updatedTotalPrice,
+        discountedTotal: updatedDiscountedTotal,
+      };
     }
 
     case 'REMOVE_ITEM': {
       const updatedItems = state.items.filter(
-        (item) => item.id !== action.payload.id
+        (item) => (item.cartItemId || item.id) !== action.payload.id
       );
       const updatedTotalPrice = updatedItems.reduce(
         (total, item) => total + Number(item.price) * item.quantity,
@@ -97,7 +95,7 @@ const cartReducer = (state, action) => {
 
     case 'UPDATE_QUANTITY': {
       const updatedItems = state.items.map((item) =>
-        item.id === action.payload.id
+        (item.cartItemId || item.id) === action.payload.id
           ? { ...item, quantity: action.payload.quantity }
           : item
       );
@@ -136,8 +134,14 @@ const cartReducer = (state, action) => {
   }
 };
 
+import VariantSelectionSidebar from '../../Components/Common/Products/VariantSelectionSidebar';
+import { useState } from 'react';
+
 // Cart Provider component
 export const CartProvider = ({ children }) => {
+  const [variantModalOpen, setVariantModalOpen] = useState(false);
+  const [currentProductForVariant, setCurrentProductForVariant] = useState(null);
+
   const [state, dispatch] = useReducer(cartReducer, initialState, (initial) => {
     try {
       const savedCart = localStorage.getItem(CART_KEY);
@@ -145,6 +149,22 @@ export const CartProvider = ({ children }) => {
         const parsed = JSON.parse(savedCart);
         // Ensure items is always an array
         if (parsed && parsed.items && Array.isArray(parsed.items)) {
+          // Sanitize items: Ensure every item has a cartItemId
+          parsed.items = parsed.items.map(item => {
+            if (!item.cartItemId) {
+              // Generate a cartItemId for legacy items
+              // Use id + variantId if available, otherwise just id
+              const newItemId = item.variantId
+                ? `${item.id}-${item.variantId}`
+                : item.id;
+
+              return {
+                ...item,
+                cartItemId: newItemId
+              };
+            }
+            return item;
+          });
           return parsed;
         }
       }
@@ -170,6 +190,25 @@ export const CartProvider = ({ children }) => {
       console.error('Invalid item added to cart:', item);
       return;
     }
+
+    // Check for product with variants without a selected variant
+    // We modify this to check if 'variants' array exists and has ANY items (> 0), AND 'variantId' is missing
+    if (item.variants && item.variants.length > 0 && !item.variantId) {
+      setCurrentProductForVariant(item);
+      setVariantModalOpen(true);
+      return;
+    }
+
+    // Default behavior for single variant or already selected variant
+    // If has 1 variant and no variantId, we might want to auto-select it here too, 
+    // but usually callers might have handled it. 
+    // Safest is to just proceed if it's 1 variant or legacy.
+
+    // Auto-resolve single variant if not specified? 
+    // ProductDetail handles this. Other pages might not.
+    // If logic is consistent: if 1 variant, treat as main product.
+    // Let's ensure we don't block 1-variant products.
+
     dispatch({ type: 'ADD_ITEM', payload: item });
   };
 
@@ -195,6 +234,31 @@ export const CartProvider = ({ children }) => {
     return Array.isArray(state.items) ? state.items : [];
   }, [state.items]);
 
+  const handleVariantSelect = (variant) => {
+    if (!currentProductForVariant) return;
+
+    // Construct the new item with variant details
+    const price = Number(variant.price);
+    const discount = Number(variant.discount || 0);
+    const itemToAdd = {
+      ...currentProductForVariant,
+      price: price,
+      discountedPrice: discount > 0 ? (price * (1 - discount / 100)).toFixed(2) : null,
+      size: variant.size,
+      variantId: variant._id,
+      // Ensure we keep original generic info
+      discount: discount
+    };
+
+    dispatch({ type: 'ADD_ITEM', payload: itemToAdd });
+    setVariantModalOpen(false);
+
+    // Delay clearing product to allow exit animation
+    setTimeout(() => {
+      setCurrentProductForVariant(null);
+    }, 400);
+  };
+
   const value = {
     items: cartItems,
     totalQuantity: state.totalQuantity || 0,
@@ -206,7 +270,70 @@ export const CartProvider = ({ children }) => {
     clearCart,
   };
 
-  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
+  return (
+    <CartContext.Provider value={value}>
+      {children}
+      {currentProductForVariant && (
+        <VariantSelectionSidebar
+          isOpen={variantModalOpen}
+          onClose={() => setVariantModalOpen(false)}
+          product={currentProductForVariant}
+          selectedVariant={null} // Always start fresh selection
+          onSelectVariant={(v) => {
+            // In sidebar we usually expect onSelectVariant to set local state.
+            // But here we might want to just let the sidebar handle its local state
+            // and when they click "Add to Cart" it calls our handler?
+            // VariantSelectionSidebar expects `selectedVariant` prop.
+            // If we pass null, it won't show selection.
+            // We need either a wrapper or the sidebar to manage state.
+            // Current Sidebar implementation manages its own 'selectedVariant' ?
+            // ANSWER: Sidebar takes `selectedVariant` and `onSelectVariant` as props. It doesn't manage it internally.
+            // So we need state here for temporary selection?
+            // Actually, the Sidebar is designed to be controlled.
+            // We can create a wrapper or just add state here.
+          }}
+        // Wait, if Sidebar is controlled, we need state for 'currentlySelectedInModal'.
+        // Let's modify the Sidebar usage slightly.
+        />
+      )}
+      {/* 
+         Re-evaluating Sidebar usage:
+         The Sidebar requires `selectedVariant` and `onSelectVariant` props.
+         So we need `[tempSelectedVariant, setTempSelectedVariant]` in CartProvider?
+         That pollutes CartProvider nicely.
+         Better: Create a wrapper component `GlobalVariantSidebar` that manages the selection state.
+      */}
+      <GlobalVariantSidebarWrapper
+        isOpen={variantModalOpen}
+        onClose={() => setVariantModalOpen(false)}
+        product={currentProductForVariant}
+        onConfirm={handleVariantSelect}
+      />
+    </CartContext.Provider>
+  );
+};
+
+// Internal wrapper to manage local selection state
+const GlobalVariantSidebarWrapper = ({ isOpen, onClose, product, onConfirm }) => {
+  const [selected, setSelected] = useState(null);
+
+  // Reset selected when opening
+  useEffect(() => {
+    if (isOpen) setSelected(null);
+  }, [isOpen, product]);
+
+  if (!product) return null;
+
+  return (
+    <VariantSelectionSidebar
+      isOpen={isOpen}
+      onClose={onClose}
+      product={product}
+      selectedVariant={selected}
+      onSelectVariant={setSelected}
+      onAddToCart={() => onConfirm(selected)}
+    />
+  );
 };
 
 export default CartProvider;

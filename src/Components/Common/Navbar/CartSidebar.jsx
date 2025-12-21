@@ -10,12 +10,12 @@ import { toast } from 'react-toastify';
 
 const CartSidebar = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
-  const { 
-    items, 
-    totalQuantity, 
-    discountedTotal, 
-    updateQuantity, 
-    removeItem 
+  const {
+    items,
+    totalQuantity,
+    discountedTotal,
+    updateQuantity,
+    removeItem
   } = useContext(CartContext);
   const { user } = useContext(AuthContext);
   const { publicApi, privateApi } = useAxiosSecure();
@@ -44,7 +44,7 @@ const CartSidebar = ({ isOpen, onClose }) => {
     document.addEventListener('mousedown', handleClickOutside);
     // Add touchstart for mobile responsiveness
     document.addEventListener('touchstart', handleClickOutside);
-    
+
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('touchstart', handleClickOutside);
@@ -79,19 +79,17 @@ const CartSidebar = ({ isOpen, onClose }) => {
   return (
     <>
       {/* Backdrop */}
-      <div 
-        className={`fixed inset-0 bg-black/50 z-[9998] transition-opacity duration-300 ${
-          isOpen ? 'opacity-100 visible' : 'opacity-0 invisible'
-        }`}
+      <div
+        className={`fixed inset-0 bg-black/50 z-[9998] transition-opacity duration-300 ${isOpen ? 'opacity-100 visible' : 'opacity-0 invisible'
+          }`}
         aria-hidden="true"
       />
 
       {/* Sidebar Panel */}
       <aside
         ref={sidebarRef}
-        className={`fixed top-0 right-0 h-full w-full sm:w-[400px] md:w-[450px] bg-white z-[9999] shadow-2xl transform transition-transform duration-300 ease-out flex flex-col ${
-          isOpen ? 'translate-x-0' : 'translate-x-full'
-        }`}
+        className={`fixed top-0 right-0 h-full w-full sm:w-[400px] md:w-[450px] bg-white z-[9999] shadow-2xl transform transition-transform duration-300 ease-out flex flex-col ${isOpen ? 'translate-x-0' : 'translate-x-full'
+          }`}
       >
         {/* Header */}
         <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-white shrink-0">
@@ -101,7 +99,7 @@ const CartSidebar = ({ isOpen, onClose }) => {
               Shporta (<span className="lux-price-number">{totalQuantity}</span>)
             </h2>
           </div>
-          <button 
+          <button
             onClick={onClose}
             className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-500 hover:text-gray-800"
             aria-label="Close cart"
@@ -121,7 +119,7 @@ const CartSidebar = ({ isOpen, onClose }) => {
                 <p className="text-gray-900 font-medium text-lg">Your cart is empty</p>
                 <p className="text-gray-500 text-sm mt-1">Looks like you haven't added anything yet.</p>
               </div>
-              <button 
+              <button
                 onClick={() => {
                   onClose();
                   navigate('/shop');
@@ -134,18 +132,18 @@ const CartSidebar = ({ isOpen, onClose }) => {
           ) : (
             <div className="space-y-6">
               {cartItems.map((item) => (
-                <div key={`${item.id}-${item.selectedSize || 'nosize'}`} className="flex gap-4 group">
+                <div key={item.cartItemId || item.id} className="flex gap-4 group">
                   {/* Product Image */}
-                  <div 
+                  <div
                     className="w-24 h-24 bg-gray-50 rounded-lg overflow-hidden border border-gray-100 shrink-0 cursor-pointer"
                     onClick={() => {
                       onClose();
                       navigate(`/product/${item.slug || item.id}`);
                     }}
                   >
-                    <img 
-                      src={getProductImage(item.image, item.id)} 
-                      alt={item.name} 
+                    <img
+                      src={getProductImage(item.image, item.id)}
+                      alt={item.name}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       onError={(e) => {
                         e.currentTarget.src = getProductImage(null, item.id);
@@ -157,7 +155,7 @@ const CartSidebar = ({ isOpen, onClose }) => {
                   <div className="flex-1 min-w-0 flex flex-col justify-between py-1">
                     <div>
                       <div className="flex justify-between items-start gap-2">
-                        <h3 
+                        <h3
                           className="text-[9px] sm:text-[12px] font-medium text-[#5A3F2A] leading-tight whitespace-normal break-words cursor-pointer hover:underline"
                           onClick={() => {
                             onClose();
@@ -166,8 +164,8 @@ const CartSidebar = ({ isOpen, onClose }) => {
                         >
                           {item.name}
                         </h3>
-                        <button 
-                          onClick={() => removeItem(item.id)}
+                        <button
+                          onClick={() => removeItem(item.cartItemId || item.id)}
                           className="text-gray-400 hover:text-red-500 transition-colors p-1 -mr-1"
                           aria-label="Remove item"
                         >
@@ -182,8 +180,8 @@ const CartSidebar = ({ isOpen, onClose }) => {
                     <div className="flex items-center justify-between mt-3">
                       {/* Quantity Controls */}
                       <div className="flex items-center border border-gray-200 rounded-lg bg-white">
-                        <button 
-                          onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
+                        <button
+                          onClick={() => updateQuantity(item.cartItemId || item.id, Math.max(1, item.quantity - 1))}
                           className="p-1.5 hover:bg-gray-50 text-gray-600 disabled:opacity-50"
                           disabled={item.quantity <= 1}
                         >
@@ -192,8 +190,8 @@ const CartSidebar = ({ isOpen, onClose }) => {
                         <span className="w-8 text-center text-sm font-medium text-gray-900 select-none">
                           {item.quantity}
                         </span>
-                        <button 
-                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                        <button
+                          onClick={() => updateQuantity(item.cartItemId || item.id, item.quantity + 1)}
                           className="p-1.5 hover:bg-gray-50 text-gray-600"
                         >
                           <Plus className="w-3.5 h-3.5" />
@@ -204,7 +202,7 @@ const CartSidebar = ({ isOpen, onClose }) => {
                       <div className="text-right">
                         {item.discountedPrice && Number(item.discountedPrice) < Number(item.price) ? (
                           <div className="flex flex-col items-end">
-                             <span className="lux-price-number font-semibold text-[#5A3F2A]">
+                            <span className="lux-price-number font-semibold text-[#5A3F2A]">
                               {(Number(item.discountedPrice) * item.quantity).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} ALL
                             </span>
                             <span className="lux-price-number text-xs text-gray-400 line-through">
@@ -240,11 +238,11 @@ const CartSidebar = ({ isOpen, onClose }) => {
               </p>
             </div>
 
-            <button 
+            <button
               onClick={handleCheckout}
               className="w-full py-3.5 bg-[#5A3F2A] hover:bg-[#4A3320] text-white font-semibold rounded-xl transition-all shadow-lg hover:shadow-xl active:scale-[0.98] uppercase tracking-wide text-sm"
             >
-              Checkout Securely
+              Checkout
             </button>
           </div>
         )}

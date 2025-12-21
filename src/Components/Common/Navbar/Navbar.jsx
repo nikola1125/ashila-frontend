@@ -11,25 +11,21 @@ import { useThrottle } from '../../../hooks/useThrottle';
 
 
 // Static navigation hierarchy for desktop & mobile menus
+// Static navigation hierarchy for desktop & mobile menus
 const NAV_CATEGORIES = [
   {
     id: 'face-care',
     label: 'Kujdesi per fytyren',
     groups: [
       {
-        id: 'face-all',
-        label: 'Te gjitha',
-        path: '/shop?category=kujdesi-per-fytyren',
-      },
-      {
         id: 'skin-type',
         label: 'Tipi i lekures',
         subitems: [
-          { id: 'skin-all', label: 'Te gjitha', path: '/shop?subcategory=tipi-i-lekures-te-gjitha' },
+          { id: 'skin-all', label: 'Te gjitha', path: '/shop?subcategory=te-gjitha' },
           { id: 'skin-normal', label: 'Lekure normale', path: '/shop?subcategory=lekure-normale' },
           { id: 'skin-oily', label: 'Lekure e yndyrshme', path: '/shop?subcategory=lekure-e-yndyrshme' },
           { id: 'skin-dry', label: 'Lekure e thate', path: '/shop?subcategory=lekure-e-thate' },
-          { id: 'skin-combination', label: 'Lekure mikes', path: '/shop?subcategory=lekure-mikes' },
+          { id: 'skin-combo', label: 'Lekure mikes', path: '/shop?subcategory=lekure-mikes' },
           { id: 'skin-sensitive', label: 'Lekure sensitive', path: '/shop?subcategory=lekure-sensitive' },
         ],
       },
@@ -37,38 +33,38 @@ const NAV_CATEGORIES = [
         id: 'skin-concerns',
         label: 'Problematikat e lekures',
         subitems: [
-          { id: 'concern-acne', label: 'Akne', path: '/shop?subcategory=akne' },
-          { id: 'concern-wrinkles', label: 'Rrudha', path: '/shop?subcategory=rrudha' },
-          { id: 'concern-hyperpigmentation', label: 'Hiperpigmentim', path: '/shop?subcategory=hiperpigmentim' },
-          { id: 'concern-oil-balance', label: 'Balancim yndyre/pore evidente', path: '/shop?subcategory=balancim-yndyre-pore-evidente' },
-          { id: 'concern-blackheads', label: 'Pika te zeza', path: '/shop?subcategory=pika-te-zeza' },
-          { id: 'concern-dehydration', label: 'Dehidratim', path: '/shop?subcategory=dehidratim' },
-          { id: 'concern-redness', label: 'Skuqje', path: '/shop?subcategory=skuqje' },
-          { id: 'concern-rosacea', label: 'Rozacea', path: '/shop?subcategory=rozacea' },
+          { id: 'acne', label: 'Akne', path: '/shop?subcategory=akne' },
+          { id: 'wrinkles', label: 'Rrudha', path: '/shop?subcategory=rrudha' },
+          { id: 'hyperpigmentation', label: 'Hiperpigmentim', path: '/shop?subcategory=hiperpigmentim' },
+          { id: 'pores', label: 'Balancim yndyre/pore evidente', path: '/shop?subcategory=balancim-yndyre-pore-evidente' },
+          { id: 'blackheads', label: 'Pika te zeza', path: '/shop?subcategory=pika-te-zeza' },
+          { id: 'dehydration', label: 'Dehidratim', path: '/shop?subcategory=dehidratim' },
+          { id: 'redness', label: 'Skuqje', path: '/shop?subcategory=skuqje' },
+          { id: 'rosacea', label: 'Rozacea', path: '/shop?subcategory=rozacea' },
         ],
       },
     ],
   },
   {
-    id: 'body-hair-care',
-    label: 'Kujdesi per trupin & floke',
+    id: 'body-hair',
+    label: 'Kujdesi per trupin dhe floke',
     groups: [
       {
-        id: 'body-care',
+        id: 'body',
         label: 'Per trupin',
         subitems: [
           { id: 'body-wash', label: 'Lares trupi', path: '/shop?subcategory=lares-trupi' },
-          { id: 'body-moisturizer', label: 'Hidratues trupi', path: '/shop?subcategory=hidratues-trupi' },
-          { id: 'body-scrub', label: 'Scrub  trupi', path: '/shop?subcategory=scrub-trupi' },
+          { id: 'body-moist', label: 'Hidratues trupi', path: '/shop?subcategory=hidratues-trupi' },
+          { id: 'body-scrub', label: 'Scrub trupi', path: '/shop?subcategory=scrub-trupi' },
           { id: 'body-acne', label: 'Akne ne trup', path: '/shop?subcategory=akne-ne-trup' },
-          { id: 'body-sun-care', label: 'Kujdesi ndaj diellit', path: '/shop?subcategory=kujdesi-ndaj-diellit' },
-          { id: 'body-deodorant', label: 'Deodorant', path: '/shop?subcategory=deodorant' },
+          { id: 'sun-care', label: 'Kujdesi ndaj diellit', path: '/shop?subcategory=kujdesi-ndaj-diellit' },
+          { id: 'deodorant', label: 'Deodorant', path: '/shop?subcategory=deodorant' },
           { id: 'body-oil', label: 'Vaj per trupin', path: '/shop?subcategory=vaj-per-trupin' },
-          { id: 'body-hands-feet', label: 'Krem per duart & kembet', path: '/shop?subcategory=krem-per-duart-dhe-kembet' },
+          { id: 'hands-feet', label: 'Krem per duart & kembet', path: '/shop?subcategory=krem-per-duart-dhe-kembet' },
         ],
       },
       {
-        id: 'hair-care',
+        id: 'hair',
         label: 'Per floke',
         subitems: [
           { id: 'scalp-dry', label: 'Skalp i thate', path: '/shop?subcategory=skalp-i-thate' },
@@ -84,64 +80,64 @@ const NAV_CATEGORIES = [
     label: 'Higjene',
     groups: [
       {
-        id: 'intimate-hygiene',
+        id: 'intimate',
         label: 'Higjena intime',
         subitems: [
           { id: 'intimate-wash', label: 'Lares intim', path: '/shop?subcategory=lares-intim' },
-          { id: 'intimate-wipes', label: 'Peceta', path: '/shop?subcategory=peceta-intime' },
+          { id: 'intimate-wipes', label: 'Peceta', path: '/shop?subcategory=peceta' },
         ],
       },
       {
-        id: 'oral-hygiene',
+        id: 'oral',
         label: 'Higjena orale',
         subitems: [
           { id: 'toothbrush', label: 'Furce dhembesh', path: '/shop?subcategory=furce-dhembesh' },
           { id: 'toothpaste', label: 'Paste dhembesh', path: '/shop?subcategory=paste-dhembesh' },
-          { id: 'dental-floss', label: 'Fill dentar/furca interdentare', path: '/shop?subcategory=fill-dentar-furca-interdentare' },
+          { id: 'floss', label: 'Fill dentar/furca interdentare', path: '/shop?subcategory=fill-dentar-furca-interdentare' },
         ],
       },
     ],
   },
   {
-    id: 'mother-child',
-    label: 'Nena & femije',
+    id: 'mom-child',
+    label: 'Nena dhe femije',
     groups: [
       {
-        id: 'mother-care',
+        id: 'mom',
         label: 'Kujdesi per nenen',
         subitems: [
           { id: 'pregnancy', label: 'Shtatezania', path: '/shop?subcategory=shtatezania' },
-          { id: 'postpartum', label: 'Pas lindjes', path: '/shop?subcategory=pas-lindjes' },
+          { id: 'post-birth', label: 'Pas lindjes', path: '/shop?subcategory=pas-lindjes' },
           { id: 'breastfeeding', label: 'Ushqyerja me gji', path: '/shop?subcategory=ushqyerja-me-gji' },
         ],
       },
       {
-        id: 'child-care',
-        label: 'Kujdesi per femijen',
-        path: '/shop?subcategory=kujdesi-per-femijen',
+        id: 'child',
+        label: 'Kujdesi per femije',
+        path: '/shop?category=nena-dhe-femije&subcategory=kujdesi-per-femije', // User gave no options, so linking to generic subcat
       },
     ],
   },
   {
     id: 'supplements',
-    label: 'Suplemente & vitamina',
+    label: 'Suplemente dhe vitamina',
     groups: [
       { id: 'vitamins', label: 'Vitamina', path: '/shop?subcategory=vitamina' },
-      { id: 'health-supplements', label: 'Suplemente per shendetin', path: '/shop?subcategory=suplemente-per-shendetin' },
+      { id: 'health-supp', label: 'Suplemente per shendetin', path: '/shop?subcategory=suplemente-per-shendetin' },
       { id: 'minerals', label: 'Minerale', path: '/shop?subcategory=minerale' },
       { id: 'herbal', label: 'Suplemente bimore', path: '/shop?subcategory=suplemente-bimore' },
     ],
   },
   {
-    id: 'health-monitors',
+    id: 'monitors',
     label: 'Monitoruesit e shendetit',
     groups: [
       { id: 'scales', label: 'Peshore', path: '/shop?subcategory=peshore' },
-      { id: 'bp-monitor', label: 'Aparat tensioni', path: '/shop?subcategory=aparat-tensioni' },
+      { id: 'bp', label: 'Aparat tensioni', path: '/shop?subcategory=aparat-tensioni' },
       { id: 'thermometer', label: 'Termometer', path: '/shop?subcategory=termometer' },
-      { id: 'diabetes-monitors', label: 'Monitorues te diabetit', path: '/shop?subcategory=monitorues-te-diabetit' },
+      { id: 'diabetes', label: 'Monitorues te diabetit', path: '/shop?subcategory=monitorues-te-diabetit' },
       { id: 'oximeter', label: 'Oksimeter', path: '/shop?subcategory=oksimeter' },
-      { id: 'orthopedic', label: 'Paisje ortopedike', path: '/shop?subcategory=paisje-ortopedike' },
+      { id: 'ortho', label: 'Paisje ortopedike', path: '/shop?subcategory=paisje-ortopedike' },
     ],
   },
 ];
@@ -187,7 +183,7 @@ const Navbar = () => {
   const isShopPage = location.pathname === '/shop' || location.pathname.startsWith('/product/') || location.pathname === '/cart' || location.pathname === '/sign-up';
   // Check if we're on login or register pages
   const isAuthPage = location.pathname === '/login' || location.pathname === '/sign-up';
-    // Fetch categories on mount (kept for compatibility, but navbar uses NAV_CATEGORIES)
+  // Fetch categories on mount (kept for compatibility, but navbar uses NAV_CATEGORIES)
   // Fetch categories on mount
   useEffect(() => {
     let mounted = true;
@@ -220,7 +216,7 @@ const Navbar = () => {
         rafId = requestAnimationFrame(() => {
           const scrollY = window.scrollY;
           const scrollDifference = Math.abs(scrollY - lastScrollY);
-          
+
           // On shop page, always show white navbar. On home page, show after scrolling
           if (isShopPage) {
             if (!lastState) {
@@ -231,23 +227,23 @@ const Navbar = () => {
             // Use slightly higher threshold for mobile but keep it responsive
             const scrollThreshold = isMobile ? 25 : 20;
             const newState = scrollY > scrollThreshold;
-            
+
             // Lower threshold for faster response
             const minScrollDiff = isMobile ? 8 : 10;
-            
+
             if (scrollDifference > minScrollDiff && newState !== lastState) {
               // Clear any pending state change
               if (stateChangeTimeout) {
                 clearTimeout(stateChangeTimeout);
               }
-              
+
               // Minimal delay on mobile for instant feel
               const delay = isMobile ? 10 : 0;
-              
+
               stateChangeTimeout = setTimeout(() => {
                 // Start transition lock
                 setIsTransitioning(true);
-                
+
                 setIsScrolled(newState);
                 lastScrollY = scrollY;
                 lastState = newState;
@@ -261,7 +257,7 @@ const Navbar = () => {
               lastScrollY = scrollY;
             }
           }
-          
+
           ticking = false;
         });
         ticking = true;
@@ -283,7 +279,7 @@ const Navbar = () => {
         lastState = initialState;
       }
     };
-    
+
     // Check after render with slight delay to ensure accurate scroll position
     setTimeout(checkInitialScroll, 100);
 
@@ -308,7 +304,7 @@ const Navbar = () => {
   // Handle scroll for mobile menu - defined at component level
   const handleMobileMenuScroll = useCallback(() => {
     if (!mobileMenuOpen) return;
-    
+
     const currentScrollY = window.scrollY;
     const lastScrollY = mobileMenuLastScrollY.current;
 
@@ -351,7 +347,7 @@ const Navbar = () => {
       window.removeEventListener("scroll", throttledHandleMobileMenuScroll);
       document.removeEventListener("click", handleClickOutside);
     };
-}, [mobileMenuOpen, throttledHandleMobileMenuScroll]);
+  }, [mobileMenuOpen, throttledHandleMobileMenuScroll]);
 
   // Close mobile menu on route change
   useEffect(() => {
@@ -371,9 +367,8 @@ const Navbar = () => {
   return (
     <>
       <header
-        className={`w-full fixed top-0 left-0 right-0 z-[100] transition-all duration-150 ${
-          isScrolled || isShopPage || isAuthPage ? 'bg-white shadow-md' : 'bg-transparent'
-        }`}
+        className={`w-full fixed top-0 left-0 right-0 z-[100] transition-all duration-150 ${isScrolled || isShopPage || isAuthPage ? 'bg-white shadow-md' : 'bg-transparent'
+          }`}
         style={{
           position: 'fixed',
           top: 0,
@@ -389,205 +384,198 @@ const Navbar = () => {
       >
         {/* Main navbar wrapper - match original size/behavior */}
         <div
-          className={`relative border-b transition-all duration-150 ${
-            isScrolled || isShopPage || isAuthPage
-              ? 'border-gray-200 bg-white'
-              : 'border-transparent bg-transparent'
-          }`}
+          className={`relative border-b transition-all duration-150 ${isScrolled || isShopPage || isAuthPage
+            ? 'border-gray-200 bg-white'
+            : 'border-transparent bg-transparent'
+            }`}
         >
           {/* Navbar content: fixed height 64px mobile, 80px desktop */}
           <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 xl:px-10">
             <div className="h-[64px] lg:h-[80px] flex items-center gap-1 lg:gap-3 lg:justify-between">
-            {/* Mobile: left menu button */}
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setMobileMenuOpen(!mobileMenuOpen);
-              }}
-              className={`lg:hidden transition-colors z-50 min-h-[44px] min-w-[44px] flex items-center justify-center ${
-                isScrolled || isAuthPage ? 'text-black hover:text-gray-700' : 'text-white hover:text-gray-200'
-              }`}
-              aria-label="Toggle menu"
-            >
-              {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
-            </button>
-
-            {/* Logo - centered on mobile, left on desktop */}
-            <div className="flex-1 flex justify-end lg:flex-none lg:justify-start items-center">
-              <div className="scale-75 lg:scale-75">
-                <Logo />
-              </div>
-            </div>
-
-            {/* Mobile: right search + cart */}
-            <div className="flex items-center gap-0.5 lg:hidden relative z-20">
+              {/* Mobile: left menu button */}
               <button
-                onClick={() => {
-                  navigate('/shop');
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setMobileMenuOpen(!mobileMenuOpen);
                 }}
-                className={`transition-colors min-h-[32px] min-w-[32px] flex items-center justify-center ${
-                  isScrolled || isAuthPage ? 'text-black hover:text-gray-700' : 'text-white hover:text-gray-200'
-                }`}
-                aria-label="Search"
+                className={`lg:hidden transition-colors z-50 min-h-[44px] min-w-[44px] flex items-center justify-center ${isScrolled || isAuthPage ? 'text-black hover:text-gray-700' : 'text-white hover:text-gray-200'
+                  }`}
+                aria-label="Toggle menu"
               >
-                <Search size={18} />
+                {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
               </button>
 
-              <Cart
-                isScrolled={isScrolled || isShopPage || isAuthPage}
-                onCartClick={() => setCartOpen(true)}
-                iconSize={18}
-                disabled={isTransitioning}
-                forceBlack={isScrolled || isShopPage || isAuthPage}
-              />
-            </div>
+              {/* Logo - centered on mobile, left on desktop */}
+              <div className="flex-1 flex justify-end lg:flex-none lg:justify-start items-center">
+                <div className="scale-75 lg:scale-75">
+                  <Logo />
+                </div>
+              </div>
 
-            {/* Desktop: main nav + desktop search/cart */}
-            <div className="hidden lg:flex items-center flex-1">
-              <div className="w-full flex items-center">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-center flex-wrap xl:flex-nowrap gap-2 xl:gap-4 xl:overflow-x-auto xl:whitespace-nowrap [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                    <NavLink
-                      to="/"
-                      onClick={() => {
-                        if (location.pathname === '/') {
-                          window.scrollTo({ top: 0, behavior: 'instant' });
-                        }
-                      }}
-                      className="font-medium transition-colors text-[10px] xl:text-xs uppercase tracking-wide whitespace-nowrap py-1 text-[#5A3F2A] hover:text-[#4A3320]"
-                    >
-                      Kreu
-                    </NavLink>
+              {/* Mobile: right search + cart */}
+              <div className="flex items-center gap-0.5 lg:hidden relative z-20">
+                <button
+                  onClick={() => {
+                    navigate('/shop');
+                  }}
+                  className={`transition-colors min-h-[32px] min-w-[32px] flex items-center justify-center ${isScrolled || isAuthPage ? 'text-black hover:text-gray-700' : 'text-white hover:text-gray-200'
+                    }`}
+                  aria-label="Search"
+                >
+                  <Search size={18} />
+                </button>
 
-                    {/* Desktop categories with hover mega-menu */}
-                    {NAV_CATEGORIES.map((category) => {
-                      const defaultPath =
-                        category.groups?.find((g) => g.path)?.path ||
-                        category.groups?.find((g) => g.subitems?.[0]?.path)?.subitems[0].path ||
-                        '/shop';
+                <Cart
+                  isScrolled={isScrolled || isShopPage || isAuthPage}
+                  onCartClick={() => setCartOpen(true)}
+                  iconSize={18}
+                  disabled={isTransitioning}
+                  forceBlack={isScrolled || isShopPage || isAuthPage}
+                />
+              </div>
 
-                      return (
-                        <div
-                          key={category.id}
-                          className="relative group"
-                          onMouseEnter={() => {
-                            cancelDesktopMenuClose();
-                            setOpenCategoryId(category.id);
-                            setDesktopOpenGroupId(null);
-                          }}
-                          onMouseLeave={() => {
-                            scheduleDesktopMenuClose();
-                          }}
-                        >
-                          <button
-                            onClick={() => navigate(defaultPath)}
-                            className="flex items-center gap-1 font-medium transition-colors text-[10px] xl:text-xs uppercase tracking-wide whitespace-nowrap py-1 text-[#5A3F2A] hover:text-[#4A3320]"
+              {/* Desktop: main nav + desktop search/cart */}
+              <div className="hidden lg:flex items-center flex-1">
+                <div className="w-full flex items-center">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-center flex-wrap xl:flex-nowrap gap-2 xl:gap-4">
+                      <NavLink
+                        to="/"
+                        onClick={() => {
+                          if (location.pathname === '/') {
+                            window.scrollTo({ top: 0, behavior: 'instant' });
+                          }
+                        }}
+                        className="font-medium transition-colors text-[10px] xl:text-xs uppercase tracking-wide whitespace-nowrap py-1 text-[#5A3F2A] hover:text-[#4A3320]"
+                      >
+                        Kreu
+                      </NavLink>
+
+                      {/* Desktop categories with hover mega-menu */}
+                      {NAV_CATEGORIES.map((category) => {
+                        const defaultPath =
+                          category.groups?.find((g) => g.path)?.path ||
+                          category.groups?.find((g) => g.subitems?.[0]?.path)?.subitems[0].path ||
+                          '/shop';
+
+                        return (
+                          <div
+                            key={category.id}
+                            className="relative group"
+                            onMouseEnter={() => {
+                              cancelDesktopMenuClose();
+                              setOpenCategoryId(category.id);
+                              setDesktopOpenGroupId(null);
+                            }}
+                            onMouseLeave={() => {
+                              scheduleDesktopMenuClose();
+                            }}
                           >
-                            {category.label}
-                            <ChevronDown className="w-3 h-3" />
-                          </button>
-
-                          {category.groups && category.groups.length > 0 && (
-                            <div
-                              className={`absolute left-0 mt-2 bg-white rounded-none shadow-md border border-gray-200 py-0 z-[120] transform transition-all duration-200 ${
-                                openCategoryId === category.id ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2'
-                              }`}
-                              onMouseEnter={() => {
-                                cancelDesktopMenuClose();
-                                setOpenCategoryId(category.id);
-                              }}
-                              onMouseLeave={() => {
-                                scheduleDesktopMenuClose();
-                              }}
+                            <button
+                              onClick={() => navigate(defaultPath)}
+                              className="flex items-center gap-1 font-medium transition-colors text-[10px] xl:text-xs uppercase tracking-wide whitespace-nowrap py-1 text-[#5A3F2A] hover:text-[#4A3320]"
                             >
-                              <div className="relative">
-                                <div className="w-[260px]">
-                                  {category.groups.map((group) => (
-                                    <div key={group.id} className="relative">
-                                      <button
-                                        onMouseEnter={() => {
-                                          if (group.subitems && group.subitems.length > 0) {
-                                            setDesktopOpenGroupId(group.id);
-                                          } else {
-                                            setDesktopOpenGroupId(null);
-                                          }
-                                        }}
-                                        onClick={() => {
-                                          if (group.path) {
-                                            navigate(group.path);
-                                            setOpenCategoryId(null);
-                                            setDesktopOpenGroupId(null);
-                                          } else if (!group.subitems || group.subitems.length === 0) {
-                                            setOpenCategoryId(null);
-                                            setDesktopOpenGroupId(null);
-                                          }
-                                        }}
-                                        className={`flex items-center justify-between w-full text-left text-[11px] py-2 px-5 leading-tight transition-colors duration-150 ${
-                                          desktopOpenGroupId === group.id
+                              {category.label}
+                              <ChevronDown className="w-3 h-3" />
+                            </button>
+
+                            {category.groups && category.groups.length > 0 && (
+                              <div
+                                className={`absolute left-0 mt-2 bg-white rounded-none shadow-md border border-gray-200 py-0 z-[120] transform transition-all duration-200 ${openCategoryId === category.id ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2'
+                                  }`}
+                                onMouseEnter={() => {
+                                  cancelDesktopMenuClose();
+                                  setOpenCategoryId(category.id);
+                                }}
+                                onMouseLeave={() => {
+                                  scheduleDesktopMenuClose();
+                                }}
+                              >
+                                <div className="relative">
+                                  <div className="w-[260px]">
+                                    {category.groups.map((group) => (
+                                      <div key={group.id} className="relative">
+                                        <button
+                                          onMouseEnter={() => {
+                                            if (group.subitems && group.subitems.length > 0) {
+                                              setDesktopOpenGroupId(group.id);
+                                            } else {
+                                              setDesktopOpenGroupId(null);
+                                            }
+                                          }}
+                                          onClick={() => {
+                                            if (group.path) {
+                                              navigate(group.path);
+                                              setOpenCategoryId(null);
+                                              setDesktopOpenGroupId(null);
+                                            } else if (!group.subitems || group.subitems.length === 0) {
+                                              setOpenCategoryId(null);
+                                              setDesktopOpenGroupId(null);
+                                            }
+                                          }}
+                                          className={`flex items-center justify-between w-full text-left text-[11px] py-2 px-5 leading-tight transition-colors duration-150 ${desktopOpenGroupId === group.id
                                             ? 'bg-gray-50 text-[#5A3F2A]'
                                             : 'text-[#6B4B3A] hover:bg-gray-50 hover:text-[#5A3F2A]'
-                                        }`}
-                                      >
-                                        <span>{group.label}</span>
-                                        {group.subitems && group.subitems.length > 0 && (
-                                          <ChevronRight
-                                            className={`w-4 h-4 ${
-                                              desktopOpenGroupId === group.id ? 'text-[#5A3F2A]' : 'text-gray-400'
                                             }`}
-                                          />
-                                        )}
-                                      </button>
-
-                                      {group.subitems && group.subitems.length > 0 && (
-                                        <div
-                                          className={`absolute top-0 left-full ml-4 w-[320px] z-[130] transition-all duration-150 ${
-                                            openCategoryId === category.id && desktopOpenGroupId === group.id
-                                              ? 'opacity-100 visible'
-                                              : 'opacity-0 invisible pointer-events-none'
-                                          }`}
-                                          onMouseEnter={() => {
-                                            cancelDesktopMenuClose();
-                                            setOpenCategoryId(category.id);
-                                            setDesktopOpenGroupId(group.id);
-                                          }}
-                                          onMouseLeave={() => {
-                                            scheduleDesktopMenuClose();
-                                          }}
                                         >
-                                          <div className="absolute top-0 -left-4 w-4 h-full" />
-                                          <div className="bg-white rounded-none shadow-md border border-gray-200 py-0">
-                                            <ul className="space-y-0">
-                                              {group.subitems.map((item) => (
-                                                <li key={item.id}>
-                                                  <button
-                                                    onClick={() => {
-                                                      navigate(item.path || '/shop');
-                                                      setOpenCategoryId(null);
-                                                      setDesktopOpenGroupId(null);
-                                                    }}
-                                                    className="text-[11px] text-[#6B4B3A] hover:text-[#5A3F2A] hover:bg-gray-50 w-full text-left py-2 px-5 leading-tight transition-colors duration-150"
-                                                  >
-                                                    {item.label}
-                                                  </button>
-                                                </li>
-                                              ))}
-                                            </ul>
+                                          <span>{group.label}</span>
+                                          {group.subitems && group.subitems.length > 0 && (
+                                            <ChevronRight
+                                              className={`w-4 h-4 ${desktopOpenGroupId === group.id ? 'text-[#5A3F2A]' : 'text-gray-400'
+                                                }`}
+                                            />
+                                          )}
+                                        </button>
+
+                                        {group.subitems && group.subitems.length > 0 && (
+                                          <div
+                                            className={`absolute top-0 left-full ml-2 w-[320px] z-[130] transition-all duration-300 ease-out ${openCategoryId === category.id && desktopOpenGroupId === group.id
+                                              ? 'opacity-100 visible translate-x-0'
+                                              : 'opacity-0 invisible pointer-events-none -translate-x-2'
+                                              }`}
+                                            onMouseEnter={() => {
+                                              cancelDesktopMenuClose();
+                                              setOpenCategoryId(category.id);
+                                              setDesktopOpenGroupId(group.id);
+                                            }}
+                                            onMouseLeave={() => {
+                                              scheduleDesktopMenuClose();
+                                            }}
+                                          >
+                                            <div className="absolute top-0 -left-4 w-4 h-full" />
+                                            <div className="bg-white rounded-none shadow-md border border-gray-200 py-0">
+                                              <ul className="space-y-0">
+                                                {group.subitems.map((item) => (
+                                                  <li key={item.id}>
+                                                    <button
+                                                      onClick={() => {
+                                                        navigate(item.path || '/shop');
+                                                        setOpenCategoryId(null);
+                                                        setDesktopOpenGroupId(null);
+                                                      }}
+                                                      className="text-[11px] text-[#6B4B3A] hover:text-[#5A3F2A] hover:bg-gray-50 w-full text-left py-2 px-5 leading-tight transition-colors duration-150"
+                                                    >
+                                                      {item.label}
+                                                    </button>
+                                                  </li>
+                                                ))}
+                                              </ul>
+                                            </div>
                                           </div>
-                                        </div>
-                                      )}
-                                    </div>
-                                  ))}
+                                        )}
+                                      </div>
+                                    ))}
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
 
-                <div className="flex items-center ml-auto lg:mr-0 flex-shrink-0">
+                  <div className="flex items-center ml-auto lg:mr-0 flex-shrink-0">
                     <button
                       onClick={() => {
                         navigate(user ? '/dashboard' : '/login');
@@ -603,7 +591,7 @@ const Navbar = () => {
                         onClick={() => {
                           navigate('/shop');
                         }}
-                        className="transition-colors min-h-[36px] min-w-[36px] flex items-center justify-center mr-3 text-[#5A3F2A] hover:text-[#4A3320]"
+                        className={`transition-colors min-h-[36px] min-w-[36px] flex items-center justify-center mr-3 ${isScrolled || isShopPage || isAuthPage ? 'text-[#5A3F2A] hover:text-[#4A3320]' : 'text-white hover:text-gray-200'}`}
                         aria-label="Search"
                       >
                         <Search size={18} />
@@ -620,17 +608,15 @@ const Navbar = () => {
 
         {/* Mobile slide-down menu */}
         <div
-          className={`lg:hidden fixed top-full left-0 right-0 border-t border-gray-200 bg-white overflow-hidden z-40 shadow-lg transition-all duration-300 ease-out ${
-            mobileMenuOpen
-              ? 'opacity-100 translate-y-0 max-h-[calc(100vh-120px)] visible'
-              : 'opacity-0 -translate-y-8 max-h-0 invisible pointer-events-none'
-          }`}
+          className={`lg:hidden fixed top-full left-0 right-0 border-t border-gray-200 bg-white overflow-hidden z-40 shadow-lg transition-all duration-300 ease-out ${mobileMenuOpen
+            ? 'opacity-100 translate-y-0 max-h-[calc(100vh-120px)] visible'
+            : 'opacity-0 -translate-y-8 max-h-0 invisible pointer-events-none'
+            }`}
           style={{ top: '100%' }}
         >
           <div
-            className={`py-4 flex flex-col gap-0 max-h-[calc(100vh-140px)] overflow-y-auto ${
-              mobileMenuOpen ? 'opacity-100' : 'opacity-0'
-            }`}
+            className={`py-4 flex flex-col gap-0 max-h-[calc(100vh-140px)] overflow-y-auto ${mobileMenuOpen ? 'opacity-100' : 'opacity-0'
+              }`}
           >
             <NavLink
               to="/"
@@ -660,9 +646,8 @@ const Navbar = () => {
                 >
                   <span>{category.label}</span>
                   <ChevronRight
-                    className={`w-4 h-4 transition-transform ${
-                      mobileOpenCategoryId === category.id ? 'rotate-90' : ''
-                    }`}
+                    className={`w-4 h-4 transition-transform ${mobileOpenCategoryId === category.id ? 'rotate-90' : ''
+                      }`}
                   />
                 </button>
 
@@ -689,9 +674,8 @@ const Navbar = () => {
                           <span className="text-[13px]">{group.label}</span>
                           {group.subitems && group.subitems.length > 0 && (
                             <ChevronRight
-                              className={`w-4 h-4 transition-transform ${
-                                mobileOpenGroupId === group.id ? 'rotate-90' : ''
-                              }`}
+                              className={`w-4 h-4 transition-transform ${mobileOpenGroupId === group.id ? 'rotate-90' : ''
+                                }`}
                             />
                           )}
                         </button>

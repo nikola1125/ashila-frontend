@@ -9,7 +9,7 @@ const Hero = () => {
   return (
     <section
       ref={heroRef}
-      className="relative w-full h-[60vh] sm:h-[70vh] md:h-screen overflow-hidden z-0 bg-cover bg-center"
+      className="relative w-full h-[60vh] sm:h-[70vh] md:h-screen overflow-hidden z-0 bg-cover bg-center bg-gray-100"
       style={{ 
         opacity: 1,
         transform: 'translateZ(0)',
@@ -23,10 +23,11 @@ const Hero = () => {
         right: 0,
         touchAction: 'pan-y',
         WebkitOverflowScrolling: 'touch',
-        overscrollBehavior: 'contain'
+        overscrollBehavior: 'contain',
+        backgroundImage: 'url(/images/background.png)'
       }}
     >
-      {/* Background video */}
+      {/* Background video with fallback */}
       <video
         className="absolute inset-0 w-full h-full object-cover"
         src="/images/backg.mp4"
@@ -36,6 +37,10 @@ const Hero = () => {
         playsInline
         preload="auto"
         aria-hidden="true"
+        onError={(e) => {
+          console.log('Video failed to load, using background image');
+          e.target.style.display = 'none';
+        }}
       />
       {/* Dark overlay */}
       <div 

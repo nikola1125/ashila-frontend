@@ -17,6 +17,15 @@ const Shop = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showFilters, setShowFilters] = useState(false); // Hidden on mobile by default, visible on desktop
 
+  // Get all medicines - Moved to top to be available for filterOptions
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['medicines'],
+    queryFn: () => publicApi.get('/medicines'),
+    staleTime: 2 * 60 * 1000, // 2 minutes - will use default refetchOnMount
+  });
+
+  const allMedicines = data?.result || [];
+
   // Category expansion states
   const [expandedCategories, setExpandedCategories] = useState({
     problematica: false,
@@ -25,7 +34,7 @@ const Shop = () => {
     bodyHair: false,
     hygiene: false,
     motherChild: false,
-    sexualHealth: false,
+
     supplements: false,
     healthMonitors: false,
   });
@@ -45,93 +54,131 @@ const Shop = () => {
   const [selectedBodyHair, setSelectedBodyHair] = useState([]);
   const [selectedHygiene, setSelectedHygiene] = useState([]);
   const [selectedMotherChild, setSelectedMotherChild] = useState([]);
-  const [selectedSexualHealth, setSelectedSexualHealth] = useState([]);
+
   const [selectedSupplements, setSelectedSupplements] = useState([]);
   const [selectedHealthMonitors, setSelectedHealthMonitors] = useState([]);
 
-  // Filter options based on navbar subcategories
-  const filterOptions = {
-    problematica: [
-      { id: 'akne', label: 'Akne', count: 0 },
-      { id: 'rrudha', label: 'Rrudha', count: 0 },
-      { id: 'hiperpigmentim', label: 'Hiperpigmentim', count: 0 },
-      { id: 'balancim-yndyre-pore-evidente', label: 'Balancim yndyre/pore evidente', count: 0 },
-      { id: 'pika-te-zeza', label: 'Pikat e zeza', count: 0 },
-      { id: 'dehidratim', label: 'Dehidratim', count: 0 },
-      { id: 'skuqje', label: 'Skuqje', count: 0 },
-      { id: 'rozacea', label: 'Rozacea', count: 0 },
-    ],
-    skinTypes: [
-      { id: 'lekure-normale', label: 'Lëkurë normale', count: 0 },
-      { id: 'lekure-e-yndyrshme', label: 'Lëkurë e yndyrshme', count: 0 },
-      { id: 'lekure-e-thate', label: 'Lëkurë e thate', count: 0 },
-      { id: 'lekure-mikes', label: 'Lëkurë mikes', count: 0 },
-      { id: 'lekure-sensitive', label: 'Lëkurë sensitive', count: 0 },
-    ],
-    bodyHair: [
-      { id: 'lares-trupi', label: 'Larës trupi', count: 0 },
-      { id: 'hidratues-trupi', label: 'Hidratues trupi', count: 0 },
-      { id: 'scrub-trupi', label: 'Scrub trupi', count: 0 },
-      { id: 'akne-ne-trup', label: 'Akne ne trup', count: 0 },
-      { id: 'kujdesi-ndaj-diellit', label: 'Kujdesi ndaj diellit', count: 0 },
-      { id: 'deodorant', label: 'Deodorant', count: 0 },
-      { id: 'vaj-per-trupin', label: 'Vaj per trupin', count: 0 },
-      { id: 'krem-per-duart-dhe-kembet', label: 'Krem per duart & kembet', count: 0 },
-      { id: 'skalp-i-thate', label: 'Skalp i thate', count: 0 },
-      { id: 'skalp-i-yndyrshem', label: 'Skalp i yndyrshem', count: 0 },
-      { id: 'skalp-sensitive', label: 'Skalp sensitive', count: 0 },
-      { id: 'renia-e-flokut', label: 'Renia e flokut', count: 0 },
-    ],
-    hygiene: [
-      { id: 'lares-intim', label: 'Larës intim', count: 0 },
-      { id: 'peceta-intime', label: 'Peceta', count: 0 },
-      { id: 'furce-dhembesh', label: 'Furce dhembesh', count: 0 },
-      { id: 'paste-dhembesh', label: 'Paste dhembesh', count: 0 },
-      { id: 'fill-dentar-furca-interdentare', label: 'Fill dentar/furca interdentare', count: 0 },
-    ],
-    motherChild: [
-      { id: 'shtatezania', label: 'Shtatezania', count: 0 },
-      { id: 'pas-lindjes', label: 'Pas lindjes', count: 0 },
-      { id: 'ushqyerja-me-gji', label: 'Ushqyerja me gji', count: 0 },
-      { id: 'kujdesi-per-femijen', label: 'Kujdesi per femijen', count: 0 },
-    ],
-    sexualHealth: [
-      { id: 'perzervativ', label: 'Perzervativ', count: 0 },
-      { id: 'lubrifikante', label: 'Lubrifikante', count: 0 },
-      { id: 'test-shtatezanie-fertiliteti', label: 'Test shtatezanie/fertiliteti', count: 0 },
-    ],
-    supplements: [
-      { id: 'vitamina', label: 'Vitamina', count: 0 },
-      { id: 'suplemente-per-shendetin', label: 'Suplemente per shendetin', count: 0 },
-      { id: 'minerale', label: 'Minerale', count: 0 },
-      { id: 'suplemente-bimore', label: 'Suplemente bimore', count: 0 },
-    ],
-    healthMonitors: [
-      { id: 'peshore', label: 'Peshore', count: 0 },
-      { id: 'aparat-tensioni', label: 'Aparat tensioni', count: 0 },
-      { id: 'termometer', label: 'Termometer', count: 0 },
-      { id: 'monitorues-te-diabetit', label: 'Monitorues te diabetit', count: 0 },
-      { id: 'oksimeter', label: 'Oksimeter', count: 0 },
-      { id: 'paisje-ortopedike', label: 'Paisje ortopedike', count: 0 },
-    ],
-    productTypes: [
-      { id: 'acide', label: 'Acide', count: 0 },
-      { id: 'acne-patches', label: 'Acne patches', count: 0 },
-      { id: 'eye-patches', label: 'Eye patches', count: 0 },
-      { id: 'hidratues', label: 'Hidratues', count: 0 },
-      { id: 'krem-dielli', label: 'Krem dielli', count: 0 },
-      { id: 'krem-sysh', label: 'Krem sysh', count: 0 },
-      { id: 'lare-ujor', label: 'Larës ujor', count: 0 },
-      { id: 'lare-vajor', label: 'Larës vajor', count: 0 },
-      { id: 'lipbalm', label: 'Lipbalm', count: 0 },
-      { id: 'maske', label: 'Maskë', count: 0 },
-      { id: 'retinoide', label: 'Retinoide', count: 0 },
-      { id: 'serum', label: 'Serum', count: 0 },
-      { id: 'set-produkte', label: 'Set me produkte', count: 0 },
-      { id: 'shampo-flokesh', label: 'Shampo flokësh', count: 0 },
-      { id: 'spot-treatment', label: 'Spot treatment', count: 0 },
-    ],
-  };
+  // Helper helper to normalize text for comparison
+  const normalizeText = useCallback((text) => text ? text.toLowerCase().replace(/[^a-z0-9]/g, '') : '', []);
+
+  // Calculate dynamic filter counts based on allMedicines
+  const filterOptions = useMemo(() => {
+    // Initial counts object
+    const counts = {};
+
+    // Initialize counts to 0
+    const filterGroups = {
+      problematica: ['akne', 'rrudha', 'hiperpigmentim', 'balancim-yndyre-pore-evidente', 'pika-te-zeza', 'dehidratim', 'skuqje', 'rozacea'],
+      skinTypes: ['lekure-normale', 'lekure-e-yndyrshme', 'lekure-e-thate', 'lekure-mikes', 'lekure-sensitive'],
+      bodyHair: ['lares-trupi', 'hidratues-trupi', 'scrub-trupi', 'akne-ne-trup', 'kujdesi-ndaj-diellit', 'deodorant', 'vaj-per-trupin', 'krem-per-duart-dhe-kembet', 'skalp-i-thate', 'skalp-i-yndyrshem', 'skalp-sensitive', 'renia-e-flokut'],
+      hygiene: ['lares-intim', 'peceta-intime', 'furce-dhembesh', 'paste-dhembesh', 'fill-dentar-furca-interdentare'],
+      motherChild: ['shtatezania', 'pas-lindjes', 'ushqyerja-me-gji', 'kujdesi-per-femijen'],
+      supplements: ['vitamina', 'suplemente-per-shendetin', 'minerale', 'suplemente-bimore'],
+      healthMonitors: ['peshore', 'aparat-tensioni', 'termometer', 'monitorues-te-diabetit', 'oksimeter', 'paisje-ortopedike'],
+      productTypes: ['acide', 'acne-patches', 'eye-patches', 'hidratues', 'krem-dielli', 'krem-sysh', 'lare-ujor', 'lare-vajor', 'lipbalm', 'maske', 'retinoide', 'serum', 'set-produkte', 'shampo-flokesh', 'spot-treatment']
+    };
+
+    // Helper to check match (reused logic from matchesFilter but for counting)
+    const checkMatch = (item, filterId) => {
+      const normalizedFilter = normalizeText(filterId);
+      const itemSub = normalizeText(item.subcategory);
+      const itemOpt = normalizeText(item.option);
+      const itemDesc = normalizeText(item.description);
+      const itemType = normalizeText(item.bestsellerCategory);
+
+      return itemSub.includes(normalizedFilter) ||
+        itemOpt.includes(normalizedFilter) ||
+        (itemDesc && itemDesc.includes(normalizedFilter)) ||
+        itemType.includes(normalizedFilter);
+    };
+
+    // Calculate actual counts
+    allMedicines.forEach(item => {
+      Object.values(filterGroups).flat().forEach(filterId => {
+        if (checkMatch(item, filterId)) {
+          counts[filterId] = (counts[filterId] || 0) + 1;
+        }
+      });
+    });
+
+    return {
+      problematica: [
+        { id: 'akne', label: 'Akne' },
+        { id: 'rrudha', label: 'Rrudha' },
+        { id: 'hiperpigmentim', label: 'Hiperpigmentim' },
+        { id: 'balancim-yndyre-pore-evidente', label: 'Balancim yndyre/pore evidente' },
+        { id: 'pika-te-zeza', label: 'Pikat e zeza' },
+        { id: 'dehidratim', label: 'Dehidratim' },
+        { id: 'skuqje', label: 'Skuqje' },
+        { id: 'rozacea', label: 'Rozacea' },
+      ].map(opt => ({ ...opt, count: counts[opt.id] || 0 })),
+      skinTypes: [
+        { id: 'lekure-normale', label: 'Lëkurë normale' },
+        { id: 'lekure-e-yndyrshme', label: 'Lëkurë e yndyrshme' },
+        { id: 'lekure-e-thate', label: 'Lëkurë e thate' },
+        { id: 'lekure-mikes', label: 'Lëkurë mikes' },
+        { id: 'lekure-sensitive', label: 'Lëkurë sensitive' },
+      ].map(opt => ({ ...opt, count: counts[opt.id] || 0 })),
+      bodyHair: [
+        { id: 'lares-trupi', label: 'Larës trupi' },
+        { id: 'hidratues-trupi', label: 'Hidratues trupi' },
+        { id: 'scrub-trupi', label: 'Scrub trupi' },
+        { id: 'akne-ne-trup', label: 'Akne ne trup' },
+        { id: 'kujdesi-ndaj-diellit', label: 'Kujdesi ndaj diellit' },
+        { id: 'deodorant', label: 'Deodorant' },
+        { id: 'vaj-per-trupin', label: 'Vaj per trupin' },
+        { id: 'krem-per-duart-dhe-kembet', label: 'Krem per duart & kembet' },
+        { id: 'skalp-i-thate', label: 'Skalp i thate' },
+        { id: 'skalp-i-yndyrshem', label: 'Skalp i yndyrshem' },
+        { id: 'skalp-sensitive', label: 'Skalp sensitive' },
+        { id: 'renia-e-flokut', label: 'Renia e flokut' },
+      ].map(opt => ({ ...opt, count: counts[opt.id] || 0 })),
+      hygiene: [
+        { id: 'lares-intim', label: 'Larës intim' },
+        { id: 'peceta-intime', label: 'Peceta' },
+        { id: 'furce-dhembesh', label: 'Furce dhembesh' },
+        { id: 'paste-dhembesh', label: 'Paste dhembesh' },
+        { id: 'fill-dentar-furca-interdentare', label: 'Fill dentar/furca interdentare' },
+      ].map(opt => ({ ...opt, count: counts[opt.id] || 0 })),
+      motherChild: [
+        { id: 'shtatezania', label: 'Shtatezania' },
+        { id: 'pas-lindjes', label: 'Pas lindjes' },
+        { id: 'ushqyerja-me-gji', label: 'Ushqyerja me gji' },
+        { id: 'kujdesi-per-femijen', label: 'Kujdesi per femijen' },
+      ].map(opt => ({ ...opt, count: counts[opt.id] || 0 })),
+      supplements: [
+        { id: 'vitamina', label: 'Vitamina' },
+        { id: 'suplemente-per-shendetin', label: 'Suplemente per shendetin' },
+        { id: 'minerale', label: 'Minerale' },
+        { id: 'suplemente-bimore', label: 'Suplemente bimore' },
+      ].map(opt => ({ ...opt, count: counts[opt.id] || 0 })),
+      healthMonitors: [
+        { id: 'peshore', label: 'Peshore' },
+        { id: 'aparat-tensioni', label: 'Aparat tensioni' },
+        { id: 'termometer', label: 'Termometer' },
+        { id: 'monitorues-te-diabetit', label: 'Monitorues te diabetit' },
+        { id: 'oksimeter', label: 'Oksimeter' },
+        { id: 'paisje-ortopedike', label: 'Paisje ortopedike' },
+      ].map(opt => ({ ...opt, count: counts[opt.id] || 0 })),
+      productTypes: [
+        { id: 'acide', label: 'Acide' },
+        { id: 'acne-patches', label: 'Acne patches' },
+        { id: 'eye-patches', label: 'Eye patches' },
+        { id: 'hidratues', label: 'Hidratues' },
+        { id: 'krem-dielli', label: 'Krem dielli' },
+        { id: 'krem-sysh', label: 'Krem sysh' },
+        { id: 'lare-ujor', label: 'Larës ujor' },
+        { id: 'lare-vajor', label: 'Larës vajor' },
+        { id: 'lipbalm', label: 'Lipbalm' },
+        { id: 'maske', label: 'Maskë' },
+        { id: 'retinoide', label: 'Retinoide' },
+        { id: 'serum', label: 'Serum' },
+        { id: 'set-produkte', label: 'Set me produkte' },
+        { id: 'shampo-flokesh', label: 'Shampo flokësh' },
+        { id: 'spot-treatment', label: 'Spot treatment' },
+      ].map(opt => ({ ...opt, count: counts[opt.id] || 0 })),
+    };
+  }, [allMedicines, normalizeText]);
 
   // Handle filter toggles
   const toggleFilter = useCallback((filterType, id) => {
@@ -157,10 +204,6 @@ const Shop = () => {
       );
     } else if (filterType === 'motherChild') {
       setSelectedMotherChild(prev =>
-        prev.includes(id) ? prev.filter(f => f !== id) : [...prev, id]
-      );
-    } else if (filterType === 'sexualHealth') {
-      setSelectedSexualHealth(prev =>
         prev.includes(id) ? prev.filter(f => f !== id) : [...prev, id]
       );
     } else if (filterType === 'supplements') {
@@ -205,20 +248,55 @@ const Shop = () => {
     setCurrentPage(1);
   }, []);
 
-  // Get all medicines
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['medicines'],
-    queryFn: () => publicApi.get('/medicines'),
-    staleTime: 2 * 60 * 1000, // 2 minutes - will use default refetchOnMount
-  });
 
-  const allMedicines = data?.result || [];
+
+
+  // Parse query parameters
+  const searchParams = new URLSearchParams(location.search);
+  const categoryParam = searchParams.get('category');
+  const subcategoryParam = searchParams.get('subcategory');
+  const searchParam = searchParams.get('search');
+
+  // Sync state with URL search
+  React.useEffect(() => {
+    setSearchTerm(searchParam || '');
+  }, [searchParam]);
 
   // Filter and sort medicines
   const filteredAndSortedMedicines = useMemo(() => {
     let filtered = [...allMedicines];
 
-    // Search filter
+    // 1. URL Category Filter
+    if (categoryParam) {
+      // Handle slug-to-name matching safely
+      const normalizedCatParam = categoryParam.toLowerCase().replace(/-/g, ' ');
+      filtered = filtered.filter(item =>
+        item.categoryName?.toLowerCase().includes(normalizedCatParam) ||
+        // Fallback: check if the slug matches roughly
+        item.categoryName?.toLowerCase().replace(/\s+/g, '-').includes(categoryParam)
+      );
+    }
+
+    // 2. URL Subcategory Filter
+    if (subcategoryParam) {
+      // Create a map of slugs to exact DB strings if needed, or use broad matching
+      const normalizedSubParam = subcategoryParam.toLowerCase().replace(/-/g, ' ');
+
+      filtered = filtered.filter(item => {
+        // Check against subcategory, option fields
+        const sub = item.subcategory?.toLowerCase() || '';
+        const opt = item.option?.toLowerCase() || '';
+        const type = item.bestsellerCategory?.toLowerCase() || ''; // sometimes used for grouping
+
+        // Try matching against various product fields
+        return sub.includes(normalizedSubParam) ||
+          opt.includes(normalizedSubParam) ||
+          opt.replace(/\s+/g, '-').includes(subcategoryParam) ||
+          type.includes(normalizedSubParam);
+      });
+    }
+
+    // 3. Search Term (Local State)
     if (searchTerm.trim()) {
       filtered = filtered.filter(
         (medicine) =>
@@ -228,28 +306,70 @@ const Shop = () => {
       );
     }
 
-    // Apply filters (mock - in real app, these would filter based on product metadata)
-    // For now, we'll just return all products that match search
+    // 4. Sidebar Checkbox Filters
+    const normalizeText = (text) => text ? text.toLowerCase().replace(/[^a-z0-9]/g, '') : '';
+
+    // Helper to check if item matches any selected filter in a group
+    const matchesFilter = (selectedFilters, item) => {
+      if (selectedFilters.length === 0) return true;
+      const itemSub = normalizeText(item.subcategory);
+      const itemOpt = normalizeText(item.option);
+      const itemDesc = normalizeText(item.description);
+      const itemType = normalizeText(item.bestsellerCategory); // fallback
+
+      return selectedFilters.some(filterId => {
+        const normalizedFilter = normalizeText(filterId); // e.g., 'akne', 'lekurenormale'
+
+        // Exact-ish match preference, but loose check for description/multiple tags
+        return itemSub.includes(normalizedFilter) ||
+          itemOpt.includes(normalizedFilter) ||
+          (itemDesc && itemDesc.includes(normalizedFilter)) ||
+          itemType.includes(normalizedFilter);
+      });
+    };
+
+    if (selectedProblems.length > 0) {
+      filtered = filtered.filter(item => matchesFilter(selectedProblems, item));
+    }
+    if (selectedSkinTypes.length > 0) {
+      filtered = filtered.filter(item => matchesFilter(selectedSkinTypes, item));
+    }
+    if (selectedProductTypes.length > 0) {
+      filtered = filtered.filter(item => matchesFilter(selectedProductTypes, item));
+    }
+    if (selectedBodyHair.length > 0) {
+      filtered = filtered.filter(item => matchesFilter(selectedBodyHair, item));
+    }
+    if (selectedHygiene.length > 0) {
+      filtered = filtered.filter(item => matchesFilter(selectedHygiene, item));
+    }
+    if (selectedMotherChild.length > 0) {
+      filtered = filtered.filter(item => matchesFilter(selectedMotherChild, item));
+    }
+
+    if (selectedSupplements.length > 0) {
+      filtered = filtered.filter(item => matchesFilter(selectedSupplements, item));
+    }
+    if (selectedHealthMonitors.length > 0) {
+      filtered = filtered.filter(item => matchesFilter(selectedHealthMonitors, item));
+    }
 
     // Sort
     if (sortBy === 'alphabetical') {
       filtered.sort((a, b) => a.itemName?.localeCompare(b.itemName) || 0);
     } else if (sortBy === 'price-low') {
       filtered.sort((a, b) => {
-        const priceA = Number(a.price) * (1 - Number(a.discount) / 100);
-        const priceB = Number(b.price) * (1 - Number(b.discount) / 100);
-        return priceA - priceB;
+        const priceA = Number(a.price) * (1 - Number(a.discount) / 0); // Fix potential division by zero if discount logic changes, but standard is (1 - discount/100)
+        return (Number(a.price) * (1 - (Number(a.discount) || 0) / 100)) - (Number(b.price) * (1 - (Number(b.discount) || 0) / 100));
       });
     } else if (sortBy === 'price-high') {
       filtered.sort((a, b) => {
-        const priceA = Number(a.price) * (1 - Number(a.discount) / 100);
-        const priceB = Number(b.price) * (1 - Number(b.discount) / 100);
-        return priceB - priceA;
+        return (Number(b.price) * (1 - (Number(b.discount) || 0) / 100)) - (Number(a.price) * (1 - (Number(a.discount) || 0) / 100));
       });
     }
 
     return filtered;
-  }, [allMedicines, searchTerm, sortBy, selectedProblems, selectedSkinTypes, selectedProductTypes, selectedBodyHair, selectedHygiene, selectedMotherChild, selectedSexualHealth, selectedSupplements, selectedHealthMonitors]);
+  }, [allMedicines, searchTerm, sortBy, categoryParam, subcategoryParam, selectedProblems, selectedSkinTypes]);
 
   // Pagination
   const totalFilteredItems = filteredAndSortedMedicines.length;
@@ -269,10 +389,10 @@ const Shop = () => {
       <Helmet key={location.pathname}>
         <title>Shop</title>
       </Helmet>
-      <section className="min-h-[80vh] pt-24 pb-4 sm:pt-24 sm:pb-8 bg-white relative overflow-x-hidden">
+      <section className="min-h-[80vh] pt-20 lg:pt-[84px] pb-4 sm:pt-24 sm:pb-8 bg-white relative overflow-x-hidden">
         <div className="max-w-full mx-auto px-4 md:px-4 lg:px-6 relative">
           {/* Header */}
-          <div className="mb-8 sm:mb-12 text-center space-y-3">
+          <div className="mb-4 sm:mb-6 text-center space-y-3">
             <p className="lux-heading">Koleksioni</p>
             <h1 className="lux-title text-gray-700 mb-0">Produktet</h1>
           </div>
@@ -281,18 +401,17 @@ const Shop = () => {
             {/* Left Sidebar - Filters */}
             {/* Mobile Filter Overlay */}
             {showFilters && (
-              <div 
+              <div
                 className="fixed inset-0 bg-black/50 z-[10001] lg:hidden transition-opacity duration-300 ease-in-out opacity-100"
                 onClick={() => setShowFilters(false)}
               />
             )}
-            
+
             <aside
-              className={`${
-                showFilters
-                  ? 'fixed inset-y-0 left-0 w-80 translate-x-0 z-[10002]'
-                  : 'fixed inset-y-0 left-0 w-80 -translate-x-full z-[10002] pointer-events-none'
-              } lg:static lg:w-72 lg:translate-x-0 lg:z-auto lg:pointer-events-auto transition-transform duration-300 ease-in-out lg:transition-none overflow-hidden flex-shrink-0`}
+              className={`${showFilters
+                ? 'fixed inset-y-0 left-0 w-80 translate-x-0 z-[10002]'
+                : 'fixed inset-y-0 left-0 w-80 -translate-x-full z-[10002] pointer-events-none'
+                } lg:static lg:w-72 lg:translate-x-0 lg:z-auto lg:pointer-events-auto transition-transform duration-300 ease-in-out lg:transition-none overflow-hidden flex-shrink-0`}
             >
               <div className="bg-white h-full flex flex-col lg:sticky lg:top-20 pointer-events-auto" style={{ maxHeight: '100vh', overflow: 'hidden' }}>
                 <div className="p-6 overflow-y-auto flex-1" data-lenis-prevent>
@@ -332,16 +451,14 @@ const Shop = () => {
                       className="w-full flex items-center justify-between text-sm font-semibold text-[#A67856] mb-3 uppercase tracking-wide hover:text-[#8B6345] transition-colors"
                     >
                       <span>Problematika</span>
-                      <ChevronDown 
-                        size={18} 
-                        className={`text-[#A67856] transition-transform duration-300 ease-in-out ${
-                          expandedCategories.problematica ? 'rotate-180' : 'rotate-0'
-                        }`}
+                      <ChevronDown
+                        size={18}
+                        className={`text-[#A67856] transition-transform duration-300 ease-in-out ${expandedCategories.problematica ? 'rotate-180' : 'rotate-0'
+                          }`}
                       />
                     </button>
-                    <div className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                      expandedCategories.problematica ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
-                    }`}>
+                    <div className={`overflow-hidden transition-all duration-300 ease-in-out ${expandedCategories.problematica ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+                      }`}>
                       <div className="space-y-2 pt-1">
                         {filterOptions.problematica.map((option) => (
                           <label
@@ -371,16 +488,14 @@ const Shop = () => {
                       className="w-full flex items-center justify-between text-sm font-semibold text-[#A67856] mb-3 uppercase tracking-wide hover:text-[#8B6345] transition-colors"
                     >
                       <span>Tipi i lëkurës</span>
-                      <ChevronDown 
-                        size={18} 
-                        className={`text-[#A67856] transition-transform duration-300 ease-in-out ${
-                          expandedCategories.skinTypes ? 'rotate-180' : 'rotate-0'
-                        }`}
+                      <ChevronDown
+                        size={18}
+                        className={`text-[#A67856] transition-transform duration-300 ease-in-out ${expandedCategories.skinTypes ? 'rotate-180' : 'rotate-0'
+                          }`}
                       />
                     </button>
-                    <div className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                      expandedCategories.skinTypes ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
-                    }`}>
+                    <div className={`overflow-hidden transition-all duration-300 ease-in-out ${expandedCategories.skinTypes ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+                      }`}>
                       <div className="space-y-2 pt-1">
                         {filterOptions.skinTypes.map((option) => (
                           <label
@@ -410,16 +525,14 @@ const Shop = () => {
                       className="w-full flex items-center justify-between text-sm font-semibold text-[#A67856] mb-3 uppercase tracking-wide hover:text-[#8B6345] transition-colors"
                     >
                       <span>Lloji i produktit</span>
-                      <ChevronDown 
-                        size={18} 
-                        className={`text-[#A67856] transition-transform duration-300 ease-in-out ${
-                          expandedCategories.productTypes ? 'rotate-180' : 'rotate-0'
-                        }`}
+                      <ChevronDown
+                        size={18}
+                        className={`text-[#A67856] transition-transform duration-300 ease-in-out ${expandedCategories.productTypes ? 'rotate-180' : 'rotate-0'
+                          }`}
                       />
                     </button>
-                    <div className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                      expandedCategories.productTypes ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
-                    }`}>
+                    <div className={`overflow-hidden transition-all duration-300 ease-in-out ${expandedCategories.productTypes ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+                      }`}>
                       <div className="space-y-2 pt-1">
                         {filterOptions.productTypes.map((option) => (
                           <label
@@ -449,16 +562,14 @@ const Shop = () => {
                       className="w-full flex items-center justify-between text-sm font-semibold text-[#A67856] mb-3 uppercase tracking-wide hover:text-[#8B6345] transition-colors"
                     >
                       <span>Trupin & Flokë</span>
-                      <ChevronDown 
-                        size={18} 
-                        className={`text-[#A67856] transition-transform duration-300 ease-in-out ${
-                          expandedCategories.bodyHair ? 'rotate-180' : 'rotate-0'
-                        }`}
+                      <ChevronDown
+                        size={18}
+                        className={`text-[#A67856] transition-transform duration-300 ease-in-out ${expandedCategories.bodyHair ? 'rotate-180' : 'rotate-0'
+                          }`}
                       />
                     </button>
-                    <div className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                      expandedCategories.bodyHair ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
-                    }`}>
+                    <div className={`overflow-hidden transition-all duration-300 ease-in-out ${expandedCategories.bodyHair ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+                      }`}>
                       <div className="space-y-2 pt-1">
                         {filterOptions.bodyHair.map((option) => (
                           <label
@@ -488,16 +599,14 @@ const Shop = () => {
                       className="w-full flex items-center justify-between text-sm font-semibold text-[#A67856] mb-3 uppercase tracking-wide hover:text-[#8B6345] transition-colors"
                     >
                       <span>Higjene</span>
-                      <ChevronDown 
-                        size={18} 
-                        className={`text-[#A67856] transition-transform duration-300 ease-in-out ${
-                          expandedCategories.hygiene ? 'rotate-180' : 'rotate-0'
-                        }`}
+                      <ChevronDown
+                        size={18}
+                        className={`text-[#A67856] transition-transform duration-300 ease-in-out ${expandedCategories.hygiene ? 'rotate-180' : 'rotate-0'
+                          }`}
                       />
                     </button>
-                    <div className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                      expandedCategories.hygiene ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
-                    }`}>
+                    <div className={`overflow-hidden transition-all duration-300 ease-in-out ${expandedCategories.hygiene ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+                      }`}>
                       <div className="space-y-2 pt-1">
                         {filterOptions.hygiene.map((option) => (
                           <label
@@ -527,16 +636,14 @@ const Shop = () => {
                       className="w-full flex items-center justify-between text-sm font-semibold text-[#A67856] mb-3 uppercase tracking-wide hover:text-[#8B6345] transition-colors"
                     >
                       <span>Nena & Fëmijë</span>
-                      <ChevronDown 
-                        size={18} 
-                        className={`text-[#A67856] transition-transform duration-300 ease-in-out ${
-                          expandedCategories.motherChild ? 'rotate-180' : 'rotate-0'
-                        }`}
+                      <ChevronDown
+                        size={18}
+                        className={`text-[#A67856] transition-transform duration-300 ease-in-out ${expandedCategories.motherChild ? 'rotate-180' : 'rotate-0'
+                          }`}
                       />
                     </button>
-                    <div className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                      expandedCategories.motherChild ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
-                    }`}>
+                    <div className={`overflow-hidden transition-all duration-300 ease-in-out ${expandedCategories.motherChild ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+                      }`}>
                       <div className="space-y-2 pt-1">
                         {filterOptions.motherChild.map((option) => (
                           <label
@@ -559,44 +666,7 @@ const Shop = () => {
                     </div>
                   </div>
 
-                  {/* Shendeti Seksual */}
-                  <div className="mb-6">
-                    <button
-                      onClick={() => toggleCategory('sexualHealth')}
-                      className="w-full flex items-center justify-between text-sm font-semibold text-[#A67856] mb-3 uppercase tracking-wide hover:text-[#8B6345] transition-colors"
-                    >
-                      <span>Shendeti Seksual</span>
-                      <ChevronDown 
-                        size={18} 
-                        className={`text-[#A67856] transition-transform duration-300 ease-in-out ${
-                          expandedCategories.sexualHealth ? 'rotate-180' : 'rotate-0'
-                        }`}
-                      />
-                    </button>
-                    <div className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                      expandedCategories.sexualHealth ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
-                    }`}>
-                      <div className="space-y-2 pt-1">
-                        {filterOptions.sexualHealth.map((option) => (
-                          <label
-                            key={option.id}
-                            className="flex items-center justify-between cursor-pointer hover:bg-[#EBD8C8] p-1"
-                          >
-                            <div className="flex items-center gap-2">
-                              <input
-                                type="checkbox"
-                                checked={selectedSexualHealth.includes(option.id)}
-                                onChange={() => toggleFilter('sexualHealth', option.id)}
-                                className="w-4 h-4 text-[#A67856] border-2 border-[#A67856] focus:ring-[#A67856]"
-                              />
-                              <span className="text-sm text-[#A67856]">{option.label}</span>
-                            </div>
-                            <span className="text-xs text-gray-500">{option.count}</span>
-                          </label>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
+
 
                   {/* Suplemente & Vitamina */}
                   <div className="mb-6">
@@ -605,16 +675,14 @@ const Shop = () => {
                       className="w-full flex items-center justify-between text-sm font-semibold text-[#A67856] mb-3 uppercase tracking-wide hover:text-[#8B6345] transition-colors"
                     >
                       <span>Suplemente & Vitamina</span>
-                      <ChevronDown 
-                        size={18} 
-                        className={`text-[#A67856] transition-transform duration-300 ease-in-out ${
-                          expandedCategories.supplements ? 'rotate-180' : 'rotate-0'
-                        }`}
+                      <ChevronDown
+                        size={18}
+                        className={`text-[#A67856] transition-transform duration-300 ease-in-out ${expandedCategories.supplements ? 'rotate-180' : 'rotate-0'
+                          }`}
                       />
                     </button>
-                    <div className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                      expandedCategories.supplements ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
-                    }`}>
+                    <div className={`overflow-hidden transition-all duration-300 ease-in-out ${expandedCategories.supplements ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+                      }`}>
                       <div className="space-y-2 pt-1">
                         {filterOptions.supplements.map((option) => (
                           <label
@@ -644,16 +712,14 @@ const Shop = () => {
                       className="w-full flex items-center justify-between text-sm font-semibold text-[#A67856] mb-3 uppercase tracking-wide hover:text-[#8B6345] transition-colors"
                     >
                       <span>Monitoruesit e Shëndetit</span>
-                      <ChevronDown 
-                        size={18} 
-                        className={`text-[#A67856] transition-transform duration-300 ease-in-out ${
-                          expandedCategories.healthMonitors ? 'rotate-180' : 'rotate-0'
-                        }`}
+                      <ChevronDown
+                        size={18}
+                        className={`text-[#A67856] transition-transform duration-300 ease-in-out ${expandedCategories.healthMonitors ? 'rotate-180' : 'rotate-0'
+                          }`}
                       />
                     </button>
-                    <div className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                      expandedCategories.healthMonitors ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
-                    }`}>
+                    <div className={`overflow-hidden transition-all duration-300 ease-in-out ${expandedCategories.healthMonitors ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+                      }`}>
                       <div className="space-y-2 pt-1">
                         {filterOptions.healthMonitors.map((option) => (
                           <label

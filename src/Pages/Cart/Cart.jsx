@@ -73,7 +73,7 @@ const Cart = () => {
             <div className="space-y-6">
               {items?.map((item) => (
                 <div
-                  key={item.id}
+                  key={item.cartItemId || item.id}
                   className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-3 sm:p-4 bg-gray-50 border border-gray-200"
                 >
                   <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto">
@@ -103,7 +103,7 @@ const Cart = () => {
                   <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-start">
                     <div className="flex items-center gap-2">
                       <button
-                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                        onClick={() => updateQuantity(item.cartItemId || item.id, item.quantity - 1)}
                         disabled={item.quantity <= 1}
                         className="p-2 sm:p-2.5 bg-[#faf9f6] hover:bg-[#946259] disabled:opacity-40 text-[#946259] transition-all border-2 border-[#946259] min-w-[44px] min-h-[44px] flex items-center justify-center text-lg leading-none"
                         aria-label="Decrease quantity"
@@ -114,7 +114,7 @@ const Cart = () => {
                         {item.quantity}
                       </span>
                       <button
-                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                        onClick={() => updateQuantity(item.cartItemId || item.id, item.quantity + 1)}
                         className="p-2 sm:p-2.5 bg-[#faf9f6] hover:bg-[#946259] text-[#946259] transition-all border-2 border-[#946259] min-w-[44px] min-h-[44px] flex items-center justify-center text-lg leading-none"
                         aria-label="Increase quantity"
                       >
@@ -122,7 +122,7 @@ const Cart = () => {
                       </button>
                     </div>
                     <button
-                      onClick={() => removeItem(item.id)}
+                      onClick={() => removeItem(item.cartItemId || item.id)}
                       className="text-red-500 hover:text-white hover:bg-red-500 p-2 sm:p-2.5 rounded-sm border border-red-200 transition min-w-[44px] min-h-[44px] flex items-center justify-center"
                       aria-label="Remove item"
                     >

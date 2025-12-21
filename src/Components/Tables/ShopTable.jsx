@@ -51,7 +51,7 @@ const ShopTable = ({
                         </div>
                       </div>
                       <div>
-                        <div 
+                        <div
                           className="font-bold cursor-pointer hover:text-gray-600 transition-colors"
                           onClick={() => {
                             window.scrollTo({ top: 0, behavior: 'instant' });
@@ -88,6 +88,7 @@ const ShopTable = ({
                             genericName: medicine.genericName,
                             discount: medicine.discount,
                             seller: medicine.seller,
+                            variants: medicine.variants
                           })
                         }
                       >
@@ -132,9 +133,8 @@ const ShopTable = ({
               [...Array(totalPages)].map((_, idx) => (
                 <button
                   key={idx + 1}
-                  className={`btn btn-sm text-xs sm:text-sm px-2 sm:px-3 py-2 ${
-                    currentPage === idx + 1 ? 'btn-active' : ''
-                  }`}
+                  className={`btn btn-sm text-xs sm:text-sm px-2 sm:px-3 py-2 ${currentPage === idx + 1 ? 'btn-active' : ''
+                    }`}
                   onClick={() => goToPage(idx + 1)}
                 >
                   {idx + 1}
@@ -145,9 +145,8 @@ const ShopTable = ({
               <>
                 {/* Always show first page */}
                 <button
-                  className={`btn btn-sm text-xs sm:text-sm px-2 sm:px-3 py-2 ${
-                    currentPage === 1 ? 'btn-active' : ''
-                  }`}
+                  className={`btn btn-sm text-xs sm:text-sm px-2 sm:px-3 py-2 ${currentPage === 1 ? 'btn-active' : ''
+                    }`}
                   onClick={() => goToPage(1)}
                 >
                   1
@@ -164,9 +163,8 @@ const ShopTable = ({
                   .map((pageNum) => (
                     <button
                       key={pageNum}
-                      className={`btn btn-sm text-xs sm:text-sm px-2 sm:px-3 py-2 ${
-                        currentPage === pageNum ? 'btn-active' : ''
-                      }`}
+                      className={`btn btn-sm text-xs sm:text-sm px-2 sm:px-3 py-2 ${currentPage === pageNum ? 'btn-active' : ''
+                        }`}
                       onClick={() => goToPage(pageNum)}
                     >
                       {pageNum}
@@ -181,9 +179,8 @@ const ShopTable = ({
                 {/* Always show last page if it's different from first */}
                 {totalPages > 1 && (
                   <button
-                    className={`btn btn-sm text-xs sm:text-sm px-2 sm:px-3 py-2 ${
-                      currentPage === totalPages ? 'btn-active' : ''
-                    }`}
+                    className={`btn btn-sm text-xs sm:text-sm px-2 sm:px-3 py-2 ${currentPage === totalPages ? 'btn-active' : ''
+                      }`}
                     onClick={() => goToPage(totalPages)}
                   >
                     {totalPages}

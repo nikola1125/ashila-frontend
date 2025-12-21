@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react';
 import useAxiosSecure from '../../../../hooks/useAxiosSecure';
-import { uploadImage } from '../../../../utils/uploadImage';
+
 import { toast } from 'react-toastify';
 import Table from './Table';
 import { AuthContext } from '../../../../Context/Auth/AuthContext';
@@ -37,28 +37,37 @@ const ManageMedicine = () => {
   const onSubmit = async (data) => {
     setLoading(true);
     try {
-      const uploaded = await uploadImage(data.image[0], privateApi);
-      if (!uploaded?.imageUrl) {
-        toast.error('Image upload failed. Please try again.');
-        setLoading(false);
-        return;
-      }
-      const medicineInfo = {
-        ...data,
-        seller: user.email,
-        created_at: new Date().toISOString(),
-        imageUrl: uploaded.imageUrl,
-        imageId: uploaded.imageId,
-        image: uploaded.imageUrl,
-      };
+      const formData = new FormData();
+      formData.append('itemName', data.itemName);
+      formData.append('genericName', data.genericName);
+      formData.append('company', data.company);
+      formData.append('categoryName', data.categoryName);
+      formData.append('price', data.price);
+      formData.append('discount', data.discount || 0);
+      formData.append('description', data.description);
+      formData.append('stock', data.stock);
+      formData.append('seller', user.email);
+      formData.append('dosage', data.dosage);
+      formData.append('manufacturer', data.manufacturer);
 
-      await privateApi.post('/medicines', medicineInfo);
+      // Append image file
+      if (data.image && data.image[0]) {
+        formData.append('image', data.image[0]);
+      }
+
+      await privateApi.post('/medicines', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
       refetch();
       toast.success('Medicine added successfully!');
       setShowModal(false);
       reset();
-    } catch {
-      toast.error('Failed to add medicine.');
+    } catch (error) {
+      console.error('Add medicine error:', error);
+      toast.error(error.response?.data?.message || 'Failed to add medicine.');
     } finally {
       setLoading(false);
     }

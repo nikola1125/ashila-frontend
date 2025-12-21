@@ -41,6 +41,7 @@ const LatestProduct = () => {
       genericName: product.genericName,
       discount: product.discount || 0,
       seller: product.seller,
+      variants: product.variants // Pass variants to trigger global selection if needed
     });
   }, [addItem]);
 
@@ -116,7 +117,7 @@ const LatestProduct = () => {
                   <span className="text-sm font-semibold text-gray-900 lux-price-number">
                     {product.price?.toLocaleString()} ALL
                   </span>
-                  <button 
+                  <button
                     onClick={() => handleAddToCart(product)}
                     className="bg-white hover:bg-gray-100 text-gray-600 px-2 py-1 text-xs font-semibold transition-all duration-150 flex items-center justify-center gap-1 flex-shrink-0 border-2 border-gray-300"
                   >
@@ -130,7 +131,7 @@ const LatestProduct = () => {
         </div>
 
         <div className="text-center mt-8">
-          <button 
+          <button
             onClick={handleShopNow}
             className="bg-[#A67856] text-white px-8 py-3 font-bold hover:bg-[#8B6345] transition-all duration-200 shadow-md hover:shadow-lg border-2 border-[#A67856] uppercase tracking-wider"
           >

@@ -17,7 +17,7 @@ const ProductCard = React.memo(({ product, pricing, index, onProductClick, onAdd
   useEffect(() => {
     // Reset visibility when component mounts
     setIsVisible(false);
-    
+
     const observer = new IntersectionObserver(([entry]) => {
       if (entry.isIntersecting) {
         setIsVisible(true);
@@ -55,7 +55,7 @@ const ProductCard = React.memo(({ product, pricing, index, onProductClick, onAdd
       className="w-full md:w-full md:max-w-[260px] md:flex-shrink-0 border border-gray-200 overflow-hidden bg-white text-center pb-1.5 md:pb-4 flex flex-col h-full swipe-hint-animation"
     >
       {/* Product Image Container */}
-      <motion.div 
+      <motion.div
         className="relative w-full overflow-hidden bg-[#f9f9f9] cursor-pointer h-[145px] md:h-[240px]"
         onClick={() => onProductClick(product._id)}
         whileHover={{ scale: 1.02 }}
@@ -97,7 +97,7 @@ const ProductCard = React.memo(({ product, pricing, index, onProductClick, onAdd
 
       {/* Product Info */}
       <div className="px-1.5 md:px-2.5 pt-1.5 md:pt-4 flex flex-col flex-grow">
-        <h3 
+        <h3
           className="lux-serif-text !text-[12px] md:!text-[14px] mb-1.5 md:mb-2.5 text-gray-800 leading-snug whitespace-normal break-words min-h-[24px] md:min-h-[40px] cursor-pointer hover:text-gray-600 transition-colors"
           onClick={() => onProductClick(product._id)}
         >
@@ -109,7 +109,7 @@ const ProductCard = React.memo(({ product, pricing, index, onProductClick, onAdd
           <div className="flex items-center justify-center gap-1.5 md:gap-2.5 mt-0.5 md:mt-0">
             {pricing.discounted ? (
               <>
-                <span className="lux-price-number text-[10px] md:text-lg font-medium text-black">
+                <span className="lux-price-number text-[10px] md:text-lg font-medium text-amber-700">
                   {pricing.discounted.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
                 </span>
                 <span className="lux-price-number text-[9px] md:text-sm text-gray-400 line-through">
@@ -129,11 +129,10 @@ const ProductCard = React.memo(({ product, pricing, index, onProductClick, onAdd
               type="button"
               disabled={product.stock === 0}
               onClick={(e) => onAddToCart && onAddToCart(e, product)}
-              className={`w-full inline-flex items-center justify-center gap-1.5 px-2.5 py-1.5 md:px-3 md:py-2 text-[11px] md:text-xs font-semibold uppercase tracking-wide border ${
-                product.stock === 0
-                  ? 'bg-gray-200 border-gray-300 text-gray-500 cursor-not-allowed'
-                  : 'bg-[#8B6F47]/70 border-[#8B6F47]/70 text-white hover:bg-[#7A5F3A]/80 hover:border-[#7A5F3A]/80'
-              } transition-colors duration-150`}
+              className={`w-full inline-flex items-center justify-center gap-1.5 px-2.5 py-1.5 md:px-3 md:py-2 text-[11px] md:text-xs font-semibold uppercase tracking-wide border ${product.stock === 0
+                ? 'bg-gray-200 border-gray-300 text-gray-500 cursor-not-allowed'
+                : 'bg-[#8B6F47]/70 border-[#8B6F47]/70 text-white hover:bg-[#7A5F3A]/80 hover:border-[#7A5F3A]/80'
+                } transition-colors duration-150`}
             >
               <ShoppingBag className="w-3.5 h-3.5 md:w-4 md:h-4" />
               {product.stock === 0 ? 'Out of stock' : 'Shto ne shporte'}
@@ -160,7 +159,7 @@ const BestSeller = () => {
     queryKey: ['bestsellers', 'skincare'],
     queryFn: async () => {
       try {
-        const res = await publicApi.get(`/medicines/bestsellers/skincare`);
+        const res = await publicApi.get(`/medicines/bestsellers`);
         const list = Array.isArray(res) ? res : (res?.result || res || []);
         return Array.isArray(list) ? list : [];
       } catch (err) {
@@ -183,7 +182,7 @@ const BestSeller = () => {
 
     setShowLeftArrow(!isAtStart);
     setShowRightArrow(!isAtEnd);
-    
+
     // Hide scroll hint after user starts scrolling
     if (scrollLeft > 5 && showScrollHint) {
       setShowScrollHint(false);
@@ -197,7 +196,7 @@ const BestSeller = () => {
       setCurrentPage(Math.max(1, Math.min(currentPageNum, totalPagesNum)));
       setTotalPages(totalPagesNum || 1);
     }
-    }, [products.length, showScrollHint]);
+  }, [products.length, showScrollHint]);
 
   // Throttle scroll handler for better performance (100ms throttle for smooth scrolling)
   const throttledCheckScrollPosition = useThrottle(checkScrollPosition, 100);
@@ -216,7 +215,7 @@ const BestSeller = () => {
 
     // Listen to scroll events with throttling
     container.addEventListener('scroll', throttledCheckScrollPosition, { passive: true });
-    
+
     // Also check on resize (debounced)
     const handleResize = () => {
       setTimeout(checkScrollPosition, 100); // Small delay to ensure layout is updated
@@ -274,7 +273,9 @@ const BestSeller = () => {
       company: product.company,
       genericName: product.genericName,
       discount: product.discount || 0,
+
       seller: product.seller,
+      variants: product.variants // Pass variants to trigger global selection if needed
     };
     addItem(cartItem);
   }, [addItem]);
@@ -316,7 +317,7 @@ const BestSeller = () => {
             <>
               <div className="relative flex items-center justify-center">
                 {/* Scrollable Container - Show 4 products on desktop, centered */}
-                <div 
+                <div
                   className="relative overflow-hidden px-0 -mx-4 md:mx-auto md:px-0"
                   style={{
                     // On desktop, limit visible width to show exactly 4 products
@@ -358,7 +359,8 @@ const BestSeller = () => {
 
                   <div
                     ref={scrollContainerRef}
-                    className={`flex md:grid md:grid-cols-4 gap-0 md:gap-5 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] md:overflow-x-visible md:justify-items-center ${showScrollHint ? 'scroll-hint-right' : ''} relative`}
+                    className={`flex gap-0 md:gap-5 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${products.length === 1 ? 'justify-center' : ''} ${products.length < 4 ? 'md:justify-center' : 'md:justify-start'
+                      } ${showScrollHint ? 'scroll-hint-right' : ''} relative`}
                     style={{
                       scrollBehavior: 'smooth',
                       WebkitOverflowScrolling: 'touch',
@@ -368,16 +370,16 @@ const BestSeller = () => {
                     {products.map((p, index) => {
                       if (!p || !p._id) return null;
                       const pricing = calculatePrice(p.price, p.discount);
-                      
+
                       // Add delay class based on index for staggered animation
-                      const delayClass = index < 4 
-                        ? `swipe-hint-animation-delay-${Math.min(index, 3)}` 
+                      const delayClass = index < 4
+                        ? `swipe-hint-animation-delay-${Math.min(index, 3)}`
                         : '';
-                      
+
                       return (
                         <div
                           key={p._id}
-                          className={`swipe-hint-animation ${delayClass} snap-start w-1/2 flex-shrink-0 px-1 md:w-auto md:px-0`}
+                          className={`swipe-hint-animation ${delayClass} snap-start w-1/2 flex-shrink-0 px-1 md:w-[227px] md:px-0`}
                         >
                           <ProductCard
                             product={p}
@@ -403,7 +405,7 @@ const BestSeller = () => {
                   )}
                 </div>
               </div>
-              
+
               {/* Page numbers for mobile */}
               <div className="block md:hidden mt-6 text-center text-sm text-[#4A3628] font-semibold font-sans" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
                 {currentPage} / {totalPages}

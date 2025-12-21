@@ -15,7 +15,7 @@ const AdminLayout = () => {
       <div className="drawer lg:drawer-open">
         <input id="admin-drawer" type="checkbox" className="drawer-toggle" />
         <div className="drawer-content flex flex-col">
-          <div className="navbar bg-white/80 backdrop-blur shadow-md rounded-b-2xl w-full px-4 sm:px-6 py-3 flex items-center justify-between">
+          <div className="navbar bg-white/80 backdrop-blur shadow-md rounded-b-2xl w-full px-4 sm:px-6 py-3 flex items-center justify-between lg:hidden">
             <div className="flex-none lg:hidden">
               <label
                 htmlFor="admin-drawer"

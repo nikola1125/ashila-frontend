@@ -56,50 +56,14 @@ const AdminLinks = () => {
       </li>
       <div className={divider}></div>
 
-      <li className={sectionHeader}>Admin Panel</li>
+      <li className={sectionHeader}>Management</li>
       <li>
         <NavLink
-          to="/admin/manage-users"
-          className={({ isActive }) => `${linkClass} ${isActive ? activeClass : ''}`}
-        >
-          <Users size={22} className="text-amber-600" />
-          Manage Users
-        </NavLink>
-      </li>
-      <li>
-        <NavLink
-          to="/admin/manage-categories"
+          to="/admin/manage-products"
           className={({ isActive }) => `${linkClass} ${isActive ? activeClass : ''}`}
         >
           <FolderKanban size={22} className="text-amber-600" />
-          Manage Categories
-        </NavLink>
-      </li>
-      <li>
-        <NavLink
-          to="/admin/manage-payments"
-          className={({ isActive }) => `${linkClass} ${isActive ? activeClass : ''}`}
-        >
-          <CreditCard size={22} className="text-amber-600" />
-          Payment Management
-        </NavLink>
-      </li>
-      <li>
-        <NavLink
-          to="/admin/sales-report"
-          className={({ isActive }) => `${linkClass} ${isActive ? activeClass : ''}`}
-        >
-          <BarChart2 size={22} className="text-amber-600" />
-          Sales Report
-        </NavLink>
-      </li>
-      <li>
-        <NavLink
-          to="/admin/manage-ads"
-          className={({ isActive }) => `${linkClass} ${isActive ? activeClass : ''}`}
-        >
-          <Megaphone size={22} className="text-amber-600" />
-          Mange Banner Advertise
+          Products
         </NavLink>
       </li>
       <li>
@@ -108,7 +72,43 @@ const AdminLinks = () => {
           className={({ isActive }) => `${linkClass} ${isActive ? activeClass : ''}`}
         >
           <Star size={22} className="text-amber-600" />
-          Manage Bestsellers
+          Best Sellers
+        </NavLink>
+      </li>
+      <li>
+        <NavLink
+          to="/admin/inventory"
+          className={({ isActive }) => `${linkClass} ${isActive ? activeClass : ''}`}
+        >
+          <BarChart2 size={22} className="text-amber-600" />
+          Inventory
+        </NavLink>
+      </li>
+      <li>
+        <NavLink
+          to="/admin/orders"
+          className={({ isActive }) => `${linkClass} ${isActive ? activeClass : ''}`}
+        >
+          <CreditCard size={22} className="text-amber-600" />
+          Orders
+        </NavLink>
+      </li>
+      <li>
+        <NavLink
+          to="/admin/economy"
+          className={({ isActive }) => `${linkClass} ${isActive ? activeClass : ''}`}
+        >
+          <Megaphone size={22} className="text-amber-600" />
+          Economy
+        </NavLink>
+      </li>
+      <li>
+        <NavLink
+          to="/admin/manage-users"
+          className={({ isActive }) => `${linkClass} ${isActive ? activeClass : ''}`}
+        >
+          <Users size={22} className="text-amber-600" />
+          Users
         </NavLink>
       </li>
 

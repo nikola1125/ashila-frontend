@@ -45,7 +45,7 @@ const InteractiveProductSelector = () => {
   // y: 0% = top edge, 50% = center, 100% = bottom edge
   // The hotspot is centered on these coordinates
   const hotspotPositions = [
-    { x: 73, y: 30},   // Product 1 - Adjust these values to move the hotspot
+    { x: 73, y: 30 },   // Product 1 - Adjust these values to move the hotspot
     { x: 60, y: 50 },   // Product 2 - Example: { x: 25, y: 45 } moves it 25% from left, 45% from top
     { x: 38, y: 50 },   // Product 3
     { x: 65, y: 90 },   // Product 4
@@ -186,9 +186,9 @@ const InteractiveProductSelector = () => {
           <div className="product-info-panel flex-1 max-w-[500px] w-full p-10 bg-white rounded-[20px] shadow-[0_10px_30px_rgba(0,0,0,0.08)]">
             {/* Product Image - Animated on change */}
             <div className="flex items-center justify-center mb-6">
-              <div 
+              <div
                 className="relative w-full overflow-hidden bg-[#f9f9f9] h-[200px] md:h-[250px]"
-                style={{ 
+                style={{
                   maxWidth: '300px',
                 }}
               >
@@ -216,7 +216,8 @@ const InteractiveProductSelector = () => {
             </div>
 
             {/* Product Name */}
-            <h2 className="product-name text-[32px] md:text-[32px] text-[#4A3628] mb-8 font-semibold text-center md:text-left font-sans" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
+            {/* Product Name */}
+            <h2 className="lux-title text-[32px] md:text-[32px] text-[#4A3628] mb-8 text-center md:text-left">
               {activeProduct.itemName}
             </h2>
 

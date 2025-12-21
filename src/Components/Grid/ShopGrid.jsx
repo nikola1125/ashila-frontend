@@ -25,7 +25,7 @@ const ShopGrid = ({
               className="w-full max-w-[280px] border border-gray-200 overflow-hidden bg-white text-center pb-4 flex flex-col h-full"
             >
               {/* Product Image Container */}
-              <div 
+              <div
                 className="relative w-full overflow-hidden bg-[#f9f9f9] cursor-pointer h-[200px] md:h-[250px]"
                 onClick={() => {
                   window.scrollTo({ top: 0, behavior: 'instant' });
@@ -40,7 +40,7 @@ const ShopGrid = ({
                     e.target.src = getProductImage(null, medicine._id || index);
                   }}
                 />
-                
+
                 {/* Discount Badge - Top Right */}
                 {medicine.discount > 0 && (
                   <div className="absolute top-2.5 right-2.5 bg-red-500 text-white px-2.5 py-1.5 text-sm font-bold">
@@ -59,7 +59,7 @@ const ShopGrid = ({
               {/* Product Info */}
               <div className="px-2.5 pt-4 flex flex-col flex-grow">
                 {/* Medicine Name */}
-                <h3 
+                <h3
                   className="lux-serif-text !text-[12px] md:!text-[14px] mb-2 text-gray-800 leading-snug whitespace-normal break-words min-h-[28px] md:min-h-[40px] cursor-pointer hover:text-gray-600 transition-colors"
                   onClick={() => {
                     window.scrollTo({ top: 0, behavior: 'instant' });
@@ -104,13 +104,13 @@ const ShopGrid = ({
                               : null,
                           image: medicine.image,
                           slug: medicine._id,
+                          variants: medicine.variants // Pass variants
                         })
                       }
-                      className={`w-full px-3 py-2 text-xs md:text-sm font-semibold uppercase tracking-wide border ${
-                        medicine.stock === 0
+                      className={`w-full px-3 py-2 text-xs md:text-sm font-semibold uppercase tracking-wide border ${medicine.stock === 0
                           ? 'bg-gray-200 border-gray-300 text-gray-500 cursor-not-allowed'
                           : 'bg-[#8B6F47]/70 border-[#8B6F47]/70 text-white hover:bg-[#7A5F3A]/80 hover:border-[#7A5F3A]/80'
-                      } transition-colors duration-150`}
+                        } transition-colors duration-150`}
                     >
                       {medicine.stock === 0 ? 'Out of stock' : 'Shto ne shporte'}
                     </button>
@@ -140,9 +140,8 @@ const ShopGrid = ({
             [...Array(totalPages)].map((_, idx) => (
               <button
                 key={idx + 1}
-                className={`btn btn-sm text-xs sm:text-sm px-2 sm:px-3 py-2 ${
-                  currentPage === idx + 1 ? 'btn-active' : ''
-                }`}
+                className={`btn btn-sm text-xs sm:text-sm px-2 sm:px-3 py-2 ${currentPage === idx + 1 ? 'btn-active' : ''
+                  }`}
                 onClick={() => goToPage(idx + 1)}
               >
                 <span className="lux-price-number">{idx + 1}</span>
@@ -153,9 +152,8 @@ const ShopGrid = ({
             <>
               {/* Always show first page */}
               <button
-                className={`btn btn-sm text-xs sm:text-sm px-2 sm:px-3 py-2 ${
-                  currentPage === 1 ? 'btn-active' : ''
-                }`}
+                className={`btn btn-sm text-xs sm:text-sm px-2 sm:px-3 py-2 ${currentPage === 1 ? 'btn-active' : ''
+                  }`}
                 onClick={() => goToPage(1)}
               >
                 <span className="lux-price-number">1</span>
@@ -172,9 +170,8 @@ const ShopGrid = ({
                 .map((pageNum) => (
                   <button
                     key={pageNum}
-                    className={`btn btn-sm text-xs sm:text-sm px-2 sm:px-3 py-2 ${
-                      currentPage === pageNum ? 'btn-active' : ''
-                    }`}
+                    className={`btn btn-sm text-xs sm:text-sm px-2 sm:px-3 py-2 ${currentPage === pageNum ? 'btn-active' : ''
+                      }`}
                     onClick={() => goToPage(pageNum)}
                   >
                     <span className="lux-price-number">{pageNum}</span>
@@ -189,9 +186,8 @@ const ShopGrid = ({
               {/* Always show last page if it's different from first */}
               {totalPages > 1 && (
                 <button
-                  className={`btn btn-sm text-xs sm:text-sm px-2 sm:px-3 py-2 ${
-                    currentPage === totalPages ? 'btn-active' : ''
-                  }`}
+                  className={`btn btn-sm text-xs sm:text-sm px-2 sm:px-3 py-2 ${currentPage === totalPages ? 'btn-active' : ''
+                    }`}
                   onClick={() => goToPage(totalPages)}
                 >
                   <span className="lux-price-number">{totalPages}</span>

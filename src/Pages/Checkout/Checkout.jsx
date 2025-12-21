@@ -71,7 +71,7 @@ const Checkout = () => {
           phoneNumber: phoneNumber.trim(),
         },
         paymentStatus: 'unpaid',
-        status: 'pending',
+        status: 'Pending',
       };
 
       await api.post('/orders', payload);

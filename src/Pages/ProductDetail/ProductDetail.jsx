@@ -9,6 +9,7 @@ import DataLoading from '../../Components/Common/Loaders/DataLoading';
 import LoadingError from '../../Components/Common/States/LoadingError';
 import { getProductImage } from '../../utils/productImages';
 import { useThrottle } from '../../hooks/useThrottle';
+import VariantSelectionSidebar from '../../Components/Common/Products/VariantSelectionSidebar';
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -16,18 +17,8 @@ const ProductDetail = () => {
   const { publicApi } = useAxiosSecure();
   const { addItem } = useContext(CartContext);
   const [quantity, setQuantity] = useState(1);
-  const [selectedSize, setSelectedSize] = useState('90GR'); // Default size
-  const relatedScrollRef = useRef(null);
-  const [showLeftRelatedArrow, setShowLeftRelatedArrow] = useState(false);
-  const [showRightRelatedArrow, setShowRightRelatedArrow] = useState(false);
-  const [relatedCurrentPage, setRelatedCurrentPage] = useState(1);
-  const [relatedTotalPages, setRelatedTotalPages] = useState(1);
-  const [relatedShowScrollHint, setRelatedShowScrollHint] = useState(true);
-
-  // Scroll to top when component mounts or product ID changes
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [id]);
+  const [activeVariant, setActiveVariant] = useState(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const { data: product, isLoading, error } = useQuery({
     queryKey: ['product', id],
@@ -47,8 +38,8 @@ const ProductDetail = () => {
       const allProducts = response?.result || response || [];
       // Filter: same category, exclude current product, limit to 4
       const related = allProducts
-        .filter(p => 
-          p._id !== id && 
+        .filter(p =>
+          p._id !== id &&
           (p.category?._id === product.category._id || p.category === product.category._id)
         )
         .slice(0, 4);
@@ -63,6 +54,18 @@ const ProductDetail = () => {
     },
     enabled: !!product && !!product.category,
   });
+
+  const relatedScrollRef = useRef(null);
+  const [showLeftRelatedArrow, setShowLeftRelatedArrow] = useState(false);
+  const [showRightRelatedArrow, setShowRightRelatedArrow] = useState(false);
+  const [relatedCurrentPage, setRelatedCurrentPage] = useState(1);
+  const [relatedTotalPages, setRelatedTotalPages] = useState(1);
+  const [relatedShowScrollHint, setRelatedShowScrollHint] = useState(true);
+
+  // Scroll to top when component mounts or product ID changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [id]);
 
   // Handle scroll state for related products carousel
   const checkRelatedScroll = useCallback(() => {
@@ -138,47 +141,85 @@ const ProductDetail = () => {
     });
   }, []);
 
-  const handleQuantityChange = useCallback((delta) => {
-    setQuantity((prev) => Math.max(1, prev + delta));
-  }, []);
+  // Initialize selected variant logic
+  useEffect(() => {
+    if (product) {
+      // Always start with no variant selected to force user choice
+      // even if there is only one variant.
+      setActiveVariant(null);
+    }
+  }, [product]);
+
+  // Derived values based on selected variant or fallback to product base values for display
+  // We want to show the "Starting at" price or the first variant's price, 
+  // but WITHOUT treating it as "selected".
+  const displayVariant = activeVariant || (product?.variants?.length > 0 ? product.variants[0] : null) || product;
+
+  const currentPrice = displayVariant ? Number(displayVariant.price) : 0;
+  const currentDiscount = displayVariant ? Number(displayVariant.discount) : 0;
+  const currentStock = displayVariant ? Number(displayVariant.stock) : 0;
+
+  const discountedPrice = currentDiscount > 0
+    ? currentPrice * (1 - currentDiscount / 100)
+    : currentPrice;
+
+  const isInStock = currentStock > 0;
 
   const handleAddToCart = useCallback(() => {
-    if (!product) return;
-    
+    if (!product) return false;
+
+    // Check if variant selection is required
+    const hasVariants = product.variants && product.variants.length > 0;
+
+    if (hasVariants && !activeVariant) {
+      setIsSidebarOpen(true);
+      return false;
+    }
+
+    // Use activeVariant or fallback (only for legacy products without variants array)
+    const variantToAdd = activeVariant || {
+      size: product.size || 'Standard',
+      _id: 'legacy-id'
+    };
+
     // Add item quantity times
     for (let i = 0; i < quantity; i++) {
       addItem({
         id: product._id,
         name: product.itemName,
-        price: product.price,
-        discountedPrice: product.discount > 0
-          ? (Number(product.price) * (1 - Number(product.discount) / 100)).toFixed(2)
+        price: currentPrice,
+        discountedPrice: currentDiscount > 0
+          ? discountedPrice.toFixed(2)
           : null,
         image: product.image,
         company: product.company,
         genericName: product.genericName,
-        discount: product.discount || 0,
+        discount: currentDiscount,
         seller: product.seller,
-        size: selectedSize,
+        size: activeVariant ? activeVariant.size : (product.size || 'Standard'),
+        variantId: activeVariant ? activeVariant._id : undefined
       });
     }
-  }, [product, quantity, selectedSize, addItem]);
+    return true;
+  }, [product, quantity, activeVariant, currentPrice, currentDiscount, discountedPrice, addItem]);
 
   const handleBuyNow = useCallback(() => {
-    if (!product) return;
-    handleAddToCart();
-    navigate('/cart');
-  }, [product, handleAddToCart, navigate]);
+    if (handleAddToCart()) {
+      navigate('/cart');
+    }
+  }, [handleAddToCart, navigate]);
 
-  if (isLoading) return <DataLoading label="Product" />;
-  if (error) return <LoadingError label="Product" />;
-  if (!product) return <div className="text-center py-12">Product not found</div>;
+  const handleQuantityChange = useCallback((change) => {
+    setQuantity(prev => Math.max(1, prev + change));
+  }, []);
 
-  const discountedPrice = product.discount > 0
-    ? Number(product.price) * (1 - Number(product.discount) / 100)
-    : Number(product.price);
+  if (isLoading) {
+    return <DataLoading label="Product Details" />;
+  }
 
-  const isInStock = product.stock > 0;
+  if (error || !product) {
+    return <LoadingError label="Product" showAction={true} />;
+  }
 
   return (
     <div className="min-h-screen bg-[#faf9f6]">
@@ -214,23 +255,43 @@ const ProductDetail = () => {
             <div className="w-16 h-0.5 bg-[#A67856] mb-4"></div>
 
             {/* Price */}
-            <div className="mb-4 sm:mb-6">
+            <div className="mb-4 sm:mb-6 flex items-baseline gap-3">
               <span className="lux-price-number text-base sm:text-xl md:text-2xl font-medium text-[#4A3628]">
                 {discountedPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ALL
               </span>
+              {currentDiscount > 0 && (
+                <span className="lux-price-number text-sm sm:text-lg md:text-xl text-gray-400 line-through decoration-gray-400">
+                  {currentPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ALL
+                </span>
+              )}
             </div>
 
             <div className="border-t border-[#D9BFA9] pt-6 mb-6"></div>
 
-            {/* SIZE Selector */}
+            {/* SIZE Selector (Variants) */}
             <div className="mb-6">
               <label className="block text-xs font-semibold text-[#4A3628] uppercase tracking-wide mb-2">
-                SIZE
+                SIZE / VARIANT
               </label>
-              <div className="w-auto inline-block">
-                <div className="px-3 py-2 border border-[#4A3628] bg-white text-[#4A3628] font-medium text-sm">
-                  {selectedSize}
-                </div>
+              <div className="flex flex-wrap gap-2">
+                {product.variants && product.variants.length > 0 ? (
+                  product.variants.map((variant, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setActiveVariant(variant)}
+                      className={`px-4 py-2 text-sm font-medium border transition-all duration-200 ${activeVariant === variant
+                        ? 'bg-[#4A3628] text-white border-[#4A3628]'
+                        : 'bg-white text-[#4A3628] border-[#4A3628] hover:bg-[#EBD8C8]'
+                        }`}
+                    >
+                      {variant.size}
+                    </button>
+                  ))
+                ) : (
+                  <div className="px-3 py-2 border border-[#4A3628] bg-white text-[#4A3628] font-medium text-sm">
+                    {product.size || 'Standard'}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -323,7 +384,7 @@ const ProductDetail = () => {
                   className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-[#4A3628] transition-colors"
                 >
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 19c-.721 0-1.418-.109-2.076-.312.286-.465.713-1.227.95-1.878.098-.35.595-2.394.595-2.394s.152.304.465.496c.435.287.936.46 1.526.46 2.01 0 3.38-1.843 3.38-4.31 0-1.87-1.577-3.174-3.832-3.174-2.602 0-4.198 1.928-4.198 3.922 0 1.152.44 2.17 1.561 2.553.174.071.334.041.384-.107.036-.137.124-.48.163-.656.053-.204.033-.275-.115-.455-.323-.38-.53-.873-.53-1.57 0-2.03 1.54-3.894 4.01-3.894 2.105 0 3.636 1.503 3.636 3.505 0 2.33-1.464 4.296-3.64 4.296-.712 0-1.387-.37-1.617-.863 0 0-.352 1.34-.436 1.67-.158.609-.586 1.37-.872 1.833A11.98 11.98 0 0 0 12 19z"/>
+                    <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 19c-.721 0-1.418-.109-2.076-.312.286-.465.713-1.227.95-1.878.098-.35.595-2.394.595-2.394s.152.304.465.496c.435.287.936.46 1.526.46 2.01 0 3.38-1.843 3.38-4.31 0-1.87-1.577-3.174-3.832-3.174-2.602 0-4.198 1.928-4.198 3.922 0 1.152.44 2.17 1.561 2.553.174.071.334.041.384-.107.036-.137.124-.48.163-.656.053-.204.033-.275-.115-.455-.323-.38-.53-.873-.53-1.57 0-2.03 1.54-3.894 4.01-3.894 2.105 0 3.636 1.503 3.636 3.505 0 2.33-1.464 4.296-3.64 4.296-.712 0-1.387-.37-1.617-.863 0 0-.352 1.34-.436 1.67-.158.609-.586 1.37-.872 1.833A11.98 11.98 0 0 0 12 19z" />
                   </svg>
                 </a>
                 <a
@@ -371,180 +432,193 @@ const ProductDetail = () => {
         <div className="border-t border-[#D9BFA9] my-12"></div>
 
         {/* Related Products Section */}
-        {relatedProducts.length > 0 && (
-          <div className="mt-12 lux-serif-text">
-            <h2 className="text-2xl font-semibold text-[#4A3628] mb-8 text-center">Sugjerime</h2>
-            <div className="relative flex items-center justify-center">
-              {/* Desktop Arrows */}
-              {showLeftRelatedArrow && (
-                <button
-                  onClick={() => scrollRelated('left')}
-                  className="hidden md:block absolute left-0 top-1/2 -translate-y-1/2 -translate-x-6 z-10 carousel-arrow p-2 shadow-lg border border-[#E0CBB5]"
-                  aria-label="Scroll left"
-                >
-                  <ChevronLeft size={24} className="text-[#A67856]" />
-                </button>
-              )}
+        {
+          relatedProducts.length > 0 && (
+            <div className="mt-12 lux-serif-text">
+              <h2 className="text-2xl font-semibold text-[#4A3628] mb-8 text-center">Sugjerime</h2>
+              <div className="relative flex items-center justify-center">
+                {/* Desktop Arrows */}
+                {showLeftRelatedArrow && (
+                  <button
+                    onClick={() => scrollRelated('left')}
+                    className="hidden md:block absolute left-0 top-1/2 -translate-y-1/2 -translate-x-6 z-10 carousel-arrow p-2 shadow-lg border border-[#E0CBB5]"
+                    aria-label="Scroll left"
+                  >
+                    <ChevronLeft size={24} className="text-[#A67856]" />
+                  </button>
+                )}
 
-              {showRightRelatedArrow && (
-                <button
-                  onClick={() => scrollRelated('right')}
-                  className="hidden md:block absolute right-0 top-1/2 -translate-y-1/2 translate-x-6 z-10 carousel-arrow p-2 shadow-lg border border-[#E0CBB5]"
-                  aria-label="Scroll right"
-                >
-                  <ChevronRight size={24} className="text-[#A67856]" />
-                </button>
-              )}
+                {showRightRelatedArrow && (
+                  <button
+                    onClick={() => scrollRelated('right')}
+                    className="hidden md:block absolute right-0 top-1/2 -translate-y-1/2 translate-x-6 z-10 carousel-arrow p-2 shadow-lg border border-[#E0CBB5]"
+                    aria-label="Scroll right"
+                  >
+                    <ChevronRight size={24} className="text-[#A67856]" />
+                  </button>
+                )}
 
-              {/* Mobile Arrows */}
-              {showLeftRelatedArrow && (
-                <button
-                  onClick={() => scrollRelated('left')}
-                  className="absolute left-1 top-1/2 -translate-y-1/2 z-10 carousel-arrow p-1.5 shadow-md border border-[#E0CBB5] md:hidden"
-                  aria-label="Scroll left"
-                >
-                  <ChevronLeft size={18} className="text-[#A67856]" />
-                </button>
-              )}
+                {/* Mobile Arrows */}
+                {showLeftRelatedArrow && (
+                  <button
+                    onClick={() => scrollRelated('left')}
+                    className="absolute left-1 top-1/2 -translate-y-1/2 z-10 carousel-arrow p-1.5 shadow-md border border-[#E0CBB5] md:hidden"
+                    aria-label="Scroll left"
+                  >
+                    <ChevronLeft size={18} className="text-[#A67856]" />
+                  </button>
+                )}
 
-              {showRightRelatedArrow && (
-                <button
-                  onClick={() => scrollRelated('right')}
-                  className="absolute right-1 top-1/2 -translate-y-1/2 z-10 carousel-arrow p-1.5 shadow-md border border-[#E0CBB5] md:hidden"
-                  aria-label="Scroll right"
-                >
-                  <ChevronRight size={18} className="text-[#A67856]" />
-                </button>
-              )}
+                {showRightRelatedArrow && (
+                  <button
+                    onClick={() => scrollRelated('right')}
+                    className="absolute right-1 top-1/2 -translate-y-1/2 z-10 carousel-arrow p-1.5 shadow-md border border-[#E0CBB5] md:hidden"
+                    aria-label="Scroll right"
+                  >
+                    <ChevronRight size={18} className="text-[#A67856]" />
+                  </button>
+                )}
 
-              <div className="relative overflow-hidden px-0 -mx-4 md:mx-0 md:px-0 w-full">
-                <div
-                  ref={relatedScrollRef}
-                  className={`flex md:grid md:grid-cols-4 gap-3 md:gap-5 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] md:overflow-x-visible md:justify-items-center ${relatedShowScrollHint ? 'scroll-hint-right' : ''}`}
-                  style={{
-                    scrollBehavior: 'smooth',
-                    WebkitOverflowScrolling: 'touch',
-                    overscrollBehavior: 'contain',
-                  }}
-                >
-                  {Array.from(
-                    { length: Math.ceil((relatedProducts?.length || 0) / 2) },
-                    (_, slideIndex) => relatedProducts.slice(slideIndex * 2, slideIndex * 2 + 2)
-                  ).map((slideProducts, slideIndex) => (
-                    <div
-                      key={`related-slide-${slideIndex}`}
-                      className="w-full flex-shrink-0 snap-start px-1 md:w-auto md:px-0"
-                    >
-                      <div className="grid grid-cols-2 gap-3 md:contents">
-                        {slideProducts.map((relatedProduct, index) => {
-                          const relatedDiscountedPrice = relatedProduct.discount > 0
-                            ? Number(relatedProduct.price) * (1 - Number(relatedProduct.discount) / 100)
-                            : Number(relatedProduct.price);
+                <div className="relative overflow-hidden px-0 -mx-4 md:mx-0 md:px-0 w-full">
+                  <div
+                    ref={relatedScrollRef}
+                    className={`flex md:grid md:grid-cols-4 gap-3 md:gap-5 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] md:overflow-x-visible md:justify-items-center ${relatedShowScrollHint ? 'scroll-hint-right' : ''}`}
+                    style={{
+                      scrollBehavior: 'smooth',
+                      WebkitOverflowScrolling: 'touch',
+                      overscrollBehavior: 'contain',
+                    }}
+                  >
+                    {Array.from(
+                      { length: Math.ceil((relatedProducts?.length || 0) / 2) },
+                      (_, slideIndex) => relatedProducts.slice(slideIndex * 2, slideIndex * 2 + 2)
+                    ).map((slideProducts, slideIndex) => (
+                      <div
+                        key={`related-slide-${slideIndex}`}
+                        className="w-full flex-shrink-0 snap-start px-1 md:w-auto md:px-0"
+                      >
+                        <div className="grid grid-cols-2 gap-3 md:contents">
+                          {slideProducts.map((relatedProduct, index) => {
+                            const relatedDiscountedPrice = relatedProduct.discount > 0
+                              ? Number(relatedProduct.price) * (1 - Number(relatedProduct.discount) / 100)
+                              : Number(relatedProduct.price);
 
-                          return (
-                            <div
-                              key={relatedProduct._id}
-                              className="swipe-hint-animation w-full border border-gray-200 overflow-hidden bg-white text-center pb-4 flex flex-col h-full cursor-pointer hover:shadow-lg transition-shadow"
-                              onClick={() => {
-                                window.scrollTo({ top: 0, behavior: 'instant' });
-                                navigate(`/product/${relatedProduct._id}`);
-                              }}
-                            >
-                              <div className="relative w-full overflow-hidden bg-[#f9f9f9] h-[200px] md:h-[250px]">
-                                <img
-                                  src={getProductImage(relatedProduct.image, relatedProduct._id || index)}
-                                  alt={relatedProduct.itemName}
-                                  className="w-full h-full object-contain p-5"
-                                  onError={(e) => {
-                                    e.target.src = getProductImage(null, relatedProduct._id || index);
-                                  }}
-                                />
-                                {relatedProduct.discount > 0 && (
-                                  <div className="absolute top-2.5 right-2.5 bg-red-500 text-white px-2.5 py-1.5 text-sm font-bold">
-                                    Save {relatedProduct.discount}%
-                                  </div>
-                                )}
-                                {relatedProduct.stock === 0 && (
-                                  <div className="absolute top-2.5 left-2.5 bg-red-500 text-white px-2.5 py-1.5 text-sm font-bold">
-                                    Sold Out
-                                  </div>
-                                )}
-                              </div>
+                            return (
+                              <div
+                                key={relatedProduct._id}
+                                className="swipe-hint-animation w-full border border-gray-200 overflow-hidden bg-white text-center pb-4 flex flex-col h-full cursor-pointer hover:shadow-lg transition-shadow"
+                                onClick={() => {
+                                  window.scrollTo({ top: 0, behavior: 'instant' });
+                                  navigate(`/product/${relatedProduct._id}`);
+                                }}
+                              >
+                                <div className="relative w-full overflow-hidden bg-[#f9f9f9] h-[200px] md:h-[250px]">
+                                  <img
+                                    src={getProductImage(relatedProduct.image, relatedProduct._id || index)}
+                                    alt={relatedProduct.itemName}
+                                    className="w-full h-full object-contain p-5"
+                                    onError={(e) => {
+                                      e.target.src = getProductImage(null, relatedProduct._id || index);
+                                    }}
+                                  />
+                                  {relatedProduct.discount > 0 && (
+                                    <div className="absolute top-2.5 right-2.5 bg-red-500 text-white px-2.5 py-1.5 text-sm font-bold">
+                                      Save {relatedProduct.discount}%
+                                    </div>
+                                  )}
+                                  {relatedProduct.stock === 0 && (
+                                    <div className="absolute top-2.5 left-2.5 bg-red-500 text-white px-2.5 py-1.5 text-sm font-bold">
+                                      Sold Out
+                                    </div>
+                                  )}
+                                </div>
 
-                              <div className="px-2.5 pt-4 flex flex-col flex-grow">
-                                <h3 className="lux-serif-text !text-[12px] md:!text-[14px] mb-2 text-gray-800 min-h-[24px] md:min-h-[40px] leading-snug whitespace-normal break-words">
-                                  {relatedProduct.itemName}
-                                </h3>
-                                <div className="mt-auto">
-                                  <div className="flex items-center justify-center gap-2.5">
-                                    {relatedProduct.discount > 0 ? (
-                                      <>
+                                <div className="px-2.5 pt-4 flex flex-col flex-grow">
+                                  <h3 className="lux-serif-text !text-[12px] md:!text-[14px] mb-2 text-gray-800 min-h-[24px] md:min-h-[40px] leading-snug whitespace-normal break-words">
+                                    {relatedProduct.itemName}
+                                  </h3>
+                                  <div className="mt-auto">
+                                    <div className="flex items-center justify-center gap-2.5">
+                                      {relatedProduct.discount > 0 ? (
+                                        <>
+                                          <span className="lux-price-number text-[11px] md:text-lg font-medium text-black">
+                                            {relatedDiscountedPrice.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
+                                          </span>
+                                          <span className="lux-price-number text-[9px] md:text-sm text-gray-400 line-through">
+                                            {Number(relatedProduct.price).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
+                                          </span>
+                                        </>
+                                      ) : (
                                         <span className="lux-price-number text-[11px] md:text-lg font-medium text-black">
-                                          {relatedDiscountedPrice.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
-                                        </span>
-                                        <span className="lux-price-number text-[9px] md:text-sm text-gray-400 line-through">
                                           {Number(relatedProduct.price).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
                                         </span>
-                                      </>
-                                    ) : (
-                                      <span className="lux-price-number text-[11px] md:text-lg font-medium text-black">
-                                        {Number(relatedProduct.price).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
-                                      </span>
-                                    )}
-                                  </div>
+                                      )}
+                                    </div>
 
-                                  <div className="pt-3">
-                                    <button
-                                      type="button"
-                                      disabled={relatedProduct.stock === 0}
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        addItem({
-                                          id: relatedProduct._id,
-                                          name: relatedProduct.itemName,
-                                          price: relatedProduct.price,
-                                          discountedPrice:
-                                            relatedProduct.discount > 0
-                                              ? (Number(relatedProduct.price) * (1 - Number(relatedProduct.discount) / 100)).toFixed(2)
-                                              : null,
-                                          image: relatedProduct.image,
-                                          company: relatedProduct.company,
-                                          genericName: relatedProduct.genericName,
-                                          discount: relatedProduct.discount || 0,
-                                          seller: relatedProduct.seller,
-                                        });
-                                      }}
-                                      className={`w-full px-3 py-2 text-xs md:text-sm font-semibold uppercase tracking-wide border ${
-                                        relatedProduct.stock === 0
+                                    <div className="pt-3">
+                                      <button
+                                        type="button"
+                                        disabled={relatedProduct.stock === 0}
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          addItem({
+                                            id: relatedProduct._id,
+                                            name: relatedProduct.itemName,
+                                            price: relatedProduct.price,
+                                            discountedPrice:
+                                              relatedProduct.discount > 0
+                                                ? (Number(relatedProduct.price) * (1 - Number(relatedProduct.discount) / 100)).toFixed(2)
+                                                : null,
+                                            image: relatedProduct.image,
+                                            company: relatedProduct.company,
+                                            genericName: relatedProduct.genericName,
+                                            discount: relatedProduct.discount || 0,
+                                            seller: relatedProduct.seller,
+                                          });
+                                        }}
+                                        className={`w-full px-3 py-2 text-xs md:text-sm font-semibold uppercase tracking-wide border ${relatedProduct.stock === 0
                                           ? 'bg-gray-200 border-gray-300 text-gray-500 cursor-not-allowed'
                                           : 'bg-[#8B6F47]/70 border-[#8B6F47]/70 text-white hover:bg-[#7A5F3A]/80 hover:border-[#7A5F3A]/80'
-                                      } transition-colors duration-150`}
-                                    >
-                                      {relatedProduct.stock === 0 ? 'Out of stock' : 'Shto ne shporte'}
-                                    </button>
+                                          } transition-colors duration-150`}
+                                      >
+                                        {relatedProduct.stock === 0 ? 'Out of stock' : 'Shto ne shporte'}
+                                      </button>
+                                    </div>
                                   </div>
                                 </div>
                               </div>
-                            </div>
-                          );
-                        })}
+                            );
+                          })}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Page indicator */}
-            {relatedTotalPages > 1 && (
-              <div className="mt-4 text-center text-sm text-[#4A3628]">
-                {relatedCurrentPage} / {relatedTotalPages}
-              </div>
-            )}
-          </div>
-        )}
+              {/* Page indicator */}
+              {relatedTotalPages > 1 && (
+                <div className="mt-4 text-center text-sm text-[#4A3628]">
+                  {relatedCurrentPage} / {relatedTotalPages}
+                </div>
+              )}
+            </div>
+          )
+        }
       </div>
 
+      <VariantSelectionSidebar
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
+        product={product}
+        selectedVariant={activeVariant}
+        onSelectVariant={setActiveVariant}
+        onAddToCart={() => {
+          if (handleAddToCart()) {
+            setIsSidebarOpen(false);
+          }
+        }}
+      />
     </div>
   );
 };
