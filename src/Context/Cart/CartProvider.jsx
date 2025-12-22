@@ -141,6 +141,7 @@ import { useState } from 'react';
 export const CartProvider = ({ children }) => {
   const [variantModalOpen, setVariantModalOpen] = useState(false);
   const [currentProductForVariant, setCurrentProductForVariant] = useState(null);
+  const [isAnimating, setIsAnimating] = useState(false);
 
   const [state, dispatch] = useReducer(cartReducer, initialState, (initial) => {
     try {
@@ -210,6 +211,10 @@ export const CartProvider = ({ children }) => {
     // Let's ensure we don't block 1-variant products.
 
     dispatch({ type: 'ADD_ITEM', payload: item });
+
+    // Trigger animation
+    setIsAnimating(true);
+    setTimeout(() => setIsAnimating(false), 300);
   };
 
   const removeItem = (id) => {
@@ -268,6 +273,7 @@ export const CartProvider = ({ children }) => {
     removeItem,
     updateQuantity,
     clearCart,
+    isAnimating,
   };
 
   return (

@@ -10,6 +10,7 @@ const ShopGrid = ({
   currentPage,
   goToPage,
   totalPages,
+  onOpenVariantSidebar,
 }) => {
   const { addItem } = useContext(CartContext);
   const navigate = useNavigate();
@@ -26,7 +27,7 @@ const ShopGrid = ({
             >
               {/* Product Image Container */}
               <div
-                className="relative w-full overflow-hidden bg-white cursor-pointer h-[200px] md:h-[250px]"
+                className="relative w-full overflow-hidden bg-white cursor-pointer h-[185px] md:h-[240px] pt-4 md:pt-0"
                 onClick={() => {
                   window.scrollTo({ top: 0, behavior: 'instant' });
                   navigate(`/product/${medicine._id}`);
@@ -35,7 +36,7 @@ const ShopGrid = ({
                 <img
                   src={getProductImage(medicine.image, medicine._id || index)}
                   alt={medicine.itemName}
-                  className="w-full h-full object-contain p-5"
+                  className="w-full h-full object-contain p-1 md:p-5"
                   onError={(e) => {
                     e.target.src = getProductImage(null, medicine._id || index);
                   }}
@@ -61,7 +62,7 @@ const ShopGrid = ({
               </div>
 
               {/* Product Info */}
-              <div className="px-2.5 pt-4 flex flex-col flex-grow">
+              <div className="px-1.5 md:px-2.5 pt-1.5 md:pt-4 flex flex-col flex-grow">
                 {/* Decorative Line */}
                 <div
                   className="mx-auto mb-3 h-[1px] w-[40px]"
@@ -104,8 +105,8 @@ const ShopGrid = ({
                         // Check if product has multiple variants
                         if (medicine.variants && medicine.variants.length > 1) {
                           // Open sidebar
-                          if (props.onOpenVariantSidebar) {
-                            props.onOpenVariantSidebar(medicine);
+                          if (onOpenVariantSidebar) {
+                            onOpenVariantSidebar(medicine);
                           }
                         } else {
                           // Add directly (single variant or no variant)

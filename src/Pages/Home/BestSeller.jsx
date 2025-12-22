@@ -465,6 +465,27 @@ const BestSeller = () => {
         selectedVariant={activeVariantForSidebar}
         onSelectVariant={setActiveVariantForSidebar}
         onAddToCart={() => {
+          if (selectedProductForVariant && activeVariantForSidebar) {
+            const variantPrice = Number(activeVariantForSidebar.price);
+            const variantDiscount = Number(activeVariantForSidebar.discount || 0);
+            const discountedPrice = variantDiscount > 0
+              ? (variantPrice * (1 - variantDiscount / 100)).toFixed(2)
+              : null;
+
+            addItem({
+              id: selectedProductForVariant._id,
+              name: selectedProductForVariant.itemName,
+              price: variantPrice,
+              discountedPrice: discountedPrice,
+              image: selectedProductForVariant.image,
+              company: selectedProductForVariant.company,
+              genericName: selectedProductForVariant.genericName,
+              discount: variantDiscount,
+              seller: selectedProductForVariant.seller,
+              size: activeVariantForSidebar.size,
+              variantId: activeVariantForSidebar._id
+            });
+          }
           setIsVariantSidebarOpen(false);
         }}
       />

@@ -10,7 +10,7 @@ const Cart = ({
   disabled = false,
   forceBlack = false,
 }) => {
-  const { totalQuantity } = useContext(CartContext);
+  const { totalQuantity, isAnimating } = useContext(CartContext);
   const isScrollingRef = useRef(false);
   const scrollTimeoutRef = useRef(null);
   const lastScrollYRef = useRef(window.scrollY);
@@ -22,19 +22,19 @@ const Cart = ({
     const currentScrollY = window.scrollY;
     const lastScrollY = lastScrollYRef.current;
     const scrollDelta = Math.abs(currentScrollY - lastScrollY);
-    
+
     // Update last scroll position
     lastScrollYRef.current = currentScrollY;
-    
+
     // If scroll is significant, mark as scrolling
     if (scrollDelta > 1) {
       isScrollingRef.current = true;
-      
+
       // Clear existing timeout
       if (scrollTimeoutRef.current) {
         clearTimeout(scrollTimeoutRef.current);
       }
-      
+
       // Set scrolling to false after scroll stops (longer delay to prevent accidental opens)
       // Also clear the timeout ref so clicks are allowed again
       // Increased delay to prevent cart from opening during navbar color transition
@@ -50,7 +50,7 @@ const Cart = ({
 
   useEffect(() => {
     window.addEventListener('scroll', throttledHandleScroll, { passive: true });
-    
+
     return () => {
       window.removeEventListener('scroll', throttledHandleScroll);
       if (scrollTimeoutRef.current) {
@@ -80,12 +80,12 @@ const Cart = ({
     // Prevent default behavior to avoid double-firing
     e.preventDefault();
     e.stopPropagation();
-    
+
     // 0. Check if disabled (e.g., during navbar transition)
     if (disabled) {
       return;
     }
-    
+
     // 1. Check if we detected scroll or movement during the specific touch interaction
     if (shouldBlockClick.current) {
       shouldBlockClick.current = false;
@@ -96,7 +96,7 @@ const Cart = ({
     if (isScrollingRef.current) {
       return;
     }
-    
+
     // 3. Don't open if scroll timeout is active (just finished scrolling)
     if (scrollTimeoutRef.current) {
       return;
@@ -113,23 +113,22 @@ const Cart = ({
       onTouchEnd={handleTouchEnd}
       className="relative p-1.5 hover:opacity-80 transition-opacity min-h-[44px] min-w-[44px] flex items-center justify-center"
       aria-label="Open cart"
-      style={{ 
+      style={{
         touchAction: 'manipulation',
         WebkitTapHighlightColor: 'transparent'
       }}
     >
-      <div className="relative">
+      <div className={`relative transition-transform duration-300 ${isAnimating ? 'scale-125' : 'scale-100'}`}>
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          className={`transition-colors duration-300 ease-in-out ${
-            forceBlack
+          className={`transition-colors duration-300 ease-in-out ${forceBlack
               ? 'text-black hover:text-gray-800'
               : useNavColors
-              ? 'text-[#5A3F2A] hover:text-[#4A3320]'
-              : isScrolled
-              ? 'text-[#A67856]'
-              : 'text-white'
-          }`}
+                ? 'text-[#5A3F2A] hover:text-[#4A3320]'
+                : isScrolled
+                  ? 'text-[#A67856]'
+                  : 'text-white'
+            }`}
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"

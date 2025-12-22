@@ -20,6 +20,11 @@ const ProductDetail = () => {
   const [activeVariant, setActiveVariant] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+  // State for related product variant sidebar
+  const [isRelatedSidebarOpen, setIsRelatedSidebarOpen] = useState(false);
+  const [relatedSidebarProduct, setRelatedSidebarProduct] = useState(null);
+  const [relatedSidebarVariant, setRelatedSidebarVariant] = useState(null);
+
   const { data: product, isLoading, error } = useQuery({
     queryKey: ['product', id],
     queryFn: async () => {
@@ -358,7 +363,7 @@ const ProductDetail = () => {
                     onClick={handleBuyNow}
                     className="w-full lux-btn-primary px-4 sm:px-6 py-3 sm:py-4 text-sm sm:text-base min-h-[44px]"
                   >
-                    Buy it now
+                    Bli tani
                   </button>
                 </>
               ) : (
@@ -509,7 +514,7 @@ const ProductDetail = () => {
                       return (
                         <div
                           key={relatedProduct._id}
-                          className="min-w-[160px] md:min-w-[240px] w-[160px] md:w-[240px] flex-shrink-0 snap-start h-auto flex"
+                          className="min-w-[calc(50%-8px)] md:min-w-[240px] w-[calc(50%-8px)] md:w-[240px] flex-shrink-0 snap-start h-auto flex"
                         >
                           <div
                             className="swipe-hint-animation w-full border border-gray-200 overflow-hidden bg-white text-center pb-4 flex flex-col cursor-pointer hover:shadow-lg transition-shadow h-full"
@@ -518,11 +523,11 @@ const ProductDetail = () => {
                               navigate(`/product/${relatedProduct._id}`);
                             }}
                           >
-                            <div className="relative w-full overflow-hidden bg-white h-[200px] md:h-[250px]">
+                            <div className="relative w-full overflow-hidden bg-white h-[185px] md:h-[240px] pt-4 md:pt-0">
                               <img
                                 src={getProductImage(relatedProduct.image, relatedProduct._id || index)}
                                 alt={relatedProduct.itemName}
-                                className="w-full h-full object-contain p-5"
+                                className="w-full h-full object-contain p-1 md:p-5"
                                 onError={(e) => {
                                   e.target.src = getProductImage(null, relatedProduct._id || index);
                                 }}
@@ -539,7 +544,7 @@ const ProductDetail = () => {
                               )}
                             </div>
 
-                            <div className="px-2.5 pt-4 flex flex-col flex-grow">
+                            <div className="px-1.5 md:px-2.5 pt-1.5 md:pt-4 flex flex-col flex-grow">
                               {/* Decorative Line */}
                               <div
                                 className="mx-auto mb-5 h-[1px] w-[40px]"
@@ -573,20 +578,32 @@ const ProductDetail = () => {
                                     disabled={relatedProduct.stock === 0}
                                     onClick={(e) => {
                                       e.stopPropagation();
-                                      addItem({
-                                        id: relatedProduct._id,
-                                        name: relatedProduct.itemName,
-                                        price: relatedProduct.price,
-                                        discountedPrice:
-                                          relatedProduct.discount > 0
-                                            ? (Number(relatedProduct.price) * (1 - Number(relatedProduct.discount) / 100)).toFixed(2)
-                                            : null,
-                                        image: relatedProduct.image,
-                                        company: relatedProduct.company,
-                                        genericName: relatedProduct.genericName,
-                                        discount: relatedProduct.discount || 0,
-                                        seller: relatedProduct.seller,
-                                      });
+                                      if (relatedProduct.variants && relatedProduct.variants.length > 1) {
+                                        setRelatedSidebarProduct(relatedProduct);
+                                        setRelatedSidebarVariant(relatedProduct.variants[0]);
+                                        setIsRelatedSidebarOpen(true);
+                                      } else {
+                                        const variantToAdd = relatedProduct.variants && relatedProduct.variants.length === 1
+                                          ? relatedProduct.variants[0]
+                                          : { size: relatedProduct.size || 'Standard', _id: undefined };
+
+                                        addItem({
+                                          id: relatedProduct._id,
+                                          name: relatedProduct.itemName,
+                                          price: relatedProduct.price,
+                                          discountedPrice:
+                                            relatedProduct.discount > 0
+                                              ? (Number(relatedProduct.price) * (1 - Number(relatedProduct.discount) / 100)).toFixed(2)
+                                              : null,
+                                          image: relatedProduct.image,
+                                          company: relatedProduct.company,
+                                          genericName: relatedProduct.genericName,
+                                          discount: relatedProduct.discount || 0,
+                                          seller: relatedProduct.seller,
+                                          size: variantToAdd.size,
+                                          variantId: variantToAdd._id
+                                        });
+                                      }
                                     }}
                                     className={`w-full px-3 py-2 text-xs md:text-sm font-semibold uppercase tracking-wide border ${relatedProduct.stock === 0
                                       ? 'bg-gray-200 border-gray-300 text-gray-500 cursor-not-allowed'
@@ -626,6 +643,42 @@ const ProductDetail = () => {
         onAddToCart={() => {
           if (handleAddToCart()) {
             setIsSidebarOpen(false);
+          }
+        }}
+      />
+
+      <VariantSelectionSidebar
+        isOpen={isRelatedSidebarOpen}
+        onClose={() => {
+          setIsRelatedSidebarOpen(false);
+          setRelatedSidebarProduct(null);
+          setRelatedSidebarVariant(null);
+        }}
+        product={relatedSidebarProduct}
+        selectedVariant={relatedSidebarVariant}
+        onSelectVariant={setRelatedSidebarVariant}
+        onAddToCart={() => {
+          if (relatedSidebarProduct && relatedSidebarVariant) {
+            const variantPrice = Number(relatedSidebarVariant.price);
+            const variantDiscount = Number(relatedSidebarVariant.discount || 0);
+            const discountedPrice = variantDiscount > 0
+              ? (variantPrice * (1 - variantDiscount / 100)).toFixed(2)
+              : null;
+
+            addItem({
+              id: relatedSidebarProduct._id,
+              name: relatedSidebarProduct.itemName,
+              price: variantPrice,
+              discountedPrice: discountedPrice,
+              image: relatedSidebarProduct.image,
+              company: relatedSidebarProduct.company,
+              genericName: relatedSidebarProduct.genericName,
+              discount: variantDiscount,
+              seller: relatedSidebarProduct.seller,
+              size: relatedSidebarVariant.size,
+              variantId: relatedSidebarVariant._id
+            });
+            setIsRelatedSidebarOpen(false);
           }
         }}
       />

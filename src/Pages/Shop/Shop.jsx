@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useContext } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import useAxiosSecure from '../../hooks/useAxiosSecure';
 import LoadingError from '../../Components/Common/States/LoadingError';
@@ -8,10 +8,17 @@ import ShopGrid from '../../Components/Grid/ShopGrid';
 import VariantSelectionSidebar from '../../Components/Common/Products/VariantSelectionSidebar';
 import { Helmet } from 'react-helmet-async';
 import { useLocation } from 'react-router-dom';
+import { CartContext } from '../../Context/Cart/CartContext';
 
 const Shop = () => {
   const location = useLocation();
+  const { addItem } = useContext(CartContext);
   const { publicApi } = useAxiosSecure();
+
+  const onAddToCart = useCallback((product, quantity = 1, selectedVariant = null) => {
+    addItem(product, quantity, selectedVariant);
+  }, [addItem]);
+
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(20);
   const [sortBy, setSortBy] = useState('alphabetical');
@@ -838,6 +845,27 @@ const Shop = () => {
         selectedVariant={activeVariantForSidebar}
         onSelectVariant={setActiveVariantForSidebar}
         onAddToCart={() => {
+          if (selectedProductForVariant && activeVariantForSidebar) {
+            const variantPrice = Number(activeVariantForSidebar.price);
+            const variantDiscount = Number(activeVariantForSidebar.discount || 0);
+            const discountedPrice = variantDiscount > 0
+              ? (variantPrice * (1 - variantDiscount / 100)).toFixed(2)
+              : null;
+
+            addItem({
+              id: selectedProductForVariant._id,
+              name: selectedProductForVariant.itemName,
+              price: variantPrice,
+              discountedPrice: discountedPrice,
+              image: selectedProductForVariant.image,
+              company: selectedProductForVariant.company,
+              genericName: selectedProductForVariant.genericName,
+              discount: variantDiscount,
+              seller: selectedProductForVariant.seller,
+              size: activeVariantForSidebar.size,
+              variantId: activeVariantForSidebar._id
+            });
+          }
           setIsVariantSidebarOpen(false);
         }}
       />

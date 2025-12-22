@@ -38,7 +38,7 @@ const Cart = () => {
         <Helmet key={location.pathname}>
           <title>Your Cart</title>
         </Helmet>
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-4 pt-24 pb-8 lg:pt-32 lg:pb-12">
           <div className="text-center">
             <h2 className="text-2xl font-bold mb-4">Your cart is empty</h2>
             <p className="text-gray-600">
@@ -55,7 +55,7 @@ const Cart = () => {
       <Helmet key={location.pathname}>
         <title>Your Cart</title>
       </Helmet>
-      <div className="min-h-screen bg-[#f9f7f4] py-8 sm:py-12 px-4 sm:px-2 md:px-0">
+      <div className="min-h-screen bg-[#f9f7f4] pt-24 pb-8 lg:pt-32 lg:pb-12 px-4 sm:px-2 md:px-0">
         <div className="max-w-3xl mx-auto bg-white lux-card lux-card-elevated">
           <div className="p-4 sm:p-6 md:p-8">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 sm:mb-8">
