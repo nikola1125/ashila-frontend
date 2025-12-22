@@ -23,6 +23,9 @@ const AuthProvider = ({ children }) => {
   };
   // sign in with google
   const signInWithGoogle = () => {
+    googleProvider.setCustomParameters({
+      prompt: 'select_account'
+    });
     return signInWithPopup(auth, googleProvider);
   };
   // sign in with email and password
