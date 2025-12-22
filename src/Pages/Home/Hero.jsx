@@ -10,7 +10,7 @@ const Hero = () => {
     <section
       ref={heroRef}
       className="relative w-full h-[60vh] sm:h-[70vh] md:h-screen overflow-hidden z-0 bg-cover bg-center bg-gray-100"
-      style={{ 
+      style={{
         opacity: 1,
         transform: 'translateZ(0)',
         backfaceVisibility: 'hidden',
@@ -24,7 +24,7 @@ const Hero = () => {
         touchAction: 'pan-y',
         WebkitOverflowScrolling: 'touch',
         overscrollBehavior: 'contain',
-        backgroundImage: 'url(/images/background.png)'
+        // backgroundImage: 'url(/images/background.png)' - Removed as per user request to avoid flash before video
       }}
     >
       {/* Background video with fallback */}
@@ -43,14 +43,14 @@ const Hero = () => {
         }}
       />
       {/* Dark overlay */}
-      <div 
-        className="absolute inset-0 bg-black/35 z-0" 
-        style={{ 
+      <div
+        className="absolute inset-0 bg-black/35 z-0"
+        style={{
           transform: 'translateZ(0)',
           willChange: 'auto'
-        }} 
+        }}
       />
-      
+
       {/* Hero Content Overlay - CTAs positioned bottom-right, slightly higher */}
       <div className="absolute inset-0 z-10 flex items-end justify-end">
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-4 pb-10 sm:pb-24 md:pb-28 flex justify-end">

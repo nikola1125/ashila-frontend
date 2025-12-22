@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { DollarSign, ShoppingBag, Users, TrendingUp, Package, CheckCircle, X } from 'lucide-react';
+import { Banknote, ShoppingBag, Users, TrendingUp, Package, CheckCircle, X } from 'lucide-react';
 import useAxiosSecure from '../../../../hooks/useAxiosSecure';
+
 import DataLoading from '../../../../Components/Common/Loaders/DataLoading';
 import OrderDetailsModal from '../OrderManagement/OrderDetailsModal';
 import { toast } from 'react-toastify';
@@ -16,7 +17,8 @@ const Economy = () => {
         queryKey: ['admin-stats'],
         queryFn: async () => {
             const res = await privateApi.get('/orders/stats/admin-dashboard');
-            return res.data[0] || res[0] || {};
+            // useAxiosSecure returns data directly, so res is the array
+            return Array.isArray(res) ? res[0] : (res?.data?.[0] || {});
         },
         refetchInterval: 3000 // Real-time polling
     });
@@ -25,7 +27,7 @@ const Economy = () => {
         queryKey: ['sales-report-chart'],
         queryFn: async () => {
             const res = await privateApi.get('/orders/admin/sales-report');
-            return res.data || res;
+            return Array.isArray(res) ? res : (res?.data || []);
         },
         refetchInterval: 5000
     });
@@ -34,11 +36,13 @@ const Economy = () => {
         queryKey: ['admin-pending-orders'],
         queryFn: async () => {
             const res = await privateApi.get('/orders');
-            const allOrders = res.data || res;
+            const allOrders = Array.isArray(res) ? res : (res?.data || []);
             return allOrders.filter(o => o.status === 'Pending').slice(0, 5);
         },
         refetchInterval: 3000
     });
+
+
 
     const updateStatusMutation = useMutation({
         mutationFn: async ({ id, status }) => {
@@ -65,7 +69,11 @@ const Economy = () => {
         setIsModalOpen(true);
     };
 
-    if (statsLoading || ordersLoading) return <DataLoading />;
+    // If loading for the first time
+    if ((statsLoading && !stats) || (ordersLoading && !pendingOrders.length && !stats)) return <DataLoading />;
+
+    // Safety check objects
+    const safeStats = stats || {};
 
     return (
         <div className="w-full">
@@ -75,23 +83,29 @@ const Economy = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <div className="bg-white p-6 rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.05)] border border-amber-50 flex items-center gap-4">
+                <div
+                    onClick={() => window.location.href = '/admin/economy/revenue-details'}
+                    className="bg-white p-6 rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.05)] border border-amber-50 flex items-center gap-4 cursor-pointer hover:shadow-md transition"
+                >
                     <div className="w-14 h-14 rounded-full bg-green-50 flex items-center justify-center text-green-600">
-                        <DollarSign size={28} />
+                        <Banknote size={28} />
                     </div>
                     <div>
                         <p className="text-gray-500 text-sm font-medium">Total Revenue</p>
-                        <h3 className="text-2xl font-bold text-gray-900">{stats?.totalRevenue?.toLocaleString() || 0} ALL</h3>
+                        <h3 className="text-2xl font-bold text-gray-900">{safeStats.totalRevenue?.toLocaleString() || 0} ALL</h3>
                     </div>
                 </div>
 
-                <div className="bg-white p-6 rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.05)] border border-amber-50 flex items-center gap-4">
+                <div
+                    onClick={() => window.location.href = '/admin/orders'}
+                    className="bg-white p-6 rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.05)] border border-amber-50 flex items-center gap-4 cursor-pointer hover:shadow-md transition"
+                >
                     <div className="w-14 h-14 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
                         <ShoppingBag size={28} />
                     </div>
                     <div>
                         <p className="text-gray-500 text-sm font-medium">Total Orders</p>
-                        <h3 className="text-2xl font-bold text-gray-900">{stats?.totalOrders || 0}</h3>
+                        <h3 className="text-2xl font-bold text-gray-900">{safeStats.totalOrders || 0}</h3>
                     </div>
                 </div>
 
@@ -101,24 +115,27 @@ const Economy = () => {
                     </div>
                     <div>
                         <p className="text-gray-500 text-sm font-medium">Pending Orders</p>
-                        <h3 className="text-2xl font-bold text-gray-900">{stats?.pendingOrders || 0}</h3>
+                        <h3 className="text-2xl font-bold text-gray-900">{safeStats.pendingOrders || 0}</h3>
                     </div>
                 </div>
 
-                <div className="bg-white p-6 rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.05)] border border-amber-50 flex items-center gap-4">
+                <div
+                    onClick={() => window.location.href = '/admin/manage-users'}
+                    className="bg-white p-6 rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.05)] border border-amber-50 flex items-center gap-4 cursor-pointer hover:shadow-md transition"
+                >
                     <div className="w-14 h-14 rounded-full bg-purple-50 flex items-center justify-center text-purple-600">
                         <Users size={28} />
                     </div>
                     <div>
                         <p className="text-gray-500 text-sm font-medium">Total Users</p>
-                        <h3 className="text-2xl font-bold text-gray-900">{stats?.totalUsers || 0}</h3>
+                        <h3 className="text-2xl font-bold text-gray-900">{safeStats.totalUsers || 0}</h3>
                     </div>
                 </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Pending Orders Section */}
-                <div className="lg:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-amber-100">
+                <div className="lg:col-span-3 bg-white p-6 rounded-2xl shadow-sm border border-amber-100">
                     <div className="flex justify-between items-center mb-6">
                         <h3 className="font-bold text-lg text-amber-900 flex items-center gap-2">
                             <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
@@ -172,26 +189,6 @@ const Economy = () => {
                                 )}
                             </tbody>
                         </table>
-                    </div>
-                </div>
-
-                {/* Sales Chart Section */}
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-amber-100">
-                    <h3 className="font-bold text-lg text-amber-900 mb-6 flex items-center gap-2"><TrendingUp size={20} /> Revenue by Status</h3>
-                    <div className="space-y-4">
-                        {salesReport.map((item) => (
-                            <div key={item._id} className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                    <div className={`w-3 h-3 rounded-full ${item._id === 'Completed' ? 'bg-green-500' : 'bg-gray-300'}`}></div>
-                                    <span className="text-gray-600 font-medium capitalize">{item._id || 'Unknown'}</span>
-                                </div>
-                                <div className="text-right">
-                                    <span className="block font-bold text-gray-900">{item.totalRevenue.toLocaleString()} ALL</span>
-                                    <span className="text-xs text-gray-400">{item.count} orders</span>
-                                </div>
-                            </div>
-                        ))}
-                        {salesReport.length === 0 && <p className="text-gray-400">No data available</p>}
                     </div>
                 </div>
             </div>

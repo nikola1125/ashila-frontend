@@ -27,12 +27,12 @@ const AdminTokenRoute = ({ children }) => {
   const { data, isLoading, isError } = useQuery({
     queryKey: ['admin-token-check', token],
     enabled: !!token,
-    queryFn: async () =>
-      publicApi.get('/admin/auth/check', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }),
+    queryFn: async () => {
+      const res = await publicApi.get('/admin/check', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      return res;
+    },
     retry: false,
     staleTime: 0,
     cacheTime: 0,

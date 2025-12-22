@@ -124,6 +124,9 @@ const InvoicePDF = ({ orderData, sessionId }) => {
               <Text style={styles.value}>
                 {new Date().toLocaleDateString()}
               </Text>
+              <Text style={{ ...styles.label, textAlign: 'right', marginTop: 4 }}>
+                Lezhë, Albania
+              </Text>
             </View>
           </View>
         </View>

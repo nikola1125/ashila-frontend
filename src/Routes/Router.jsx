@@ -39,6 +39,7 @@ import ManageProducts from '../Pages/Dashboard/Admin/ManageProducts/ManageProduc
 import Inventory from '../Pages/Dashboard/Admin/Inventory/Inventory';
 import OrderManagement from '../Pages/Dashboard/Admin/OrderManagement/OrderManagement';
 import Economy from '../Pages/Dashboard/Admin/Economy/Economy';
+import RevenueDetails from '../Pages/Dashboard/Admin/Economy/RevenueDetails';
 import AdminLogin from '../Pages/Admin/AdminLogin';
 
 import Canceled from '../Pages/Payment/Canceled';
@@ -205,6 +206,10 @@ export const router = createBrowserRouter([
       {
         path: 'economy',
         element: <Economy />,
+      },
+      {
+        path: 'economy/revenue-details',
+        element: <RevenueDetails />,
       },
     ],
   },

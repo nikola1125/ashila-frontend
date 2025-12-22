@@ -45,12 +45,12 @@ const AcneCategories = () => {
     const width = slider.clientWidth || 1;
     const pageIndex = Math.round(slider.scrollLeft / width);
     setCurrentPage(Math.min(chunkedItems.length, pageIndex + 1));
-    
+
     // Hide scroll hint after user starts scrolling
     if (slider.scrollLeft > 5 && showScrollHint) {
       setShowScrollHint(false);
     }
-    
+
     // Update mobile arrow visibility based on scroll position
     const maxScrollLeft = slider.scrollWidth - slider.clientWidth;
     const isAtStart = slider.scrollLeft <= 5;
@@ -100,7 +100,7 @@ const AcneCategories = () => {
     setTimeout(checkInitial, 100);
 
     slider.addEventListener('scroll', throttledHandleScroll, { passive: true });
-    
+
     const handleResize = () => {
       setTimeout(checkInitial, 100);
     };
@@ -192,7 +192,7 @@ const AcneCategories = () => {
               {items.map((item, index) => (
                 <button
                   key={item.key}
-                  onClick={() => navigate(`/shop?category=${item.key}`)}
+                  onClick={() => navigate(`/shop?skinProblem=${item.key}`)}
                   className={`group flex flex-col items-center scale-in stagger-${Math.min(index + 1, 4)}`}
                 >
                   {/* Circular Image Frame */}
@@ -319,7 +319,7 @@ const AcneCategories = () => {
                       return (
                         <button
                           key={item.key}
-                          onClick={() => navigate(`/shop?category=${item.key}`)}
+                          onClick={() => navigate(`/shop?skinProblem=${item.key}`)}
                           className={`group flex flex-col items-center scale-in stagger-${Math.min(itemIndex + 1, 4)} swipe-hint-animation ${delayClass}`}
                         >
                           {/* Circular Image Frame */}

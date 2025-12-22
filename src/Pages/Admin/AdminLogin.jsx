@@ -20,7 +20,7 @@ const AdminLogin = () => {
 
     try {
       setLoading(true);
-      const res = await publicApi.post('/admin/auth/login', { username, password, rememberMe });
+      const res = await publicApi.post('/admin/login', { username, password, rememberMe });
       const token = res?.token;
       if (!token) {
         toast.error('Login failed');

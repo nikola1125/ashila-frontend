@@ -24,7 +24,7 @@ const PRODUCT_IMAGES = [
  */
 export const getImageByIndex = (indexOrId) => {
   // Convert ID to number if it's a string
-  let num = typeof indexOrId === 'string' 
+  let num = typeof indexOrId === 'string'
     ? indexOrId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
     : indexOrId;
   return PRODUCT_IMAGES[Math.abs(num) % PRODUCT_IMAGES.length];
@@ -45,12 +45,7 @@ export const getFallbackProductImage = () => {
  * @returns {string} Image path
  */
 export const getProductImage = (image, indexOrId = 0) => {
-  if (image && image.trim() && 
-      !image.includes('placeholder') && 
-      !image.includes('unsplash') && 
-      !image.includes('curology') && 
-      !image.toLowerCase().includes('curology') &&
-      !image.includes('produkt.png')) {
+  if (image && typeof image === 'string' && image.trim()) {
     return image;
   }
   return getImageByIndex(indexOrId);

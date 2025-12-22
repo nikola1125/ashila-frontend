@@ -8,6 +8,7 @@ import Logo from '../Logo/Logo';
 import { Search, ChevronDown, Menu, X, ChevronRight } from 'lucide-react';
 import useAxiosSecure from '../../../hooks/useAxiosSecure';
 import { useThrottle } from '../../../hooks/useThrottle';
+import SearchModal from './SearchModal';
 
 
 // Static navigation hierarchy for desktop & mobile menus
@@ -162,6 +163,7 @@ const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [accountDropdownOpen, setAccountDropdownOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
 
   const cancelDesktopMenuClose = useCallback(() => {
     if (desktopMenuCloseTimeoutRef.current) {
@@ -415,8 +417,9 @@ const Navbar = () => {
               {/* Mobile: right search + cart */}
               <div className="flex items-center gap-0.5 lg:hidden relative z-20">
                 <button
-                  onClick={() => {
-                    navigate('/shop');
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSearchOpen(true);
                   }}
                   className={`transition-colors min-h-[32px] min-w-[32px] flex items-center justify-center ${isScrolled || isAuthPage ? 'text-black hover:text-gray-700' : 'text-white hover:text-gray-200'
                     }`}
@@ -588,13 +591,14 @@ const Navbar = () => {
 
                     {!isShopPage && (
                       <button
-                        onClick={() => {
-                          navigate('/shop');
-                        }}
-                        className={`transition-colors min-h-[36px] min-w-[36px] flex items-center justify-center mr-3 ${isScrolled || isShopPage || isAuthPage ? 'text-[#5A3F2A] hover:text-[#4A3320]' : 'text-white hover:text-gray-200'}`}
+                        onClick={() => setSearchOpen(true)}
+                        className={`transition-colors min-h-[36px] min-w-[36px] flex items-center justify-center mr-1 font-medium text-[10px] xl:text-xs uppercase tracking-wide text-[#5A3F2A] hover:text-[#4A3320]`}
                         aria-label="Search"
                       >
-                        <Search size={18} />
+                        <div className="flex items-center gap-1">
+                          <Search size={18} />
+                          <span className="hidden xl:inline">Kërko</span>
+                        </div>
                       </button>
                     )}
 
@@ -755,6 +759,7 @@ const Navbar = () => {
 
       {/* Cart Sidebar - outside of header so fixed positioning uses full viewport */}
       <CartSidebar isOpen={cartOpen} onClose={() => setCartOpen(false)} />
+      <SearchModal isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
     </>
   );
 };

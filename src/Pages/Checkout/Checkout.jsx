@@ -1,4 +1,5 @@
 import React, { useContext, useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Helmet } from 'react-helmet-async';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -6,6 +7,16 @@ import { CartContext } from '../../Context/Cart/CartContext';
 import { AuthContext } from '../../Context/Auth/AuthContext';
 import useAxiosSecure from '../../hooks/useAxiosSecure';
 import { getProductImage } from '../../utils/productImages';
+
+const ALBANIA_CITIES = [
+  "Tirana", "Durrës", "Vlorë", "Shkodër", "Fier", "Korçë", "Elbasan", "Berat", "Lushnje", "Kavajë",
+  "Gjirokastër", "Sarandë", "Lezhë", "Kukës", "Burrel", "Peshkopi", "Patos", "Krujë", "Kuçovë",
+  "Laç", "Pogradec", "Librazhd", "Delvinë", "Tepelenë", "Gramsh", "Bulqizë", "Përmet", "Ersekë",
+  "Rrëshen", "Ballsh", "Mamurras", "Bajram Curri", "Krumë", "Peqin", "Divjakë", "Selenicë",
+  "Roskovec", "Pukë", "Rrogozhinë", "Vorë", "Urë Vajgurore", "Himarë", "Rubik", "Koplik",
+  "Maliq", "Poliçan", "Memaliaj", "Çorovodë", "Këlcyrë", "Belsh", "Orikum", "Prrenjas",
+  "Krrabë", "Libohovë", "Konispol", "Fushë-Krujë", "Shijak", "Kamëz"
+].sort();
 
 const Checkout = () => {
   const location = useLocation();
@@ -17,11 +28,24 @@ const Checkout = () => {
   const cartItems = useMemo(() => (Array.isArray(items) ? items : []), [items]);
 
   const [fullName, setFullName] = useState(user?.displayName || '');
+  const [email, setEmail] = useState('');
   const [street, setStreet] = useState('');
   const [city, setCity] = useState('');
   const [postalCode, setPostalCode] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // Fetch Global Settings for Free Delivery
+  const { data: settings } = useQuery({
+    queryKey: ['settings'],
+    queryFn: async () => {
+      const res = await publicApi.get('/settings');
+      return res;
+    }
+  });
+
+
+  const shippingCost = settings?.freeDelivery ? 0 : 300;
 
   const api = user ? privateApi : publicApi;
 
@@ -37,6 +61,7 @@ const Checkout = () => {
         quantity,
         price,
         discount,
+        image: item.image,
         seller: item.seller || null,
         sellerEmail: item.sellerEmail || null,
       };
@@ -56,12 +81,17 @@ const Checkout = () => {
       return;
     }
 
+    if (!user && !email.trim()) {
+      toast.error('Ju lutem shkruani email-in tuaj');
+      return;
+    }
+
     try {
       setLoading(true);
 
       const payload = {
         items: computedItems,
-        buyerEmail: user?.email || 'guest',
+        buyerEmail: user?.email || email.trim(),
         buyerName: fullName.trim(),
         deliveryAddress: {
           street: street.trim(),
@@ -72,12 +102,13 @@ const Checkout = () => {
         },
         paymentStatus: 'unpaid',
         status: 'Pending',
+        shippingCost: shippingCost, // Frontend hint, backend enforces this
       };
 
       await api.post('/orders', payload);
 
       clearCart();
-      toast.success('Porosia u krye me sukses');
+      toast.success('Porosia u dergua per konfirmim.');
       navigate('/', { replace: true });
     } catch (err) {
       console.error(err);
@@ -103,6 +134,20 @@ const Checkout = () => {
             <div className="bg-white border border-gray-200 p-5 sm:p-6">
               <h2 className="text-lg font-bold text-gray-900 mb-4">Të dhënat e klientit</h2>
               <form onSubmit={onSubmit} className="space-y-4">
+                {!user && (
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Email</label>
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="w-full border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#5A3F2A]/30"
+                      placeholder="Email juaj"
+                      required
+                    />
+                  </div>
+                )}
+
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Emër Mbiemër</label>
                   <input
@@ -129,12 +174,18 @@ const Checkout = () => {
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-1">Qyteti</label>
                     <input
+                      list="albania-cities"
                       value={city}
                       onChange={(e) => setCity(e.target.value)}
                       className="w-full border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#5A3F2A]/30"
-                      placeholder="Qyteti"
+                      placeholder="Zgjidh qytetin..."
                       required
                     />
+                    <datalist id="albania-cities">
+                      {ALBANIA_CITIES.map((c) => (
+                        <option key={c} value={c} />
+                      ))}
+                    </datalist>
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-1">Postal code</label>
@@ -223,7 +274,21 @@ const Checkout = () => {
                         {Number(discountedTotal).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} ALL
                       </span>
                     </div>
-                    <div className="text-xs text-gray-500">
+                    {/* Delivery Fee Display */}
+                    <div className="flex items-center justify-between text-sm text-gray-700">
+                      <span>Transporti</span>
+                      <span className="font-semibold lux-price-number">
+                        {shippingCost.toLocaleString('en-US')} ALL
+                      </span>
+                    </div>
+                    {/* Total with Delivery Fee */}
+                    <div className="flex items-center justify-between text-base font-bold text-gray-900 pt-2 border-t border-gray-100">
+                      <span>Totali (përfshirë transportin)</span>
+                      <span className="lux-price-number">
+                        {(Number(discountedTotal) + shippingCost).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} ALL
+                      </span>
+                    </div>
+                    <div className="text-xs text-gray-500 mt-2">
                       Pagesa bëhet në dorëzim.
                     </div>
                   </div>

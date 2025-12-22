@@ -1,12 +1,38 @@
 import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { AlertTriangle, TrendingDown } from 'lucide-react';
+import { toast } from 'react-toastify';
 import useAxiosSecure from '../../../../hooks/useAxiosSecure';
 import DataLoading from '../../../../Components/Common/Loaders/DataLoading';
 
 const Inventory = () => {
-    const { publicApi } = useAxiosSecure();
+    const { publicApi, privateApi } = useAxiosSecure();
+    const queryClient = useQueryClient();
     const [filter, setFilter] = useState('all'); // all, low
+
+    // Fetch Global Settings
+    const { data: settings } = useQuery({
+        queryKey: ['settings'],
+        queryFn: async () => {
+            const res = await publicApi.get('/settings');
+            return res;
+        }
+    });
+
+    // Update Settings Mutation
+    const { mutate: updateSettings, isPending: updating } = useMutation({
+        mutationFn: async (newValue) => {
+            const res = await privateApi.patch('/settings', { freeDelivery: newValue });
+            return res;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries(['settings']);
+            toast.success('Store settings updated successfully');
+        },
+        onError: (error) => {
+            toast.error(error.response?.data?.message || 'Failed to update settings');
+        }
+    });
 
     const { data: products = [], isLoading } = useQuery({
         queryKey: ['inventory-products'],
@@ -46,6 +72,33 @@ const Inventory = () => {
                 </div>
             </div>
 
+            {/* Store Settings Section */}
+            <div className="bg-white p-6 rounded-xl border border-amber-100 shadow-sm mb-6">
+                <h3 className="text-lg font-bold text-amber-900 mb-4">Store Settings</h3>
+                <div className="flex items-center justify-between p-4 bg-amber-50 rounded-lg border border-amber-100">
+                    <div>
+                        <h4 className="font-semibold text-amber-900 ">Free Delivery Campaign</h4>
+                        <p className="text-sm text-amber-700 mt-1">
+                            When active, all customers will receive free delivery (0 ALL shipping fee).
+                        </p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                            type="checkbox"
+                            className="sr-only peer"
+                            checked={settings?.freeDelivery || false}
+                            onChange={(e) => updateSettings(e.target.checked)}
+                            disabled={updating}
+                        />
+                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-amber-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-600"></div>
+                        <span className="ml-3 text-sm font-medium text-gray-700">
+                            {settings?.freeDelivery ? 'Active' : 'Inactive'}
+                        </span>
+                    </label>
+                </div>
+            </div>
+
+            {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 <div className="bg-white p-5 rounded-xl border border-amber-100 shadow-sm">
                     <h3 className="text-gray-500 text-sm font-medium uppercase">Total Items</h3>
@@ -61,40 +114,43 @@ const Inventory = () => {
                 </div>
             </div>
 
-            <div className="bg-white rounded-xl shadow-sm border border-amber-100">
-                <table className="w-full text-left">
-                    <thead className="bg-amber-50 text-amber-900 text-sm">
-                        <tr>
-                            <th className="p-4">Product</th>
-                            <th className="p-4">Category</th>
-                            <th className="p-4">SKU / ID</th>
-                            <th className="p-4 text-center">Status</th>
-                            <th className="p-4 text-right">Quantity</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-amber-50 text-sm">
-                        {displayProducts.map(product => (
-                            <tr key={product._id} className="hover:bg-amber-50/50">
-                                <td className="p-4 font-medium text-gray-800 flex items-center gap-3">
-                                    <img src={product.image} className="w-8 h-8 rounded object-cover bg-gray-100" />
-                                    {product.itemName}
-                                </td>
-                                <td className="p-4 text-gray-500">{product.categoryName}</td>
-                                <td className="p-4 text-gray-400 font-mono text-xs">{product._id.slice(-6).toUpperCase()}</td>
-                                <td className="p-4 text-center">
-                                    {product.stock === 0 ? (
-                                        <span className="inline-block px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full font-semibold">Out of Stock</span>
-                                    ) : product.stock <= lowStockThreshold ? (
-                                        <span className="inline-block px-2 py-1 bg-red-100 text-red-600 text-xs rounded-full font-semibold animate-pulse">Low Stock</span>
-                                    ) : (
-                                        <span className="inline-block px-2 py-1 bg-green-100 text-green-600 text-xs rounded-full font-semibold">In Stock</span>
-                                    )}
-                                </td>
-                                <td className="p-4 text-right font-mono font-bold text-gray-700">{product.stock}</td>
+            {/* Products Table */}
+            <div className="w-full mb-6">
+                <div className="bg-white rounded-xl shadow-sm border border-amber-100">
+                    <table className="w-full text-left">
+                        <thead className="bg-amber-50 text-amber-900 text-sm">
+                            <tr>
+                                <th className="p-4">Product</th>
+                                <th className="p-4">Category</th>
+                                <th className="p-4">SKU / ID</th>
+                                <th className="p-4 text-center">Status</th>
+                                <th className="p-4 text-right">Quantity</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody className="divide-y divide-amber-50 text-sm">
+                            {displayProducts.map(product => (
+                                <tr key={product._id} className="hover:bg-amber-50/50">
+                                    <td className="p-4 font-medium text-gray-800 flex items-center gap-3">
+                                        <img src={product.image} className="w-8 h-8 rounded object-cover bg-gray-100" />
+                                        {product.itemName}
+                                    </td>
+                                    <td className="p-4 text-gray-500">{product.categoryName}</td>
+                                    <td className="p-4 text-gray-400 font-mono text-xs">{product._id.slice(-6).toUpperCase()}</td>
+                                    <td className="p-4 text-center">
+                                        {product.stock === 0 ? (
+                                            <span className="inline-block px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full font-semibold">Out of Stock</span>
+                                        ) : product.stock <= lowStockThreshold ? (
+                                            <span className="inline-block px-2 py-1 bg-red-100 text-red-600 text-xs rounded-full font-semibold animate-pulse">Low Stock</span>
+                                        ) : (
+                                            <span className="inline-block px-2 py-1 bg-green-100 text-green-600 text-xs rounded-full font-semibold">In Stock</span>
+                                        )}
+                                    </td>
+                                    <td className="p-4 text-right font-mono font-bold text-gray-700">{product.stock}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     );

@@ -5,11 +5,14 @@ import useAxiosSecure from '../../../../hooks/useAxiosSecure';
 import DataLoading from '../../../../Components/Common/Loaders/DataLoading';
 import { toast } from 'react-toastify';
 import Swal from 'sweetalert2';
+import OrderDetailsModal from './OrderDetailsModal';
+import { getProductImage } from '../../../../utils/productImages';
 
 const OrderManagement = () => {
     const { privateApi } = useAxiosSecure();
     const queryClient = useQueryClient();
     const [statusFilter, setStatusFilter] = useState('all');
+    const [selectedOrder, setSelectedOrder] = useState(null);
 
     const { data: orders = [], isLoading } = useQuery({
         queryKey: ['admin-orders'],
@@ -47,9 +50,22 @@ const OrderManagement = () => {
         }
     };
 
-    const filteredOrders = statusFilter === 'all'
-        ? orders
-        : orders.filter(o => o.status === statusFilter);
+    const [searchTerm, setSearchTerm] = useState('');
+
+    const filteredOrders = orders.filter(o => {
+        // 1. Status Filter
+        if (statusFilter !== 'all' && o.status !== statusFilter) return false;
+
+        // 2. Search Filter (Order #, Name, Email)
+        const term = searchTerm.toLowerCase();
+        const matchesSearch =
+            (o.orderNumber || '').toLowerCase().includes(term) ||
+            (o.buyerName || '').toLowerCase().includes(term) ||
+            (o.buyerEmail || '').toLowerCase().includes(term) ||
+            (new Date(o.createdAt).toLocaleDateString().includes(term)); // Simple date match
+
+        return matchesSearch;
+    });
 
     // Sorting: Pending first, then by Date desc
     const sortedOrders = [...filteredOrders].sort((a, b) => {
@@ -66,6 +82,23 @@ const OrderManagement = () => {
                 <div>
                     <h2 className="text-2xl font-bold text-amber-900">Orders</h2>
                     <p className="text-amber-700 text-sm">Manage client orders and deliveries</p>
+                </div>
+                <div className="relative">
+                    <input
+                        type="text"
+                        placeholder="Search orders..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-4 pr-10 py-2 border border-amber-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    />
+                    {searchTerm && (
+                        <button
+                            onClick={() => setSearchTerm('')}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                        >
+                            <XCircle size={16} />
+                        </button>
+                    )}
                 </div>
             </div>
 
@@ -96,7 +129,11 @@ const OrderManagement = () => {
                     </thead>
                     <tbody className="divide-y divide-amber-50 text-sm">
                         {sortedOrders.map(order => (
-                            <tr key={order._id} className="hover:bg-amber-50/50">
+                            <tr
+                                key={order._id}
+                                className="hover:bg-amber-50/50 cursor-pointer transition-colors"
+                                onClick={() => setSelectedOrder(order)}
+                            >
                                 <td className="p-4 font-mono text-gray-500">{order.orderNumber}</td>
                                 <td className="p-4">
                                     <div className="font-medium text-gray-800">{order.buyerName || 'Guest'}</div>
@@ -106,12 +143,18 @@ const OrderManagement = () => {
                                     <div className="flex -space-x-2">
                                         {order.items.slice(0, 3).map((item, idx) => (
                                             <div key={idx} className="w-8 h-8 rounded-full bg-gray-100 border-2 border-white flex items-center justify-center text-xs overflow-hidden" title={item.itemName}>
-                                                {/* Assuming item.productId populated or item has image stored? Model stores productId ref. 
-                                   Ideally store image in order item snapshot. For now just standard icon/placeholder if no image.
-                                */}
-                                                <Package size={14} className="text-gray-400" />
+                                                {item.image || item.productId?.image || item.productId?.imageUrl ? (
+                                                    <img
+                                                        src={getProductImage(item.productId?.image || item.productId?.imageUrl || item.productId?.imageId || item.image, item.productId?._id || item.productId)}
+                                                        alt={item.itemName}
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                ) : (
+                                                    <Package size={14} className="text-gray-400" />
+                                                )}
                                             </div>
                                         ))}
+
                                         {order.items.length > 3 && (
                                             <div className="w-8 h-8 rounded-full bg-gray-100 border-2 border-white flex items-center justify-center text-xs font-medium text-gray-500">
                                                 +{order.items.length - 3}
@@ -126,7 +169,7 @@ const OrderManagement = () => {
                                         {order.status}
                                     </span>
                                 </td>
-                                <td className="p-4 text-right">
+                                <td className="p-4 text-right" onClick={(e) => e.stopPropagation()}>
                                     <select
                                         value={order.status}
                                         onChange={(e) => handleStatusChange(order._id, e.target.value)}
@@ -149,7 +192,17 @@ const OrderManagement = () => {
                     </tbody>
                 </table>
             </div>
-        </div>
+
+            {
+                selectedOrder && (
+                    <OrderDetailsModal
+                        isOpen={!!selectedOrder}
+                        onClose={() => setSelectedOrder(null)}
+                        order={selectedOrder}
+                    />
+                )
+            }
+        </div >
     );
 };
 

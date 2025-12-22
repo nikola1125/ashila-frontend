@@ -37,11 +37,18 @@ const useAxiosSecure = () => {
       nextConfig.headers = { ...(config?.headers || {}) };
 
       try {
-        const user = auth?.currentUser;
-        if (user) {
-          const token = await user.getIdToken();
-          if (token) {
-            nextConfig.headers.Authorization = `Bearer ${token}`;
+        // 1. Check for Admin Token (Custom Auth)
+        const adminToken = localStorage.getItem('adminToken') || sessionStorage.getItem('adminToken');
+        if (adminToken) {
+          nextConfig.headers.Authorization = `Bearer ${adminToken}`;
+        } else {
+          // 2. Fallback to Firebase Token (Client Auth)
+          const user = auth?.currentUser;
+          if (user) {
+            const token = await user.getIdToken();
+            if (token) {
+              nextConfig.headers.Authorization = `Bearer ${token}`;
+            }
           }
         }
       } catch {

@@ -58,6 +58,7 @@ const Shop = () => {
   const [selectedSupplements, setSelectedSupplements] = useState([]);
   const [selectedHealthMonitors, setSelectedHealthMonitors] = useState([]);
 
+
   // Helper helper to normalize text for comparison
   const normalizeText = useCallback((text) => text ? text.toLowerCase().replace(/[^a-z0-9]/g, '') : '', []);
 
@@ -75,7 +76,7 @@ const Shop = () => {
       motherChild: ['shtatezania', 'pas-lindjes', 'ushqyerja-me-gji', 'kujdesi-per-femijen'],
       supplements: ['vitamina', 'suplemente-per-shendetin', 'minerale', 'suplemente-bimore'],
       healthMonitors: ['peshore', 'aparat-tensioni', 'termometer', 'monitorues-te-diabetit', 'oksimeter', 'paisje-ortopedike'],
-      productTypes: ['acide', 'acne-patches', 'eye-patches', 'hidratues', 'krem-dielli', 'krem-sysh', 'lare-ujor', 'lare-vajor', 'lipbalm', 'maske', 'retinoide', 'serum', 'set-produkte', 'shampo-flokesh', 'spot-treatment']
+      productTypes: ['lares-vajor', 'lares-ujor', 'toner', 'exfoliant', 'serume', 'krem-per-syte', 'vitamin-c-antioxidant', 'hidratues', 'retinol', 'spf', 'eye-patches', 'acne-patches', 'maske-fytyre', 'spot-treatment', 'uje-termal', 'peeling-pads', 'lipbalm', 'set-me-produkte']
     };
 
     // Helper to check match (reused logic from matchesFilter but for counting)
@@ -85,11 +86,13 @@ const Shop = () => {
       const itemOpt = normalizeText(item.option);
       const itemDesc = normalizeText(item.description);
       const itemType = normalizeText(item.bestsellerCategory);
+      const itemProdType = normalizeText(item.productType);
 
       return itemSub.includes(normalizedFilter) ||
         itemOpt.includes(normalizedFilter) ||
         (itemDesc && itemDesc.includes(normalizedFilter)) ||
-        itemType.includes(normalizedFilter);
+        itemType.includes(normalizedFilter) ||
+        itemProdType.includes(normalizedFilter);
     };
 
     // Calculate actual counts
@@ -161,21 +164,24 @@ const Shop = () => {
         { id: 'paisje-ortopedike', label: 'Paisje ortopedike' },
       ].map(opt => ({ ...opt, count: counts[opt.id] || 0 })),
       productTypes: [
-        { id: 'acide', label: 'Acide' },
-        { id: 'acne-patches', label: 'Acne patches' },
-        { id: 'eye-patches', label: 'Eye patches' },
+        { id: 'lares-vajor', label: 'Lares vajor' },
+        { id: 'lares-ujor', label: 'Lares ujor' },
+        { id: 'toner', label: 'Toner' },
+        { id: 'exfoliant', label: 'Exfoliant' },
+        { id: 'serume', label: 'Serume' },
+        { id: 'krem-per-syte', label: 'Krem per syte' },
+        { id: 'vitamin-c-antioxidant', label: 'Vitamin C/antioxidant' },
         { id: 'hidratues', label: 'Hidratues' },
-        { id: 'krem-dielli', label: 'Krem dielli' },
-        { id: 'krem-sysh', label: 'Krem sysh' },
-        { id: 'lare-ujor', label: 'Larës ujor' },
-        { id: 'lare-vajor', label: 'Larës vajor' },
-        { id: 'lipbalm', label: 'Lipbalm' },
-        { id: 'maske', label: 'Maskë' },
-        { id: 'retinoide', label: 'Retinoide' },
-        { id: 'serum', label: 'Serum' },
-        { id: 'set-produkte', label: 'Set me produkte' },
-        { id: 'shampo-flokesh', label: 'Shampo flokësh' },
+        { id: 'retinol', label: 'Retinol' },
+        { id: 'spf', label: 'SPF' },
+        { id: 'eye-patches', label: 'Eye patches' },
+        { id: 'acne-patches', label: 'Acne patches' },
+        { id: 'maske-fytyre', label: 'Maske fytyre' },
         { id: 'spot-treatment', label: 'Spot treatment' },
+        { id: 'uje-termal', label: 'Uje termal' },
+        { id: 'peeling-pads', label: 'Peeling Pads' },
+        { id: 'lipbalm', label: 'Lipbalm' },
+        { id: 'set-me-produkte', label: 'Set me produkte' },
       ].map(opt => ({ ...opt, count: counts[opt.id] || 0 })),
     };
   }, [allMedicines, normalizeText]);
@@ -256,6 +262,7 @@ const Shop = () => {
   const categoryParam = searchParams.get('category');
   const subcategoryParam = searchParams.get('subcategory');
   const searchParam = searchParams.get('search');
+  const skinProblemParam = searchParams.get('skinProblem');
 
   // Sync state with URL search
   React.useEffect(() => {
@@ -265,6 +272,13 @@ const Shop = () => {
   // Filter and sort medicines
   const filteredAndSortedMedicines = useMemo(() => {
     let filtered = [...allMedicines];
+
+    // 0. Skin Problem Filter (Strict)
+    if (skinProblemParam) {
+      filtered = filtered.filter(item =>
+        item.skinProblem?.toLowerCase() === skinProblemParam.toLowerCase()
+      );
+    }
 
     // 1. URL Category Filter
     if (categoryParam) {
@@ -302,7 +316,8 @@ const Shop = () => {
         (medicine) =>
           medicine.itemName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
           medicine.company?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          medicine.genericName?.toLowerCase().includes(searchTerm.toLowerCase())
+          medicine.genericName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          medicine.categoryName?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
@@ -316,6 +331,7 @@ const Shop = () => {
       const itemOpt = normalizeText(item.option);
       const itemDesc = normalizeText(item.description);
       const itemType = normalizeText(item.bestsellerCategory); // fallback
+      const itemProdType = normalizeText(item.productType);
 
       return selectedFilters.some(filterId => {
         const normalizedFilter = normalizeText(filterId); // e.g., 'akne', 'lekurenormale'
@@ -324,7 +340,8 @@ const Shop = () => {
         return itemSub.includes(normalizedFilter) ||
           itemOpt.includes(normalizedFilter) ||
           (itemDesc && itemDesc.includes(normalizedFilter)) ||
-          itemType.includes(normalizedFilter);
+          itemType.includes(normalizedFilter) ||
+          itemProdType.includes(normalizedFilter);
       });
     };
 
@@ -354,6 +371,8 @@ const Shop = () => {
       filtered = filtered.filter(item => matchesFilter(selectedHealthMonitors, item));
     }
 
+
+
     // Sort
     if (sortBy === 'alphabetical') {
       filtered.sort((a, b) => a.itemName?.localeCompare(b.itemName) || 0);
@@ -369,7 +388,7 @@ const Shop = () => {
     }
 
     return filtered;
-  }, [allMedicines, searchTerm, sortBy, categoryParam, subcategoryParam, selectedProblems, selectedSkinTypes]);
+  }, [allMedicines, searchTerm, sortBy, categoryParam, subcategoryParam, selectedProblems, selectedSkinTypes, selectedProductTypes, selectedBodyHair, selectedHygiene, selectedMotherChild, selectedSupplements, selectedHealthMonitors]);
 
   // Pagination
   const totalFilteredItems = filteredAndSortedMedicines.length;
@@ -419,6 +438,9 @@ const Shop = () => {
                   <div className="hidden lg:block mb-4">
                     <h2 className="text-lg font-semibold text-[#A67856] uppercase tracking-wide">Filters</h2>
                   </div>
+
+
+
                   {/* Mobile Close Button */}
                   <div className="flex items-center justify-between mb-4 lg:hidden">
                     <h2 className="text-lg font-semibold text-[#A67856] uppercase tracking-wide">Filters</h2>

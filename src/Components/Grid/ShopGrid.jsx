@@ -48,12 +48,16 @@ const ShopGrid = ({
                   </div>
                 )}
 
-                {/* Sold Out Badge - Top Left */}
-                {medicine.stock === 0 && (
-                  <div className="absolute top-2.5 left-2.5 bg-red-500 text-white px-2.5 py-1.5 text-sm font-bold">
-                    Sold Out
-                  </div>
-                )}
+                {/* Badges Container - Top Left */}
+                <div className="absolute top-2.5 left-2.5 flex flex-col gap-1 items-start z-10">
+                  {/* Sold Out Badge */}
+                  {medicine.stock === 0 && (
+                    <div className="bg-red-500 text-white px-2.5 py-1.5 text-sm font-bold shadow-sm">
+                      Sold Out
+                    </div>
+                  )}
+
+                </div>
               </div>
 
               {/* Product Info */}
@@ -71,22 +75,20 @@ const ShopGrid = ({
 
                 <div className="mt-auto">
                   {/* Price */}
-                  <div className="flex items-center justify-center gap-2.5">
-                    {medicine.discount > 0 ? (
-                      <>
-                        <span className="lux-price-number text-[11px] md:text-lg font-medium text-black">
-                          {(Number(medicine.price) * (1 - Number(medicine.discount) / 100)).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
-                        </span>
-                        <span className="lux-price-number text-[9px] md:text-sm text-gray-400 line-through">
-                          {Number(medicine.price).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
-                        </span>
-                      </>
-                    ) : (
-                      <span className="lux-price-number text-[11px] md:text-lg font-medium text-black">
+                  {medicine.discount > 0 ? (
+                    <>
+                      <span className="lux-price-number text-sm md:text-lg font-medium text-black">
+                        {(Number(medicine.price) * (1 - Number(medicine.discount) / 100)).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
+                      </span>
+                      <span className="lux-price-number text-xs md:text-sm text-gray-400 line-through">
                         {Number(medicine.price).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
                       </span>
-                    )}
-                  </div>
+                    </>
+                  ) : (
+                    <span className="lux-price-number text-sm md:text-lg font-medium text-black">
+                      {Number(medicine.price).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
+                    </span>
+                  )}
 
                   {/* Add to Cart */}
                   <div className="pt-3">
@@ -108,8 +110,8 @@ const ShopGrid = ({
                         })
                       }
                       className={`w-full px-3 py-2 text-xs md:text-sm font-semibold uppercase tracking-wide border ${medicine.stock === 0
-                          ? 'bg-gray-200 border-gray-300 text-gray-500 cursor-not-allowed'
-                          : 'bg-[#8B6F47]/70 border-[#8B6F47]/70 text-white hover:bg-[#7A5F3A]/80 hover:border-[#7A5F3A]/80'
+                        ? 'bg-gray-200 border-gray-300 text-gray-500 cursor-not-allowed'
+                        : 'bg-[#8B6F47]/70 border-[#8B6F47]/70 text-white hover:bg-[#7A5F3A]/80 hover:border-[#7A5F3A]/80'
                         } transition-colors duration-150`}
                     >
                       {medicine.stock === 0 ? 'Out of stock' : 'Shto ne shporte'}

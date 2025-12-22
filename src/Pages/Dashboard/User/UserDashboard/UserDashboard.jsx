@@ -18,7 +18,7 @@ const UserDashboard = () => {
     enabled: !isUserLoading && !!user?.email,
     queryFn: async () => {
       try {
-        const response = await privateApi.get(`/orders/buyer/${user?.email}`);
+        const response = await privateApi.get(`/orders/${user?.email}`);
         return Array.isArray(response) ? response : [];
       } catch (err) {
         console.error('Error fetching orders:', err);
@@ -40,8 +40,9 @@ const UserDashboard = () => {
     };
 
     orders.forEach(order => {
-      if (grouped[order.status]) {
-        grouped[order.status].push(order);
+      const statusKey = order.status?.toLowerCase();
+      if (grouped[statusKey]) {
+        grouped[statusKey].push(order);
       }
     });
 
@@ -56,7 +57,7 @@ const UserDashboard = () => {
     const shippedOrders = ordersByStatus.shipped.length;
     const deliveredOrders = ordersByStatus.delivered.length;
     const totalSpent = orders
-      .filter(o => o.status === 'delivered')
+      .filter(o => o.status?.toLowerCase() === 'delivered' || o.status?.toLowerCase() === 'completed') // Added 'completed' just in case
       .reduce((sum, order) => sum + (order.finalPrice || 0), 0);
 
     return {
@@ -90,7 +91,7 @@ const UserDashboard = () => {
       cancelled: { bg: 'bg-red-100', text: 'text-red-800', icon: XCircle, label: 'Cancelled' }
     };
 
-    const config = statusConfig[status] || statusConfig.pending;
+    const config = statusConfig[status?.toLowerCase()] || statusConfig.pending;
     const Icon = config.icon;
 
     return (

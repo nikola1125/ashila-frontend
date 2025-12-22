@@ -34,7 +34,9 @@ const OrderDetailsModal = ({ isOpen, onClose, order }) => {
                             <div className="space-y-2 text-sm text-gray-700">
                                 <p><span className="font-medium">Name:</span> {order.buyerName || 'N/A'}</p>
                                 <p className="flex items-center gap-2"><Mail size={14} className="text-gray-400" /> {order.buyerEmail}</p>
-                                {/* Assuming phone might be in deliveryAddress or separate field if added later */}
+                                {order.deliveryAddress?.phoneNumber && (
+                                    <p className="flex items-center gap-2"><Phone size={14} className="text-gray-400" /> {order.deliveryAddress.phoneNumber}</p>
+                                )}
                             </div>
                         </div>
 
@@ -49,8 +51,8 @@ const OrderDetailsModal = ({ isOpen, onClose, order }) => {
                                         <p>{order.deliveryAddress.street || ''}</p>
                                         <p>{order.deliveryAddress.city}, {order.deliveryAddress.zipCode || ''}</p>
                                         <p>{order.deliveryAddress.country || ''}</p>
-                                        {order.deliveryAddress.phone && (
-                                            <p className="mt-2 flex items-center gap-2"><Phone size={14} className="text-gray-400" /> {order.deliveryAddress.phone}</p>
+                                        {order.deliveryAddress.phoneNumber && (
+                                            <p className="mt-2 flex items-center gap-2"><Phone size={14} className="text-gray-400" /> {order.deliveryAddress.phoneNumber}</p>
                                         )}
                                     </>
                                 ) : (
@@ -82,7 +84,7 @@ const OrderDetailsModal = ({ isOpen, onClose, order }) => {
                             {order.items.map((item, index) => (
                                 <div key={index} className="flex gap-4 p-3 border border-gray-100 rounded-xl hover:border-amber-200 transition bg-white">
                                     <img
-                                        src={getProductImage(item.image)}
+                                        src={getProductImage(item.productId?.image || item.productId?.imageUrl || item.productId?.imageId || item.image, item.productId?._id || item.productId)}
                                         alt={item.itemName}
                                         className="w-16 h-16 object-cover rounded-lg bg-gray-50"
                                     />

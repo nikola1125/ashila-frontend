@@ -53,7 +53,6 @@ const Table = ({ users }) => {
             <th>Profile</th>
             <th>Name</th>
             <th>Email</th>
-            <th>Select Role</th>
           </tr>
         </thead>
         <tbody>
@@ -77,33 +76,6 @@ const Table = ({ users }) => {
                 <p>{user.name}</p>
               </td>
               <td>{user.email}</td>
-              <th>
-                <select
-                  onChange={(e) => handleRoleChange(e, user._id)}
-                  defaultValue={user.role}
-                  className="select capitalize"
-                >
-                  <option disabled={true}>{user.role}</option>
-                  {user.role === 'user' && (
-                    <>
-                      <option value="admin">Admin</option>
-                      <option value="seller">Seller</option>
-                    </>
-                  )}
-                  {user.role === 'admin' && (
-                    <>
-                      <option value="seller">seller</option>
-                      <option value="user">User</option>
-                    </>
-                  )}
-                  {user.role === 'seller' && (
-                    <>
-                      <option value="admin">Admin</option>
-                      <option value="user">User</option>
-                    </>
-                  )}
-                </select>
-              </th>
             </tr>
           ))}
         </tbody>

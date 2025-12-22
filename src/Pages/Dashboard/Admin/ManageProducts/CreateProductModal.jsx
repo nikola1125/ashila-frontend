@@ -41,6 +41,13 @@ const CATEGORY_HIERARCHY = {
     }
 };
 
+const PRODUCT_TYPE_OPTIONS = [
+    "Lares vajor", "Lares ujor", "Toner", "Exfoliant", "Serume", "Krem per syte",
+    "Vitamin C/antioxidant", "Hidratues", "Retinol", "SPF", "Eye patches",
+    "Acne patches", "Maske fytyre", "Spot treatment", "Uje termal",
+    "Peeling Pads", "Lipbalm", "Set me produkte"
+];
+
 const CreateProductModal = ({ isOpen, onClose, productToEdit, refetch, isBestseller = false }) => {
     const { privateApi, publicApi } = useAxiosSecure();
     const [loading, setLoading] = useState(false);
@@ -56,7 +63,10 @@ const CreateProductModal = ({ isOpen, onClose, productToEdit, refetch, isBestsel
         categoryName: productToEdit?.categoryName || Object.keys(CATEGORY_HIERARCHY)[0],
         subcategory: productToEdit?.subcategory || '',
         option: productToEdit?.option || '',
+        productType: productToEdit?.productType || '',
+        skinProblem: productToEdit?.skinProblem || '',
         description: productToEdit?.description || '',
+        isFreeDelivery: productToEdit?.isFreeDelivery || false,
         discount: productToEdit?.discount || 0,
         discountPrice: (productToEdit?.price && productToEdit?.discount > 0)
             ? Math.round(productToEdit.price * (1 - productToEdit.discount / 100))
@@ -100,10 +110,20 @@ const CreateProductModal = ({ isOpen, onClose, productToEdit, refetch, isBestsel
         }
     }, [formData.subcategory]);
 
+    useEffect(() => {
+        // Reset skinProblem when option changes if not Akne
+        if (formData.option !== 'Akne') {
+            setFormData(prev => ({ ...prev, skinProblem: '' }));
+        }
+    }, [formData.option]);
+
     // Handlers
     const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+        const { name, value, type, checked } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: type === 'checkbox' ? checked : value
+        }));
     };
 
     const handleImageChange = (e) => {
@@ -304,6 +324,7 @@ const CreateProductModal = ({ isOpen, onClose, productToEdit, refetch, isBestsel
                                             ))}
                                         </select>
                                     </div>
+
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">Option / Type</label>
                                         <select
@@ -321,7 +342,39 @@ const CreateProductModal = ({ isOpen, onClose, productToEdit, refetch, isBestsel
                                     </div>
                                 </div>
 
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Lloji Produktit</label>
+                                    <select
+                                        name="productType"
+                                        className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                                        value={formData.productType}
+                                        onChange={handleChange}
+                                    >
+                                        <option value="">Select Type...</option>
+                                        {PRODUCT_TYPE_OPTIONS.map(opt => (
+                                            <option key={opt} value={opt}>{opt}</option>
+                                        ))}
+                                    </select>
+                                </div>
 
+                                {formData.subcategory === 'Problematikat e lekures' && formData.option === 'Akne' && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Lloji i problematikës</label>
+                                        <select
+                                            name="skinProblem"
+                                            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                                            value={formData.skinProblem}
+                                            onChange={handleChange}
+                                        >
+                                            <option value="">Select Acne Type...</option>
+                                            <option value="papules">Papules</option>
+                                            <option value="cyst">Cyst</option>
+                                            <option value="pustules">Pustules</option>
+                                            <option value="blackhead">Blackheads</option>
+                                            <option value="back-acne">Back Acne</option>
+                                        </select>
+                                    </div>
+                                )}
 
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>

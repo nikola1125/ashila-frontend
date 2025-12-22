@@ -3,7 +3,7 @@ import useAxiosSecure from '../../../../hooks/useAxiosSecure';
 import { toast } from 'react-toastify';
 import { Star, StarOff } from 'lucide-react';
 
-const BestsellerTable = ({ products, refetch }) => {
+const BestsellerTable = ({ products, refetch, onEdit, onDelete }) => {
   const { privateApi } = useAxiosSecure();
   const [updating, setUpdating] = useState(null);
 
@@ -118,8 +118,8 @@ const BestsellerTable = ({ products, refetch }) => {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span
                       className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${product.isBestseller
-                          ? 'bg-yellow-100 text-yellow-800'
-                          : 'bg-gray-100 text-gray-800'
+                        ? 'bg-yellow-100 text-yellow-800'
+                        : 'bg-gray-100 text-gray-800'
                         }`}
                     >
                       {product.isBestseller ? 'Bestseller' : 'Regular'}
@@ -163,8 +163,8 @@ const BestsellerTable = ({ products, refetch }) => {
                         }
                         disabled={updating === product._id}
                         className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium transition-colors ${product.isBestseller
-                            ? 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          ? 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                           }`}
                         title={product.isBestseller ? "Remove from Bestsellers" : "Add to Bestsellers"}
                       >

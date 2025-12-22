@@ -109,15 +109,15 @@ const ProductCard = React.memo(({ product, pricing, index, onProductClick, onAdd
           <div className="flex items-center justify-center gap-1.5 md:gap-2.5 mt-0.5 md:mt-0">
             {pricing.discounted ? (
               <>
-                <span className="lux-price-number text-[10px] md:text-lg font-medium text-amber-700">
+                <span className="lux-price-number text-sm md:text-lg font-medium text-amber-700">
                   {pricing.discounted.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
                 </span>
-                <span className="lux-price-number text-[9px] md:text-sm text-gray-400 line-through">
+                <span className="lux-price-number text-xs md:text-sm text-gray-400 line-through">
                   {pricing.original.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
                 </span>
               </>
             ) : (
-              <span className="lux-price-number text-[10px] md:text-lg font-medium text-black">
+              <span className="lux-price-number text-sm md:text-lg font-medium text-black">
                 {pricing.original.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
               </span>
             )}

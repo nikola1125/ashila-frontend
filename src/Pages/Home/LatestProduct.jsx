@@ -114,7 +114,7 @@ const LatestProduct = () => {
                   {product.description || product.genericName || ''}
                 </p>
                 <div className="flex justify-between items-center gap-1">
-                  <span className="text-sm font-semibold text-gray-900 lux-price-number">
+                  <span className="text-base font-semibold text-gray-900 lux-price-number">
                     {product.price?.toLocaleString()} ALL
                   </span>
                   <button
