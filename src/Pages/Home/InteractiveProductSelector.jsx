@@ -6,8 +6,11 @@ const InteractiveProductSelector = () => {
       className="w-full flex justify-center items-center"
       style={{
         backgroundColor: '#ffffff', // Matches page background
-        paddingTop: 'clamp(0px, 10vh, 120px)',
+        marginTop: '-25px', // Pull section up slightly less
+        paddingTop: '0px',
         paddingBottom: 'clamp(80px, 10vh, 120px)',
+        position: 'relative',
+        zIndex: 20
       }}
     >
       <div className="max-w-[480px] px-6 text-center">

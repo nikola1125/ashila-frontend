@@ -5,6 +5,7 @@ import LoadingError from '../../Components/Common/States/LoadingError';
 import { Search, X, Filter, ChevronDown } from 'lucide-react';
 import DataLoading from '../../Components/Common/Loaders/DataLoading';
 import ShopGrid from '../../Components/Grid/ShopGrid';
+import VariantSelectionSidebar from '../../Components/Common/Products/VariantSelectionSidebar';
 import { Helmet } from 'react-helmet-async';
 import { useLocation } from 'react-router-dom';
 
@@ -57,6 +58,11 @@ const Shop = () => {
 
   const [selectedSupplements, setSelectedSupplements] = useState([]);
   const [selectedHealthMonitors, setSelectedHealthMonitors] = useState([]);
+
+  // Variant Selection State
+  const [isVariantSidebarOpen, setIsVariantSidebarOpen] = useState(false);
+  const [selectedProductForVariant, setSelectedProductForVariant] = useState(null);
+  const [activeVariantForSidebar, setActiveVariantForSidebar] = useState(null);
 
 
   // Helper helper to normalize text for comparison
@@ -805,6 +811,13 @@ const Shop = () => {
                       totalPages={totalPages}
                       goToPage={goToPage}
                       handleItemsPerPageChange={handleItemsPerPageChange}
+                      onOpenVariantSidebar={(product) => {
+                        setSelectedProductForVariant(product);
+                        if (product.variants && product.variants.length > 0) {
+                          setActiveVariantForSidebar(product.variants[0]);
+                        }
+                        setIsVariantSidebarOpen(true);
+                      }}
                     />
                   )}
                 </div>
@@ -813,6 +826,21 @@ const Shop = () => {
           </div>
         </div>
       </section>
+
+      <VariantSelectionSidebar
+        isOpen={isVariantSidebarOpen}
+        onClose={() => {
+          setIsVariantSidebarOpen(false);
+          setSelectedProductForVariant(null);
+          setActiveVariantForSidebar(null);
+        }}
+        product={selectedProductForVariant}
+        selectedVariant={activeVariantForSidebar}
+        onSelectVariant={setActiveVariantForSidebar}
+        onAddToCart={() => {
+          setIsVariantSidebarOpen(false);
+        }}
+      />
     </>
   );
 };

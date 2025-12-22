@@ -261,8 +261,7 @@ const ProductDetail = () => {
 
           {/* Right Column - Product Details */}
           <div className="flex flex-col lux-serif-text">
-            {/* Shop Name */}
-            <p className="text-sm text-gray-500 mb-2 font-light">Ashila</p>
+
 
             {/* Product Title */}
             <h1 className="lux-serif-text text-lg sm:text-2xl md:text-3xl font-bold text-[#4A3628] mb-2 break-words">{product.itemName}</h1>
@@ -280,12 +279,12 @@ const ProductDetail = () => {
               )}
             </div>
 
-            <div className="border-t border-[#D9BFA9] pt-6 mb-6"></div>
+            <div className="border-t border-[#D9BFA9] my-2"></div>
 
             {/* SIZE Selector (Variants) */}
-            <div className="mb-6">
+            <div className="mb-2">
               <label className="block text-xs font-semibold text-[#4A3628] uppercase tracking-wide mb-2">
-                SIZE / VARIANT
+                SIZE
               </label>
               <div className="flex flex-wrap gap-2">
                 {product.variants && product.variants.length > 0 ? (
@@ -498,7 +497,6 @@ const ProductDetail = () => {
                     ref={relatedScrollRef}
                     className={`flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${relatedShowScrollHint ? 'scroll-hint-right' : ''}`}
                     style={{
-                      scrollBehavior: 'smooth',
                       WebkitOverflowScrolling: 'touch',
                       overscrollBehavior: 'contain',
                     }}
@@ -511,16 +509,16 @@ const ProductDetail = () => {
                       return (
                         <div
                           key={relatedProduct._id}
-                          className="min-w-[160px] md:min-w-[240px] w-[160px] md:w-[240px] flex-shrink-0 snap-start"
+                          className="min-w-[160px] md:min-w-[240px] w-[160px] md:w-[240px] flex-shrink-0 snap-start h-auto flex"
                         >
                           <div
-                            className="swipe-hint-animation w-full border border-gray-200 overflow-hidden bg-white text-center pb-4 flex flex-col cursor-pointer hover:shadow-lg transition-shadow"
+                            className="swipe-hint-animation w-full border border-gray-200 overflow-hidden bg-white text-center pb-4 flex flex-col cursor-pointer hover:shadow-lg transition-shadow h-full"
                             onClick={() => {
                               window.scrollTo({ top: 0, behavior: 'instant' });
                               navigate(`/product/${relatedProduct._id}`);
                             }}
                           >
-                            <div className="relative w-full overflow-hidden bg-[#f9f9f9] h-[200px] md:h-[250px]">
+                            <div className="relative w-full overflow-hidden bg-white h-[200px] md:h-[250px]">
                               <img
                                 src={getProductImage(relatedProduct.image, relatedProduct._id || index)}
                                 alt={relatedProduct.itemName}
@@ -541,24 +539,29 @@ const ProductDetail = () => {
                               )}
                             </div>
 
-                            <div className="px-2.5 pt-4 flex flex-col">
-                              <h3 className="lux-serif-text !text-[12px] md:!text-[14px] mb-2 text-gray-800 min-h-[24px] md:min-h-[40px] leading-snug whitespace-normal break-words">
+                            <div className="px-2.5 pt-4 flex flex-col flex-grow">
+                              {/* Decorative Line */}
+                              <div
+                                className="mx-auto mb-5 h-[1px] w-[40px]"
+                                style={{ backgroundColor: 'rgba(74, 54, 40, 0.3)' }}
+                              ></div>
+                              <h3 className="lux-serif-text !text-[12px] md:!text-[14px] mb-2 text-gray-800 leading-snug whitespace-normal break-words min-h-[28px] md:min-h-[40px]">
                                 {relatedProduct.itemName}
                               </h3>
 
-                              <div className="mt-4">
+                              <div className="mt-auto">
                                 <div className="flex items-center justify-center gap-2.5">
                                   {relatedProduct.discount > 0 ? (
                                     <>
-                                      <span className="lux-price-number text-[11px] md:text-lg font-medium text-black">
+                                      <span className="lux-price-number text-sm md:text-lg font-medium text-black">
                                         {relatedDiscountedPrice.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
                                       </span>
-                                      <span className="lux-price-number text-[9px] md:text-sm text-gray-400 line-through">
+                                      <span className="lux-price-number text-xs md:text-sm text-gray-400 line-through">
                                         {Number(relatedProduct.price).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
                                       </span>
                                     </>
                                   ) : (
-                                    <span className="lux-price-number text-[11px] md:text-lg font-medium text-black">
+                                    <span className="lux-price-number text-sm md:text-lg font-medium text-black">
                                       {Number(relatedProduct.price).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
                                     </span>
                                   )}

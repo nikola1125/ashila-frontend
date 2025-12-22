@@ -26,7 +26,7 @@ const NAV_CATEGORIES = [
           { id: 'skin-normal', label: 'Lekure normale', path: '/shop?subcategory=lekure-normale' },
           { id: 'skin-oily', label: 'Lekure e yndyrshme', path: '/shop?subcategory=lekure-e-yndyrshme' },
           { id: 'skin-dry', label: 'Lekure e thate', path: '/shop?subcategory=lekure-e-thate' },
-          { id: 'skin-combo', label: 'Lekure mikes', path: '/shop?subcategory=lekure-mikes' },
+          { id: 'skin-combo', label: 'Lekure mikse', path: '/shop?subcategory=lekure-mikes' },
           { id: 'skin-sensitive', label: 'Lekure sensitive', path: '/shop?subcategory=lekure-sensitive' },
         ],
       },
@@ -393,7 +393,7 @@ const Navbar = () => {
         >
           {/* Navbar content: fixed height 64px mobile, 80px desktop */}
           <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 xl:px-10">
-            <div className="h-[64px] lg:h-[80px] flex items-center gap-1 lg:gap-3 lg:justify-between">
+            <div className="h-[64px] lg:h-[80px] flex items-center gap-1 lg:gap-8 lg:justify-start">
               {/* Mobile: left menu button */}
               <button
                 onClick={(e) => {
@@ -441,7 +441,7 @@ const Navbar = () => {
               <div className="hidden lg:flex items-center flex-1">
                 <div className="w-full flex items-center">
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-center flex-wrap xl:flex-nowrap gap-2 xl:gap-4">
+                    <div className="flex items-center justify-start flex-wrap xl:flex-nowrap gap-2 xl:gap-4">
                       <NavLink
                         to="/"
                         onClick={() => {
@@ -655,7 +655,10 @@ const Navbar = () => {
                   />
                 </button>
 
-                {mobileOpenCategoryId === category.id && category.groups && (
+                <div
+                  className={`overflow-hidden transition-all duration-300 ease-in-out ${mobileOpenCategoryId === category.id ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'
+                    }`}
+                >
                   <div className="bg-gray-50 border-t border-gray-100">
                     {category.groups.map((group) => (
                       <div key={group.id} className="border-b border-gray-100">
@@ -678,35 +681,40 @@ const Navbar = () => {
                           <span className="text-[13px]">{group.label}</span>
                           {group.subitems && group.subitems.length > 0 && (
                             <ChevronRight
-                              className={`w-4 h-4 transition-transform ${mobileOpenGroupId === group.id ? 'rotate-90' : ''
+                              className={`w-4 h-4 transition-transform duration-300 ${mobileOpenGroupId === group.id ? 'rotate-90' : ''
                                 }`}
                             />
                           )}
                         </button>
 
-                        {group.subitems && group.subitems.length > 0 && mobileOpenGroupId === group.id && (
-                          <ul className="space-y-0 bg-white border-t border-gray-100">
-                            {group.subitems.map((item) => (
-                              <li key={item.id}>
-                                <button
-                                  onClick={() => {
-                                    navigate(item.path || '/shop');
-                                    setMobileMenuOpen(false);
-                                    setMobileOpenCategoryId(null);
-                                    setMobileOpenGroupId(null);
-                                  }}
-                                  className="w-full text-left text-[13px] text-gray-700 hover:bg-gray-50 transition-colors px-6 py-2"
-                                >
-                                  {item.label}
-                                </button>
-                              </li>
-                            ))}
-                          </ul>
+                        {group.subitems && group.subitems.length > 0 && (
+                          <div
+                            className={`overflow-hidden transition-all duration-300 ease-in-out ${mobileOpenGroupId === group.id ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+                              }`}
+                          >
+                            <ul className="space-y-0 bg-white border-t border-gray-100">
+                              {group.subitems.map((item) => (
+                                <li key={item.id}>
+                                  <button
+                                    onClick={() => {
+                                      navigate(item.path || '/shop');
+                                      setMobileMenuOpen(false);
+                                      setMobileOpenCategoryId(null);
+                                      setMobileOpenGroupId(null);
+                                    }}
+                                    className="w-full text-left text-[13px] text-gray-700 hover:bg-gray-50 transition-colors px-6 py-2"
+                                  >
+                                    {item.label}
+                                  </button>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
                         )}
                       </div>
                     ))}
                   </div>
-                )}
+                </div>
               </div>
             ))}
 

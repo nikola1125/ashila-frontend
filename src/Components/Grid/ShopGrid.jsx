@@ -26,7 +26,7 @@ const ShopGrid = ({
             >
               {/* Product Image Container */}
               <div
-                className="relative w-full overflow-hidden bg-[#f9f9f9] cursor-pointer h-[200px] md:h-[250px]"
+                className="relative w-full overflow-hidden bg-white cursor-pointer h-[200px] md:h-[250px]"
                 onClick={() => {
                   window.scrollTo({ top: 0, behavior: 'instant' });
                   navigate(`/product/${medicine._id}`);
@@ -62,6 +62,11 @@ const ShopGrid = ({
 
               {/* Product Info */}
               <div className="px-2.5 pt-4 flex flex-col flex-grow">
+                {/* Decorative Line */}
+                <div
+                  className="mx-auto mb-3 h-[1px] w-[40px]"
+                  style={{ backgroundColor: 'rgba(74, 54, 40, 0.3)' }}
+                ></div>
                 {/* Medicine Name */}
                 <h3
                   className="lux-serif-text !text-[12px] md:!text-[14px] mb-2 text-gray-800 leading-snug whitespace-normal break-words min-h-[28px] md:min-h-[40px] cursor-pointer hover:text-gray-600 transition-colors"
@@ -95,20 +100,35 @@ const ShopGrid = ({
                     <button
                       type="button"
                       disabled={medicine.stock === 0}
-                      onClick={() =>
-                        addItem({
-                          id: medicine._id,
-                          name: medicine.itemName,
-                          price: Number(medicine.price),
-                          discountedPrice:
-                            medicine.discount > 0
-                              ? Number(medicine.price) * (1 - Number(medicine.discount) / 100)
-                              : null,
-                          image: medicine.image,
-                          slug: medicine._id,
-                          variants: medicine.variants // Pass variants
-                        })
-                      }
+                      onClick={() => {
+                        // Check if product has multiple variants
+                        if (medicine.variants && medicine.variants.length > 1) {
+                          // Open sidebar
+                          if (props.onOpenVariantSidebar) {
+                            props.onOpenVariantSidebar(medicine);
+                          }
+                        } else {
+                          // Add directly (single variant or no variant)
+                          const variantToAdd = medicine.variants && medicine.variants.length === 1
+                            ? medicine.variants[0]
+                            : { size: medicine.size || 'Standard', _id: undefined };
+
+                          addItem({
+                            id: medicine._id,
+                            name: medicine.itemName,
+                            price: Number(medicine.price),
+                            discountedPrice:
+                              medicine.discount > 0
+                                ? Number(medicine.price) * (1 - Number(medicine.discount) / 100)
+                                : null,
+                            image: medicine.image,
+                            slug: medicine._id,
+                            variants: medicine.variants,
+                            size: variantToAdd.size,
+                            variantId: variantToAdd._id
+                          });
+                        }
+                      }}
                       className={`w-full px-3 py-2 text-xs md:text-sm font-semibold uppercase tracking-wide border ${medicine.stock === 0
                         ? 'bg-gray-200 border-gray-300 text-gray-500 cursor-not-allowed'
                         : 'bg-[#8B6F47]/70 border-[#8B6F47]/70 text-white hover:bg-[#7A5F3A]/80 hover:border-[#7A5F3A]/80'

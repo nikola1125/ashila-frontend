@@ -8,6 +8,7 @@ import { ChevronLeft, ChevronRight, ShoppingBag } from 'lucide-react';
 import { CartContext } from '../../Context/Cart/CartContext';
 import { getProductImage } from '../../utils/productImages';
 import { useThrottle } from '../../hooks/useThrottle';
+import VariantSelectionSidebar from '../../Components/Common/Products/VariantSelectionSidebar';
 
 // Product Card Component with animation
 const ProductCard = React.memo(({ product, pricing, index, onProductClick, onAddToCart }) => {
@@ -56,7 +57,7 @@ const ProductCard = React.memo(({ product, pricing, index, onProductClick, onAdd
     >
       {/* Product Image Container */}
       <motion.div
-        className="relative w-full overflow-hidden bg-[#f9f9f9] cursor-pointer h-[145px] md:h-[240px]"
+        className="relative w-full overflow-hidden bg-white cursor-pointer h-[185px] md:h-[240px]"
         onClick={() => onProductClick(product._id)}
         whileHover={{ scale: 1.02 }}
         transition={{ duration: 0.2 }}
@@ -97,6 +98,11 @@ const ProductCard = React.memo(({ product, pricing, index, onProductClick, onAdd
 
       {/* Product Info */}
       <div className="px-1.5 md:px-2.5 pt-1.5 md:pt-4 flex flex-col flex-grow">
+        {/* Decorative Line */}
+        <div
+          className="mx-auto mb-2 md:mb-3 h-[1px] w-[30px] md:w-[40px]"
+          style={{ backgroundColor: 'rgba(74, 54, 40, 0.3)' }}
+        ></div>
         <h3
           className="lux-serif-text !text-[12px] md:!text-[14px] mb-1.5 md:mb-2.5 text-gray-800 leading-snug whitespace-normal break-words min-h-[24px] md:min-h-[40px] cursor-pointer hover:text-gray-600 transition-colors"
           onClick={() => onProductClick(product._id)}
@@ -154,6 +160,11 @@ const BestSeller = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [showScrollHint, setShowScrollHint] = useState(true);
+
+  // Variant Logic
+  const [isVariantSidebarOpen, setIsVariantSidebarOpen] = useState(false);
+  const [selectedProductForVariant, setSelectedProductForVariant] = useState(null);
+  const [activeVariantForSidebar, setActiveVariantForSidebar] = useState(null);
 
   const { data: products = [], isLoading: loading, error } = useQuery({
     queryKey: ['bestsellers', 'skincare'],
@@ -262,6 +273,23 @@ const BestSeller = () => {
 
   const handleAddToCart = useCallback((e, product) => {
     e.stopPropagation(); // Prevent navigation when clicking add to cart
+
+    // Check if product has multiple variants
+    if (product.variants && product.variants.length > 1) {
+      setSelectedProductForVariant(product);
+      // Pre-select if only 1 variant (though conditional above prevents this branch for length === 1, 
+      // useful if logic changes)
+      if (product.variants.length === 1) {
+        setActiveVariantForSidebar(product.variants[0]);
+      }
+      setIsVariantSidebarOpen(true);
+      return;
+    }
+
+    const variantToAdd = product.variants && product.variants.length === 1
+      ? product.variants[0]
+      : { size: product.size || 'Standard', _id: undefined };
+
     const cartItem = {
       id: product._id,
       name: product.itemName,
@@ -275,7 +303,9 @@ const BestSeller = () => {
       discount: product.discount || 0,
 
       seller: product.seller,
-      variants: product.variants // Pass variants to trigger global selection if needed
+      variants: product.variants,
+      size: variantToAdd.size,
+      variantId: variantToAdd._id
     };
     addItem(cartItem);
   }, [addItem]);
@@ -286,142 +316,159 @@ const BestSeller = () => {
   }, [navigate]);
 
   return (
-    <section className="mt-0 bg-white lux-section pt-4 md:pt-[5.5rem] -mt-4 md:mt-0">
-      <div className="lux-section-inner">
-        {/* Centered Title */}
-        <div className="text-center mb-10 md:mb-12 space-y-3 fade-in">
-          <h2 className="lux-title">Best sellers</h2>
-          <p className="lux-subtitle mx-auto">
-            Produktet më të preferuara nga klientët tanë, të kuruara për rezultate të dukshme dhe të qëndrueshme.
-          </p>
-        </div>
+    <>
+      <section className="mt-0 bg-white lux-section pt-4 md:pt-[5.5rem] -mt-4 md:mt-0">
+        <div className="lux-section-inner">
+          {/* Centered Title */}
+          <div className="text-center mb-10 md:mb-12 space-y-3 fade-in">
+            <h2 className="lux-title">Best sellers</h2>
+            <p className="lux-subtitle mx-auto">
+              Produktet më të preferuara nga klientët tanë, të kuruara për rezultate të dukshme dhe të qëndrueshme.
+            </p>
+          </div>
 
-        {/* Content Container with min-height to prevent layout shift */}
-        <div className="min-h-[400px]">
-          {/* Loading State */}
-          {loading && (
-            <div className="py-12">
-              <DataLoading />
-            </div>
-          )}
+          {/* Content Container with min-height to prevent layout shift */}
+          <div className="min-h-[400px]">
+            {/* Loading State */}
+            {loading && (
+              <div className="py-12">
+                <DataLoading />
+              </div>
+            )}
 
-          {/* Error State */}
-          {error && !loading && (
-            <div className="text-center py-12">
-              <p className="text-gray-500">Failed to load bestseller products</p>
-            </div>
-          )}
+            {/* Error State */}
+            {error && !loading && (
+              <div className="text-center py-12">
+                <p className="text-gray-500">Failed to load bestseller products</p>
+              </div>
+            )}
 
-          {/* Products Carousel */}
-          {!loading && !error && products.length > 0 && (
-            <>
-              <div className="relative flex items-center justify-center">
-                {/* Scrollable Container - Show 4 products on desktop, centered */}
-                <div
-                  className="relative overflow-hidden px-0 -mx-4 md:mx-auto md:px-0"
-                  style={{
-                    // On desktop, limit visible width to show exactly 4 products
-                    // 4 products * 224px (w-56) + 3 gaps * 24px (gap-6) = 896 + 72 = 968px
-                    maxWidth: '968px'
-                  }}
-                >
-                  {/* Mobile Arrows - show on mobile when scrollable */}
-                  {showLeftArrow && (
-                    <button
-                      onClick={() => scroll('left')}
-                      className="absolute left-1 top-[40%] -translate-y-1/2 z-10 carousel-arrow p-1.5 shadow-md border border-[#E0CBB5] md:hidden"
-                      aria-label="Scroll left"
-                    >
-                      <ChevronLeft size={18} className="text-[#A67856]" />
-                    </button>
-                  )}
-
-                  {showRightArrow && (
-                    <button
-                      onClick={() => scroll('right')}
-                      className="absolute right-1 top-[40%] -translate-y-1/2 z-10 carousel-arrow p-1.5 shadow-md border border-[#E0CBB5] md:hidden"
-                      aria-label="Scroll right"
-                    >
-                      <ChevronRight size={18} className="text-[#A67856]" />
-                    </button>
-                  )}
-
-                  {/* Left Arrow - Only show when scrolled, hidden on mobile */}
-                  {showLeftArrow && (
-                    <button
-                      onClick={() => scroll('left')}
-                      className="hidden md:block absolute left-0 top-1/2 -translate-y-1/2 -translate-x-12 z-10 carousel-arrow p-2 shadow-lg border border-[#E0CBB5]"
-                      aria-label="Scroll left"
-                    >
-                      <ChevronLeft size={24} className="text-[#A67856]" />
-                    </button>
-                  )}
-
+            {/* Products Carousel */}
+            {!loading && !error && products.length > 0 && (
+              <>
+                <div className="relative flex items-center justify-center">
+                  {/* Scrollable Container - Show 4 products on desktop, centered */}
                   <div
-                    ref={scrollContainerRef}
-                    className={`flex gap-0 md:gap-5 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${products.length === 1 ? 'justify-center' : ''} ${products.length < 4 ? 'md:justify-center' : 'md:justify-start'
-                      } ${showScrollHint ? 'scroll-hint-right' : ''} relative`}
+                    className="relative overflow-hidden px-0 -mx-4 md:mx-auto md:px-0"
                     style={{
-                      scrollBehavior: 'smooth',
-                      WebkitOverflowScrolling: 'touch',
-                      overscrollBehavior: 'contain',
+                      // On desktop, limit visible width to show exactly 4 products
+                      // 4 products * 224px (w-56) + 3 gaps * 24px (gap-6) = 896 + 72 = 968px
+                      maxWidth: '968px'
                     }}
                   >
-                    {products.map((p, index) => {
-                      if (!p || !p._id) return null;
-                      const pricing = calculatePrice(p.price, p.discount);
+                    {/* Mobile Arrows - show on mobile when scrollable */}
+                    {showLeftArrow && (
+                      <button
+                        onClick={() => scroll('left')}
+                        className="absolute left-1 top-[40%] -translate-y-1/2 z-10 carousel-arrow p-1.5 shadow-md border border-[#E0CBB5] md:hidden"
+                        aria-label="Scroll left"
+                      >
+                        <ChevronLeft size={18} className="text-[#A67856]" />
+                      </button>
+                    )}
 
-                      // Add delay class based on index for staggered animation
-                      const delayClass = index < 4
-                        ? `swipe-hint-animation-delay-${Math.min(index, 3)}`
-                        : '';
+                    {showRightArrow && (
+                      <button
+                        onClick={() => scroll('right')}
+                        className="absolute right-1 top-[40%] -translate-y-1/2 z-10 carousel-arrow p-1.5 shadow-md border border-[#E0CBB5] md:hidden"
+                        aria-label="Scroll right"
+                      >
+                        <ChevronRight size={18} className="text-[#A67856]" />
+                      </button>
+                    )}
 
-                      return (
-                        <div
-                          key={p._id}
-                          className={`swipe-hint-animation ${delayClass} snap-start w-1/2 flex-shrink-0 px-1 md:w-[227px] md:px-0`}
-                        >
-                          <ProductCard
-                            product={p}
-                            pricing={pricing}
-                            index={index}
-                            onProductClick={handleProductClick}
-                            onAddToCart={handleAddToCart}
-                          />
-                        </div>
-                      );
-                    })}
-                  </div>
+                    {/* Left Arrow - Only show when scrolled, hidden on mobile */}
+                    {showLeftArrow && (
+                      <button
+                        onClick={() => scroll('left')}
+                        className="hidden md:block absolute left-0 top-1/2 -translate-y-1/2 -translate-x-12 z-10 carousel-arrow p-2 shadow-lg border border-[#E0CBB5]"
+                        aria-label="Scroll left"
+                      >
+                        <ChevronLeft size={24} className="text-[#A67856]" />
+                      </button>
+                    )}
 
-                  {/* Right Arrow - Only show when there are more products, hidden on mobile */}
-                  {showRightArrow && (
-                    <button
-                      onClick={() => scroll('right')}
-                      className="hidden md:block absolute right-0 top-1/2 -translate-y-1/2 translate-x-12 z-10 carousel-arrow p-2 shadow-lg border border-[#E0CBB5]"
-                      aria-label="Scroll right"
+                    <div
+                      ref={scrollContainerRef}
+                      className={`flex gap-0 md:gap-5 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${products.length === 1 ? 'justify-center' : ''} ${products.length < 4 ? 'md:justify-center' : 'md:justify-start'
+                        } ${showScrollHint ? 'scroll-hint-right' : ''} relative`}
+                      style={{
+                        scrollBehavior: 'smooth',
+                        WebkitOverflowScrolling: 'touch',
+                        overscrollBehavior: 'contain',
+                      }}
                     >
-                      <ChevronRight size={24} className="text-[#A67856]" />
-                    </button>
-                  )}
+                      {products.map((p, index) => {
+                        if (!p || !p._id) return null;
+                        const pricing = calculatePrice(p.price, p.discount);
+
+                        // Add delay class based on index for staggered animation
+                        const delayClass = index < 4
+                          ? `swipe-hint-animation-delay-${Math.min(index, 3)}`
+                          : '';
+
+                        return (
+                          <div
+                            key={p._id}
+                            className={`swipe-hint-animation ${delayClass} snap-start w-1/2 flex-shrink-0 px-1 md:w-[227px] md:px-0`}
+                          >
+                            <ProductCard
+                              product={p}
+                              pricing={pricing}
+                              index={index}
+                              onProductClick={handleProductClick}
+                              onAddToCart={handleAddToCart}
+                            />
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Right Arrow - Only show when there are more products, hidden on mobile */}
+                    {showRightArrow && (
+                      <button
+                        onClick={() => scroll('right')}
+                        className="hidden md:block absolute right-0 top-1/2 -translate-y-1/2 translate-x-12 z-10 carousel-arrow p-2 shadow-lg border border-[#E0CBB5]"
+                        aria-label="Scroll right"
+                      >
+                        <ChevronRight size={24} className="text-[#A67856]" />
+                      </button>
+                    )}
+                  </div>
                 </div>
-              </div>
 
-              {/* Page numbers for mobile */}
-              <div className="block md:hidden mt-6 text-center text-sm text-[#4A3628] font-semibold font-sans" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
-                {currentPage} / {totalPages}
-              </div>
-            </>
-          )}
+                {/* Page numbers for mobile */}
+                <div className="block md:hidden mt-6 text-center text-sm text-[#4A3628] font-semibold font-sans" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
+                  {currentPage} / {totalPages}
+                </div>
+              </>
+            )}
 
-          {/* Empty State - Only show when not loading and no products */}
-          {!loading && !error && products.length === 0 && (
-            <div className="text-center py-12">
-              <p className="text-gray-500">No bestseller products available for this category</p>
-            </div>
-          )}
+            {/* Empty State - Only show when not loading and no products */}
+            {!loading && !error && products.length === 0 && (
+              <div className="text-center py-12">
+                <p className="text-gray-500">No bestseller products available for this category</p>
+              </div>
+            )}
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+
+      <VariantSelectionSidebar
+        isOpen={isVariantSidebarOpen}
+        onClose={() => {
+          setIsVariantSidebarOpen(false);
+          setSelectedProductForVariant(null);
+          setActiveVariantForSidebar(null);
+        }}
+        product={selectedProductForVariant}
+        selectedVariant={activeVariantForSidebar}
+        onSelectVariant={setActiveVariantForSidebar}
+        onAddToCart={() => {
+          setIsVariantSidebarOpen(false);
+        }}
+      />
+    </>
   );
 };
 
