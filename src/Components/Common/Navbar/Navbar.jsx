@@ -612,9 +612,9 @@ const Navbar = () => {
 
         {/* Mobile slide-down menu */}
         <div
-          className={`lg:hidden fixed top-full left-0 right-0 border-t border-gray-200 bg-white overflow-hidden z-40 shadow-lg transition-all duration-300 ease-out ${mobileMenuOpen
+          className={`lg:hidden fixed top-full left-0 right-0 border-t border-gray-200 bg-white overflow-hidden z-40 shadow-lg transition-all duration-500 ease-in-out ${mobileMenuOpen
             ? 'opacity-100 translate-y-0 max-h-[calc(100vh-120px)] visible'
-            : 'opacity-0 -translate-y-8 max-h-0 invisible pointer-events-none'
+            : 'opacity-0 -translate-y-4 max-h-0 invisible pointer-events-none'
             }`}
           style={{ top: '100%' }}
         >
@@ -656,7 +656,7 @@ const Navbar = () => {
                 </button>
 
                 <div
-                  className={`overflow-hidden transition-all duration-300 ease-in-out ${mobileOpenCategoryId === category.id ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'
+                  className={`overflow-hidden transition-all duration-500 ease-in-out ${mobileOpenCategoryId === category.id ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'
                     }`}
                 >
                   <div className="bg-gray-50 border-t border-gray-100">
@@ -689,7 +689,7 @@ const Navbar = () => {
 
                         {group.subitems && group.subitems.length > 0 && (
                           <div
-                            className={`overflow-hidden transition-all duration-300 ease-in-out ${mobileOpenGroupId === group.id ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+                            className={`overflow-hidden transition-all duration-500 ease-in-out ${mobileOpenGroupId === group.id ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
                               }`}
                           >
                             <ul className="space-y-0 bg-white border-t border-gray-100">

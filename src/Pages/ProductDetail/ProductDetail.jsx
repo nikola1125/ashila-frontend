@@ -377,42 +377,7 @@ const ProductDetail = () => {
             </div>
 
             {/* Social Sharing */}
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-3">
-                <a
-                  href={`https://www.facebook.com/sharer/sharer.php?u=${window.location.href}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-[#4A3628] transition-colors"
-                >
-                  <Facebook size={18} />
-                </a>
-                <a
-                  href={`https://twitter.com/intent/tweet?url=${window.location.href}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-[#4A3628] transition-colors"
-                >
-                  <Twitter size={18} />
-                </a>
-                <a
-                  href={`https://pinterest.com/pin/create/button/?url=${window.location.href}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-[#4A3628] transition-colors"
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 19c-.721 0-1.418-.109-2.076-.312.286-.465.713-1.227.95-1.878.098-.35.595-2.394.595-2.394s.152.304.465.496c.435.287.936.46 1.526.46 2.01 0 3.38-1.843 3.38-4.31 0-1.87-1.577-3.174-3.832-3.174-2.602 0-4.198 1.928-4.198 3.922 0 1.152.44 2.17 1.561 2.553.174.071.334.041.384-.107.036-.137.124-.48.163-.656.053-.204.033-.275-.115-.455-.323-.38-.53-.873-.53-1.57 0-2.03 1.54-3.894 4.01-3.894 2.105 0 3.636 1.503 3.636 3.505 0 2.33-1.464 4.296-3.64 4.296-.712 0-1.387-.37-1.617-.863 0 0-.352 1.34-.436 1.67-.158.609-.586 1.37-.872 1.833A11.98 11.98 0 0 0 12 19z" />
-                  </svg>
-                </a>
-                <a
-                  href={`mailto:?subject=${encodeURIComponent(product.itemName)}&body=${encodeURIComponent(window.location.href)}`}
-                  className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-[#4A3628] transition-colors"
-                >
-                  <Mail size={18} />
-                </a>
-              </div>
-            </div>
+
           </div>
         </div>
 

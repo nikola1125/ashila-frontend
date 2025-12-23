@@ -58,11 +58,11 @@ const ScrollToTopButton = () => {
   return (
     <button
       onClick={handleScrollToTop}
-      className="fixed bottom-6 right-6 md:bottom-8 md:right-8 z-50 bg-transparent hover:bg-black/10 text-black p-3 md:p-4 rounded-full transition-all duration-300 transform hover:scale-110 hover:-translate-y-1 active:scale-95 flex items-center justify-center min-h-[44px] min-w-[44px] md:min-h-[50px] md:min-w-[50px] shadow-md hover:shadow-lg"
+      className="fixed bottom-6 right-6 md:bottom-8 md:right-8 z-50 bg-[#5A3F2A] hover:bg-[#4A3320] text-white p-3 md:p-4 rounded-full transition-all duration-300 transform hover:scale-110 hover:-translate-y-1 active:scale-95 flex items-center justify-center min-h-[44px] min-w-[44px] md:min-h-[50px] md:min-w-[50px] shadow-lg hover:shadow-xl"
       aria-label="Scroll to top"
       style={{ aspectRatio: '1/1' }}
     >
-      <ChevronUp size={24} className="md:w-6 md:h-6 text-black transition-transform duration-300 hover:scale-110" />
+      <ChevronUp size={24} className="md:w-6 md:h-6 text-white transition-transform duration-300 hover:scale-110" />
     </button>
   );
 };
