@@ -8,9 +8,10 @@ const ScrollToTopButton = () => {
   const { scrollToTop, getScroll, lenis } = useSmoothScroll();
 
   const toggleVisibility = useCallback(() => {
-    // Show button when user scrolls down 300px
+    // Show button when user scrolls down 30px
     const scrollY = getScroll ? getScroll() : window.scrollY;
-    if (scrollY > 300) {
+    // Show button almost immediately (30px)
+    if (scrollY > 30) {
       setIsVisible(true);
     } else {
       setIsVisible(false);
