@@ -12,13 +12,19 @@ const SelectProductModal = ({ isOpen, onClose, refetch }) => {
     const { data: products = [], isLoading } = useQuery({
         queryKey: ['non-bestsellers'],
         queryFn: async () => {
-            // Fetch all and filter client side or backend? Backend doesn't have "not bestseller" filter easily.
-            // We'll fetch all and filter in JS for now as list isn't huge yet.
-            // Or fetch /medicines which returns all.
-            const res = await publicApi.get('/medicines');
+            // Fetch all products grouped to show one product per variant group
+            const res = await publicApi.get('/medicines?group=true');
             const allProducts = res.result || res || [];
-            // Filter out existing bestsellers
-            return allProducts.filter(p => !p.isBestseller);
+            // Filter out products that have any variant marked as bestseller
+            // Check if any variant in the group is a bestseller
+            return allProducts.filter(p => {
+                if (p.variants && p.variants.length > 0) {
+                    // Check if any variant is marked as bestseller
+                    return !p.variants.some(v => v.isBestseller);
+                }
+                // For non-variant products, check the product itself
+                return !p.isBestseller;
+            });
         }
     });
 
@@ -85,24 +91,40 @@ const SelectProductModal = ({ isOpen, onClose, refetch }) => {
                         <div className="text-center p-8 text-gray-500">No available products found.</div>
                     ) : (
                         <div className="space-y-2">
-                            {filteredProducts.map(product => (
-                                <div key={product._id} className="flex items-center justify-between p-3 hover:bg-amber-50 rounded-lg border border-transparent hover:border-amber-100 transition">
-                                    <div className="flex items-center gap-3">
-                                        <img src={product.image} alt={product.itemName} className="w-10 h-10 object-cover rounded-md" />
-                                        <div>
-                                            <div className="font-medium text-gray-800">{product.itemName}</div>
-                                            <div className="text-xs text-gray-500">{product.company} • {product.price} ALL</div>
+                            {filteredProducts.map(product => {
+                                // For grouped products, use the first variant's ID or the product's own ID
+                                const productId = (product.variants && product.variants.length > 0) 
+                                    ? product.variants[0]._id 
+                                    : product._id;
+                                
+                                return (
+                                    <div key={product._id || productId} className="flex items-center justify-between p-3 hover:bg-amber-50 rounded-lg border border-transparent hover:border-amber-100 transition">
+                                        <div className="flex items-center gap-3">
+                                            <img src={product.image} alt={product.itemName} className="w-10 h-10 object-cover rounded-md" />
+                                            <div>
+                                                <div className="font-medium text-gray-800">{product.itemName}</div>
+                                                <div className="text-xs text-gray-500">
+                                                    {product.company} • {
+                                                        product.minPrice && product.maxPrice && product.minPrice !== product.maxPrice
+                                                            ? `${product.minPrice} - ${product.maxPrice} ALL`
+                                                            : product.price || (product.minPrice || 0)
+                                                    } ALL
+                                                    {product.variants && product.variants.length > 1 && (
+                                                        <span className="ml-2 text-amber-600">({product.variants.length} variants)</span>
+                                                    )}
+                                                </div>
+                                            </div>
                                         </div>
+                                        <button
+                                            onClick={() => handleAdd(productId)}
+                                            disabled={addingId === productId}
+                                            className="p-2 bg-amber-100 text-amber-700 rounded-lg hover:bg-amber-200 transition disabled:opacity-50"
+                                        >
+                                            {addingId === productId ? <Loader2 className="animate-spin" size={18} /> : <Plus size={18} />}
+                                        </button>
                                     </div>
-                                    <button
-                                        onClick={() => handleAdd(product._id)}
-                                        disabled={addingId === product._id}
-                                        className="p-2 bg-amber-100 text-amber-700 rounded-lg hover:bg-amber-200 transition disabled:opacity-50"
-                                    >
-                                        {addingId === product._id ? <Loader2 className="animate-spin" size={18} /> : <Plus size={18} />}
-                                    </button>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     )}
                 </div>

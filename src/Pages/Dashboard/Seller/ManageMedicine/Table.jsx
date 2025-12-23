@@ -77,7 +77,7 @@ const Table = ({ setShowModal, medicinesArr }) => {
               </td>
               <td className="py-3 px-2">{medicine.massUnit}</td>
               <td className="py-3 px-2">{Number(medicine.price).toLocaleString()} ALL</td>
-              <td className="py-3 px-2">{medicine.discount}%</td>
+              <td className="py-3 px-2">{Math.round(medicine.discount)}%</td>
             </tr>
           ))}
         </tbody>

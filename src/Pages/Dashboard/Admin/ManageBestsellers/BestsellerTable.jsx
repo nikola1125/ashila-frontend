@@ -111,7 +111,7 @@ const BestsellerTable = ({ products, refetch, onEdit, onDelete }) => {
                     </div>
                     {product.discount > 0 && (
                       <div className="text-xs text-green-600">
-                        {product.discount}% off
+                        {Math.round(product.discount)}% off
                       </div>
                     )}
                   </td>

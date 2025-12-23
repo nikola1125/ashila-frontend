@@ -1,18 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Package, Truck, CheckCircle, Clock, XCircle, Eye } from 'lucide-react';
+import { Package, Truck, CheckCircle, Clock, XCircle, Eye, Volume2, VolumeX, Settings } from 'lucide-react';
 import useAxiosSecure from '../../../../hooks/useAxiosSecure';
 import DataLoading from '../../../../Components/Common/Loaders/DataLoading';
 import { toast } from 'react-toastify';
 import Swal from 'sweetalert2';
 import OrderDetailsModal from './OrderDetailsModal';
 import { getProductImage } from '../../../../utils/productImages';
+import notificationManager from '../../../../utils/notifications';
+import SoundPicker from '../../../../Components/Common/SoundPicker';
 
 const OrderManagement = () => {
     const { privateApi } = useAxiosSecure();
     const queryClient = useQueryClient();
     const [statusFilter, setStatusFilter] = useState('all');
     const [selectedOrder, setSelectedOrder] = useState(null);
+    const [soundEnabled, setSoundEnabled] = useState(true);
+    const [showSoundPicker, setShowSoundPicker] = useState(false);
+    const [currentSound, setCurrentSound] = useState(notificationManager.getSelectedSound());
+    const previousOrdersCount = useRef(0);
 
     const { data: orders = [], isLoading } = useQuery({
         queryKey: ['admin-orders'],
@@ -22,12 +28,38 @@ const OrderManagement = () => {
         }
     });
 
+    // Detect new orders and play notification
+    useEffect(() => {
+        if (orders.length > previousOrdersCount.current && previousOrdersCount.current > 0) {
+            const newOrdersCount = orders.length - previousOrdersCount.current;
+            if (soundEnabled) {
+                // Play notification sound for each new order
+                for (let i = 0; i < Math.min(newOrdersCount, 3); i++) {
+                    setTimeout(() => {
+                        notificationManager.playNotificationSound('order');
+                    }, i * 500); // Stagger sounds for multiple orders
+                }
+                
+                // Show browser notification
+                if (newOrdersCount === 1) {
+                    notificationManager.showNotification('New Order Received', 'A customer has placed a new order');
+                } else {
+                    notificationManager.showNotification(`${newOrdersCount} New Orders`, `${newOrdersCount} customers have placed new orders`);
+                }
+            }
+        }
+        previousOrdersCount.current = orders.length;
+    }, [orders, soundEnabled]);
+
     const updateStatusMutation = useMutation({
         mutationFn: async ({ id, status }) => {
             await privateApi.patch(`/orders/${id}`, { status });
         },
         onSuccess: () => {
             queryClient.invalidateQueries(['admin-orders']);
+            // Also invalidate products queries to refresh stock levels
+            queryClient.invalidateQueries(['admin-v2', 'products']);
+            queryClient.invalidateQueries(['inventory-products']);
             toast.success('Order status updated');
         },
         onError: (err) => {
@@ -83,22 +115,49 @@ const OrderManagement = () => {
                     <h2 className="text-2xl font-bold text-amber-900">Orders</h2>
                     <p className="text-amber-700 text-sm">Manage client orders and deliveries</p>
                 </div>
-                <div className="relative">
-                    <input
-                        type="text"
-                        placeholder="Search orders..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-4 pr-10 py-2 border border-amber-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
-                    />
-                    {searchTerm && (
-                        <button
-                            onClick={() => setSearchTerm('')}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                        >
-                            <XCircle size={16} />
-                        </button>
-                    )}
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={() => {
+                            setSoundEnabled(!soundEnabled);
+                            if (soundEnabled) {
+                                notificationManager.disable();
+                            } else {
+                                notificationManager.enable();
+                            }
+                        }}
+                        className={`p-2 rounded-lg border transition-colors ${
+                            soundEnabled 
+                                ? 'bg-amber-100 border-amber-300 text-amber-700 hover:bg-amber-200' 
+                                : 'bg-gray-100 border-gray-300 text-gray-500 hover:bg-gray-200'
+                        }`}
+                        title={soundEnabled ? 'Disable notification sounds' : 'Enable notification sounds'}
+                    >
+                        {soundEnabled ? <Volume2 size={18} /> : <VolumeX size={18} />}
+                    </button>
+                    <button
+                        onClick={() => setShowSoundPicker(true)}
+                        className="p-2 rounded-lg border border-amber-300 bg-amber-100 text-amber-700 hover:bg-amber-200 transition-colors"
+                        title="Sound settings"
+                    >
+                        <Settings size={18} />
+                    </button>
+                    <div className="relative">
+                        <input
+                            type="text"
+                            placeholder="Search orders..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="pl-4 pr-10 py-2 border border-amber-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                        />
+                        {searchTerm && (
+                            <button
+                                onClick={() => setSearchTerm('')}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                            >
+                                <XCircle size={16} />
+                            </button>
+                        )}
+                    </div>
                 </div>
             </div>
 
@@ -202,6 +261,17 @@ const OrderManagement = () => {
                     />
                 )
             }
+            
+            {/* Sound Picker Modal */}
+            <SoundPicker
+                isOpen={showSoundPicker}
+                onClose={() => setShowSoundPicker(false)}
+                currentSound={currentSound}
+                onSoundChange={(soundId) => {
+                    setCurrentSound(soundId);
+                    notificationManager.setSelectedSound(soundId);
+                }}
+            />
         </div >
     );
 };

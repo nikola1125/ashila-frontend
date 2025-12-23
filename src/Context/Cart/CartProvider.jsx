@@ -246,13 +246,21 @@ export const CartProvider = ({ children }) => {
     const price = Number(variant.price);
     const discount = Number(variant.discount || 0);
     const itemToAdd = {
-      ...currentProductForVariant,
+      id: variant._id, // Use variant ID as the product ID
+      name: currentProductForVariant.name || currentProductForVariant.itemName,
+      itemName: currentProductForVariant.itemName || currentProductForVariant.name,
+      image: variant.image || currentProductForVariant.image,
       price: price,
       discountedPrice: discount > 0 ? (price * (1 - discount / 100)).toFixed(2) : null,
       size: variant.size,
       variantId: variant._id,
-      // Ensure we keep original generic info
-      discount: discount
+      discount: discount,
+      seller: currentProductForVariant.seller,
+      sellerEmail: currentProductForVariant.sellerEmail,
+      description: currentProductForVariant.description,
+      category: currentProductForVariant.category,
+      categoryName: currentProductForVariant.categoryName,
+      categoryPath: currentProductForVariant.categoryPath
     };
 
     dispatch({ type: 'ADD_ITEM', payload: itemToAdd });

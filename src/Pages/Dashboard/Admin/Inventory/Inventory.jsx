@@ -37,18 +37,13 @@ const Inventory = () => {
     const { data: products = [], isLoading } = useQuery({
         queryKey: ['inventory-products'],
         queryFn: async () => {
-            const res = await publicApi.get('/medicines');
+            const res = await privateApi.get('/products');
             return res.result || res;
         }
     });
 
     const lowStockThreshold = 10;
-    const lowStockProducts = products.filter(p => {
-        if (p.variants && p.variants.length > 0) {
-            return p.variants.some(v => (v.stock || 0) <= lowStockThreshold);
-        }
-        return (p.stock || 0) <= lowStockThreshold;
-    });
+    const lowStockProducts = products.filter(p => (p.stock || 0) <= lowStockThreshold);
 
     const displayProducts = filter === 'low' ? lowStockProducts : products;
 
@@ -134,25 +129,24 @@ const Inventory = () => {
                         </thead>
                         <tbody className="divide-y divide-amber-50 text-sm">
                             {displayProducts.map(product => {
-                                const hasVariants = product.variants && product.variants.length > 0;
-                                let isLowStock = false;
-                                let isOutOfStock = false;
-
-                                if (hasVariants) {
-                                    isLowStock = product.variants.some(v => (v.stock || 0) <= lowStockThreshold);
-                                    isOutOfStock = product.variants.every(v => (v.stock || 0) === 0);
-                                } else {
-                                    isLowStock = (product.stock || 0) <= lowStockThreshold;
-                                    isOutOfStock = (product.stock || 0) === 0;
-                                }
+                                const stock = product.stock || 0;
+                                const isLowStock = stock <= lowStockThreshold && stock > 0;
+                                const isOutOfStock = stock === 0;
 
                                 return (
                                     <tr key={product._id} className="hover:bg-amber-50/50">
                                         <td className="p-4 font-medium text-gray-800 flex items-center gap-3">
                                             <img src={product.image} className="w-8 h-8 rounded object-cover bg-gray-100" />
-                                            {product.itemName}
+                                            <div>
+                                                <div>{product.itemName}</div>
+                                                {(product.size || product.dosage) && (
+                                                    <div className="text-xs text-gray-500">{product.size || product.dosage}</div>
+                                                )}
+                                            </div>
                                         </td>
-                                        <td className="p-4 text-gray-500">{product.categoryName}</td>
+                                        <td className="p-4 text-gray-500">
+                                            {(Array.isArray(product.categoryPath) ? product.categoryPath.join(' > ') : product.categoryName) || '—'}
+                                        </td>
                                         <td className="p-4 text-gray-400 font-mono text-xs">{product._id.slice(-6).toUpperCase()}</td>
                                         <td className="p-4 text-center">
                                             {isOutOfStock ? (
@@ -164,17 +158,13 @@ const Inventory = () => {
                                             )}
                                         </td>
                                         <td className="p-4 text-right font-mono font-bold text-gray-700">
-                                            {hasVariants ? (
-                                                <div className="flex flex-col gap-1 items-end">
-                                                    {product.variants.map((v, idx) => (
-                                                        <div key={idx} className={`text-xs ${(v.stock || 0) <= lowStockThreshold ? 'text-red-600 bg-red-50 px-2 py-0.5 rounded' : 'text-gray-600'}`}>
-                                                            <span className="font-medium mr-1">{v.size}:</span>
-                                                            <span className={(v.stock || 0) <= lowStockThreshold ? 'font-bold' : ''}>{v.stock || 0}</span>
-                                                        </div>
-                                                    ))}
+                                            {(product.size || product.dosage) ? (
+                                                <div className={`text-xs ${stock <= lowStockThreshold ? 'text-red-600 bg-red-50 px-2 py-0.5 rounded' : 'text-gray-600'}`}>
+                                                    <span className="font-medium mr-1">{product.size || product.dosage}:</span>
+                                                    <span className={stock <= lowStockThreshold ? 'font-bold' : ''}>{stock}</span>
                                                 </div>
                                             ) : (
-                                                <span>{product.stock || 0}</span>
+                                                <span>{stock}</span>
                                             )}
                                         </td>
                                     </tr>

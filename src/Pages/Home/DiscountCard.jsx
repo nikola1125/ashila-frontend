@@ -20,7 +20,7 @@ const DiscountCard = ({ medicine }) => {
       {/* Discount Badge - Bottom Left */}
       {medicine.discount > 0 && (
         <span className="elegant-badge bg-[#F4A640] text-white px-2.5 py-1 text-xs font-semibold">
-          Save <span className="lux-price-number">{medicine.discount}%</span>
+          Save <span className="lux-price-number">{Math.round(medicine.discount)}%</span>
         </span>
       )}
 

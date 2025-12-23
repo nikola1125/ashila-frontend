@@ -28,30 +28,71 @@ const ProductDetail = () => {
   const { data: product, isLoading, error } = useQuery({
     queryKey: ['product', id],
     queryFn: async () => {
-      const response = await publicApi.get(`/medicines/${id}`);
+      const response = await publicApi.get(`/products/${id}`);
       return response;
     },
     enabled: !!id,
   });
 
+  // Fetch all variants of the same product using variantGroupId
+  const { data: allVariants = [] } = useQuery({
+    queryKey: ['product-variants', product?.variantGroupId, product?._id],
+    queryFn: async () => {
+      if (!product) return [];
+      
+      // If product has variantGroupId, fetch all products with same variantGroupId
+      if (product.variantGroupId) {
+        const response = await publicApi.get(`/products?group=false`);
+        const allProducts = response?.result || response || [];
+        const variants = allProducts.filter(p => 
+          p.variantGroupId === product.variantGroupId
+        );
+        return variants.length > 0 ? variants : [product];
+      }
+      
+      // Fallback: if no variantGroupId, try to find by name/company/category
+      const response = await publicApi.get(`/products?group=false`);
+      const allProducts = response?.result || response || [];
+      const variants = allProducts.filter(p => 
+        p.itemName === product.itemName && 
+        p.company === product.company && 
+        p.categoryName === product.categoryName
+      );
+      return variants.length > 0 ? variants : [product];
+    },
+    enabled: !!product,
+  });
+
   // Fetch related products (same category, excluding current product)
+  // Use group=true to get grouped products
   const { data: relatedProducts = [] } = useQuery({
-    queryKey: ['relatedProducts', product?.category?._id, id],
+    queryKey: ['relatedProducts', product?.category?._id, id, product?.variantGroupId],
     queryFn: async () => {
       if (!product?.category?._id) return [];
-      const response = await publicApi.get(`/medicines`);
+      const response = await publicApi.get(`/products?group=true`);
       const allProducts = response?.result || response || [];
-      // Filter: same category, exclude current product, limit to 4
+      // Filter: same category, exclude current product and its variants, limit to 4
+      const currentVariantGroupId = product?.variantGroupId;
       const related = allProducts
-        .filter(p =>
-          p._id !== id &&
-          (p.category?._id === product.category._id || p.category === product.category._id)
-        )
+        .filter(p => {
+          // Exclude current product and products in the same variant group
+          if (currentVariantGroupId && p.variantGroupId === currentVariantGroupId) return false;
+          // Check if any variant matches current product ID
+          if (p.variants && p.variants.some(v => v._id === id)) return false;
+          if (p._id === id) return false;
+          // Check category match
+          return (p.category?._id === product.category._id || p.category === product.category._id);
+        })
         .slice(0, 4);
       // If not enough in same category, add products in order (no random)
       if (related.length < 4) {
         const additional = allProducts
-          .filter(p => p._id !== id && !related.find(r => r._id === p._id))
+          .filter(p => {
+            if (currentVariantGroupId && p.variantGroupId === currentVariantGroupId) return false;
+            if (p.variants && p.variants.some(v => v._id === id)) return false;
+            if (p._id === id) return false;
+            return !related.find(r => r._id === p._id);
+          })
           .slice(0, 4 - related.length);
         return [...related, ...additional].slice(0, 4);
       }
@@ -148,21 +189,25 @@ const ProductDetail = () => {
 
   // Initialize selected variant logic
   useEffect(() => {
-    if (product) {
-      // If there is exactly one variant, auto-select it so the user can add to cart immediately
-      // without opening the sidebar.
-      if (product.variants && product.variants.length === 1) {
-        setActiveVariant(product.variants[0]);
+    if (product && allVariants.length > 0) {
+      // Auto-select the current variant if it matches the URL ID
+      const currentVariant = allVariants.find(v => v._id === id);
+      if (currentVariant) {
+        setActiveVariant(currentVariant);
+      } else if (allVariants.length === 1) {
+        // If only one variant, auto-select it
+        setActiveVariant(allVariants[0]);
       } else {
+        // Multiple variants - select the first one for display but don't treat as selected
         setActiveVariant(null);
       }
     }
-  }, [product]);
+  }, [product, allVariants, id]);
 
   // Derived values based on selected variant or fallback to product base values for display
   // We want to show the "Starting at" price or the first variant's price, 
   // but WITHOUT treating it as "selected".
-  const displayVariant = activeVariant || (product?.variants?.length > 0 ? product.variants[0] : null) || product;
+  const displayVariant = activeVariant || (allVariants.length > 0 ? allVariants[0] : product) || product;
 
   const currentPrice = displayVariant ? Number(displayVariant.price) : 0;
   const currentDiscount = displayVariant ? Number(displayVariant.discount) : 0;
@@ -178,15 +223,15 @@ const ProductDetail = () => {
     if (!product) return false;
 
     // Check if variant selection is required
-    const hasVariants = product.variants && product.variants.length > 0;
+    const hasVariants = allVariants.length > 0;
 
     let effectiveVariant = activeVariant;
 
     // Handle case where no variant is explicitly selected
     if (hasVariants && !effectiveVariant) {
-      if (product.variants.length === 1) {
+      if (allVariants.length === 1) {
         // Auto-select single variant immediately
-        effectiveVariant = product.variants[0];
+        effectiveVariant = allVariants[0];
         setActiveVariant(effectiveVariant);
       } else {
         // Multiple variants require user selection
@@ -198,29 +243,29 @@ const ProductDetail = () => {
     // Use effectiveVariant or fallback (only for legacy products without variants array)
     const variantToAdd = effectiveVariant || {
       size: product.size || 'Standard',
-      _id: undefined
+      _id: product._id
     };
 
     // Add item quantity times
     for (let i = 0; i < quantity; i++) {
       addItem({
-        id: product._id,
+        id: variantToAdd._id, // Use variant ID
         name: product.itemName,
-        price: currentPrice,
-        discountedPrice: currentDiscount > 0
-          ? discountedPrice.toFixed(2)
+        price: variantToAdd.price || currentPrice,
+        discountedPrice: (variantToAdd.discount || currentDiscount) > 0
+          ? ((variantToAdd.price || currentPrice) * (1 - (variantToAdd.discount || currentDiscount) / 100)).toFixed(2)
           : null,
-        image: product.image,
+        image: variantToAdd.image || product.image,
         company: product.company,
         genericName: product.genericName,
-        discount: currentDiscount,
+        discount: variantToAdd.discount || currentDiscount,
         seller: product.seller,
         size: variantToAdd.size,
         variantId: variantToAdd._id
       });
     }
     return true;
-  }, [product, quantity, activeVariant, currentPrice, currentDiscount, discountedPrice, addItem]);
+  }, [product, allVariants, quantity, activeVariant, currentPrice, currentDiscount, discountedPrice, addItem]);
 
   const handleBuyNow = useCallback(() => {
     if (handleAddToCart()) {
@@ -292,10 +337,10 @@ const ProductDetail = () => {
                 SIZE
               </label>
               <div className="flex flex-wrap gap-2">
-                {product.variants && product.variants.length > 0 ? (
-                  product.variants.map((variant, idx) => (
+                {allVariants.length > 0 ? (
+                  allVariants.map((variant, idx) => (
                     <button
-                      key={idx}
+                      key={variant._id}
                       onClick={() => setActiveVariant(variant)}
                       className={`px-4 py-2 text-sm font-medium border transition-all duration-200 ${activeVariant === variant
                         ? 'bg-[#4A3628] text-white border-[#4A3628]'
@@ -485,7 +530,11 @@ const ProductDetail = () => {
                             className="swipe-hint-animation w-full border border-gray-200 overflow-hidden bg-white text-center pb-4 flex flex-col cursor-pointer hover:shadow-lg transition-shadow h-full"
                             onClick={() => {
                               window.scrollTo({ top: 0, behavior: 'instant' });
-                              navigate(`/product/${relatedProduct._id}`);
+                              // If product has variants, navigate to first variant, otherwise use product ID
+                              const productId = (relatedProduct.variants && relatedProduct.variants.length > 0) 
+                                ? relatedProduct.variants[0]._id 
+                                : relatedProduct._id;
+                              navigate(`/product/${productId}`);
                             }}
                           >
                             <div className="relative w-full overflow-hidden bg-white h-[185px] md:h-[240px] pt-4 md:pt-0">
@@ -499,7 +548,7 @@ const ProductDetail = () => {
                               />
                               {relatedProduct.discount > 0 && (
                                 <div className="absolute top-2.5 right-2.5 bg-red-500 text-white px-2.5 py-1.5 text-sm font-bold">
-                                  Save {relatedProduct.discount}%
+                                  Save {Math.round(relatedProduct.discount)}%
                                 </div>
                               )}
                               {relatedProduct.stock === 0 && (
@@ -547,11 +596,30 @@ const ProductDetail = () => {
                                         setRelatedSidebarProduct(relatedProduct);
                                         setRelatedSidebarVariant(relatedProduct.variants[0]);
                                         setIsRelatedSidebarOpen(true);
-                                      } else {
-                                        const variantToAdd = relatedProduct.variants && relatedProduct.variants.length === 1
-                                          ? relatedProduct.variants[0]
-                                          : { size: relatedProduct.size || 'Standard', _id: undefined };
+                                      } else if (relatedProduct.variants && relatedProduct.variants.length === 1) {
+                                        // Single variant - add directly
+                                        const variant = relatedProduct.variants[0];
+                                        const variantPrice = Number(variant.price);
+                                        const variantDiscount = Number(variant.discount || 0);
+                                        const discountedPrice = variantDiscount > 0
+                                          ? (variantPrice * (1 - variantDiscount / 100)).toFixed(2)
+                                          : null;
 
+                                        addItem({
+                                          id: variant._id,
+                                          name: relatedProduct.itemName,
+                                          price: variantPrice,
+                                          discountedPrice: discountedPrice,
+                                          image: variant.image || relatedProduct.image,
+                                          company: relatedProduct.company,
+                                          genericName: relatedProduct.genericName,
+                                          discount: variantDiscount,
+                                          seller: relatedProduct.seller,
+                                          size: variant.size,
+                                          variantId: variant._id
+                                        });
+                                      } else {
+                                        // No variants - add directly
                                         addItem({
                                           id: relatedProduct._id,
                                           name: relatedProduct.itemName,
@@ -565,8 +633,8 @@ const ProductDetail = () => {
                                           genericName: relatedProduct.genericName,
                                           discount: relatedProduct.discount || 0,
                                           seller: relatedProduct.seller,
-                                          size: variantToAdd.size,
-                                          variantId: variantToAdd._id
+                                          size: relatedProduct.size || 'Standard',
+                                          variantId: relatedProduct._id
                                         });
                                       }
                                     }}

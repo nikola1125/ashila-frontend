@@ -64,7 +64,7 @@ const Checkout = () => {
         image: item.image,
         seller: item.seller || null,
         sellerEmail: item.sellerEmail || null,
-        selectedSize: item.selectedSize || null,
+        selectedSize: item.size || item.selectedSize || null,
       };
     });
   }, [cartItems]);
@@ -231,7 +231,7 @@ const Checkout = () => {
                 <div className="space-y-4">
                   <div className="space-y-3">
                     {cartItems.map((item, index) => (
-                      <div key={`${item.id}-${item.selectedSize || 'nosize'}-${index}`} className="flex gap-3 border border-gray-100 p-3 bg-gray-50">
+                      <div key={`${item.id}-${item.size || item.selectedSize || 'nosize'}-${index}`} className="flex gap-3 border border-gray-100 p-3 bg-gray-50">
                         <div className="w-16 h-16 bg-white border border-gray-200 overflow-hidden shrink-0">
                           <img
                             src={getProductImage(item.image, item.id)}
@@ -244,6 +244,11 @@ const Checkout = () => {
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="font-semibold text-gray-900 text-sm break-words">{item.name}</div>
+                          {(item.size || item.selectedSize) && (
+                            <div className="text-xs font-medium text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-100 inline-block mt-1">
+                              {item.size || item.selectedSize}
+                            </div>
+                          )}
                           <div className="text-xs text-gray-600 mt-1">Sasia: {item.quantity}</div>
                           <div className="text-xs text-gray-600">
                             Çmimi: {(Number(item.discountedPrice) && Number(item.discountedPrice) < Number(item.price)

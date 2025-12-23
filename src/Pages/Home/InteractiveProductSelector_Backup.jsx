@@ -204,7 +204,7 @@ const InteractiveProductSelector = () => {
                                 />
                                 {activeProduct.discount > 0 && (
                                     <div className="absolute top-2.5 right-2.5 bg-red-500 text-white px-2.5 py-1.5 text-sm font-bold product-badge">
-                                        Save {activeProduct.discount}%
+                                        Save {Math.round(activeProduct.discount)}%
                                     </div>
                                 )}
                                 {activeProduct.stock === 0 && (

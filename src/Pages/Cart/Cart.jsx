@@ -84,6 +84,11 @@ const Cart = () => {
                       <h3 className="font-bold text-gray-900 text-base sm:text-lg break-words">
                         {item.name}
                       </h3>
+                      {item.size && (
+                        <p className="text-xs font-medium text-amber-600 bg-amber-50 px-2 py-1 rounded border border-amber-100 inline-block mb-1">
+                          {item.size}
+                        </p>
+                      )}
                       <p className="text-gray-700 text-sm">
                         Price:{' '}
                         <span className="font-semibold lux-price-number">

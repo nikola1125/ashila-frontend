@@ -90,9 +90,16 @@ const OrderDetailsModal = ({ isOpen, onClose, order }) => {
                                         className="w-16 h-16 object-cover rounded-lg bg-gray-50"
                                     />
                                     <div className="flex-1">
+                                        {/* Debug log */}
+                                        {console.log('Order Item:', item)}
                                         <h4 className="text-sm font-medium text-gray-900 line-clamp-2">
                                             {item.itemName}
-                                            {item.selectedSize && <span className="ml-2 text-xs font-normal text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-100">{item.selectedSize}</span>}
+                                            {/* Show selectedSize, OR fallback to product size if available */}
+                                            {(item.selectedSize || item.productId?.size) && (
+                                                <span className="ml-2 text-xs font-normal text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-100">
+                                                    {item.selectedSize || item.productId?.size}
+                                                </span>
+                                            )}
                                         </h4>
                                         <p className="text-xs text-gray-500 mt-1">{item.company}</p>
                                         <div className="flex justify-between items-center mt-2">

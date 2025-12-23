@@ -58,7 +58,7 @@ const ProductCard = React.memo(({ product, pricing, index, onProductClick, onAdd
       {/* Product Image Container */}
       <motion.div
         className="relative w-full overflow-hidden bg-white cursor-pointer h-[185px] md:h-[240px]"
-        onClick={() => onProductClick(product._id)}
+        onClick={() => onProductClick(product)}
         whileHover={{ scale: 1.02 }}
         transition={{ duration: 0.2 }}
       >
@@ -81,10 +81,10 @@ const ProductCard = React.memo(({ product, pricing, index, onProductClick, onAdd
             transition={{ delay: index * 0.1 + 0.3 }}
             className="absolute top-1.5 md:top-2.5 right-1.5 md:right-2.5 bg-red-500 text-white px-1.5 md:px-2.5 py-1 md:py-1.5 text-xs md:text-sm font-bold"
           >
-            Save <span className="lux-price-number">{pricing.discountPercent}%</span>
+            Save <span className="lux-price-number">{Math.round(pricing.discountPercent)}%</span>
           </motion.div>
         )}
-        {product.stock === 0 && (
+        {(product.totalStock === 0 || product.stock === 0) && (
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -105,7 +105,7 @@ const ProductCard = React.memo(({ product, pricing, index, onProductClick, onAdd
         ></div>
         <h3
           className="lux-serif-text !text-[12px] md:!text-[14px] mb-1.5 md:mb-2.5 text-gray-800 leading-snug whitespace-normal break-words min-h-[24px] md:min-h-[40px] cursor-pointer hover:text-gray-600 transition-colors"
-          onClick={() => onProductClick(product._id)}
+          onClick={() => onProductClick(product)}
         >
           {product.itemName}
         </h3>
@@ -113,7 +113,11 @@ const ProductCard = React.memo(({ product, pricing, index, onProductClick, onAdd
         <div className="mt-auto">
           {/* Price */}
           <div className="flex items-center justify-center gap-1.5 md:gap-2.5 mt-0.5 md:mt-0">
-            {pricing.discounted ? (
+            {pricing.priceRange ? (
+              <span className="lux-price-number text-sm md:text-lg font-medium text-black">
+                {pricing.priceRange} ALL
+              </span>
+            ) : pricing.discounted ? (
               <>
                 <span className="lux-price-number text-sm md:text-lg font-medium text-amber-700">
                   {pricing.discounted.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
@@ -133,15 +137,15 @@ const ProductCard = React.memo(({ product, pricing, index, onProductClick, onAdd
           <div className="pt-1.5 md:pt-3">
             <button
               type="button"
-              disabled={product.stock === 0}
+              disabled={(product.totalStock === 0 || product.stock === 0)}
               onClick={(e) => onAddToCart && onAddToCart(e, product)}
-              className={`w-full inline-flex items-center justify-center gap-1.5 px-2.5 py-1.5 md:px-3 md:py-2 text-[11px] md:text-xs font-semibold uppercase tracking-wide border ${product.stock === 0
+              className={`w-full inline-flex items-center justify-center gap-1.5 px-2.5 py-1.5 md:px-3 md:py-2 text-[11px] md:text-xs font-semibold uppercase tracking-wide border ${product.totalStock === 0 || product.stock === 0
                 ? 'bg-gray-200 border-gray-300 text-gray-500 cursor-not-allowed'
                 : 'bg-[#8B6F47]/70 border-[#8B6F47]/70 text-white hover:bg-[#7A5F3A]/80 hover:border-[#7A5F3A]/80'
                 } transition-colors duration-150`}
             >
               <ShoppingBag className="w-3.5 h-3.5 md:w-4 md:h-4" />
-              {product.stock === 0 ? 'Out of stock' : 'Shto ne shporte'}
+              {(product.totalStock === 0 || product.stock === 0) ? 'Out of stock' : 'Shto ne shporte'}
             </button>
           </div>
         </div>
@@ -170,9 +174,15 @@ const BestSeller = () => {
     queryKey: ['bestsellers', 'skincare'],
     queryFn: async () => {
       try {
-        const res = await publicApi.get(`/medicines/bestsellers`);
+        const res = await publicApi.get(`/products/bestsellers?group=true`);
         const list = Array.isArray(res) ? res : (res?.result || res || []);
-        return Array.isArray(list) ? list : [];
+        const finalList = Array.isArray(list) ? list : [];
+        console.log('BestSeller API response:', res);
+        console.log('Final products list:', finalList);
+        finalList.forEach(p => {
+          console.log(`- ${p.itemName}: variants=${p.variants?.length || 0}`);
+        });
+        return finalList;
       } catch (err) {
         console.warn('BestSeller fetch failed:', err);
         return [];
@@ -259,39 +269,87 @@ const BestSeller = () => {
     });
   }, []);
 
-  const calculatePrice = useCallback((price, discount) => {
-    if (discount && discount > 0) {
-      const discountedPrice = price * (1 - discount / 100);
+  const calculatePrice = useCallback((product) => {
+    // Handle grouped products with variants - find lowest price variant
+    if (product.variants && product.variants.length > 0) {
+      // Find the variant with the lowest final price (after discount)
+      let lowestVariant = product.variants[0];
+      let lowestFinalPrice = Number(lowestVariant.price) * (1 - (Number(lowestVariant.discount) || 0) / 100);
+      
+      product.variants.forEach(variant => {
+        const variantPrice = Number(variant.price);
+        const variantDiscount = Number(variant.discount) || 0;
+        const finalPrice = variantPrice * (1 - variantDiscount / 100);
+        
+        if (finalPrice < lowestFinalPrice) {
+          lowestFinalPrice = finalPrice;
+          lowestVariant = variant;
+        }
+      });
+      
+      const variantPrice = Number(lowestVariant.price);
+      const variantDiscount = Number(lowestVariant.discount) || 0;
+      
+      if (variantDiscount > 0) {
+        const discountedPrice = variantPrice * (1 - variantDiscount / 100);
+        return {
+          original: variantPrice,
+          discounted: Math.round(discountedPrice),
+          discountPercent: variantDiscount
+        };
+      }
+      
       return {
-        original: price,
-        discounted: Math.round(discountedPrice),
-        discountPercent: discount
+        original: variantPrice,
+        discounted: null,
+        discountPercent: 0
       };
     }
-    return { original: price, discounted: null, discountPercent: 0 };
+    
+    // Handle grouped products with min/max prices (fallback)
+    if (product.minPrice !== undefined && product.maxPrice !== undefined) {
+      return {
+        original: product.minPrice,
+        discounted: null,
+        discountPercent: 0
+      };
+    }
+    
+    // Handle single products
+    if (product.discount && product.discount > 0) {
+      const discountedPrice = product.price * (1 - product.discount / 100);
+      return {
+        original: product.price,
+        discounted: Math.round(discountedPrice),
+        discountPercent: product.discount
+      };
+    }
+    return { original: product.price, discounted: null, discountPercent: 0 };
   }, []);
 
   const handleAddToCart = useCallback((e, product) => {
     e.stopPropagation(); // Prevent navigation when clicking add to cart
 
+    console.log('Add to cart clicked for:', product.itemName);
+    console.log('Product variants:', product.variants);
+    console.log('Number of variants:', product.variants?.length || 0);
+
     // Check if product has multiple variants
     if (product.variants && product.variants.length > 1) {
+      console.log('Opening variant sidebar for:', product.itemName);
       setSelectedProductForVariant(product);
-      // Pre-select if only 1 variant (though conditional above prevents this branch for length === 1, 
-      // useful if logic changes)
-      if (product.variants.length === 1) {
-        setActiveVariantForSidebar(product.variants[0]);
-      }
+      // Pre-select first variant
+      setActiveVariantForSidebar(product.variants[0]);
       setIsVariantSidebarOpen(true);
       return;
     }
 
     const variantToAdd = product.variants && product.variants.length === 1
       ? product.variants[0]
-      : { size: product.size || 'Standard', _id: undefined };
+      : { size: product.size || 'Standard', _id: product._id };
 
     const cartItem = {
-      id: product._id,
+      id: variantToAdd._id || product._id,
       name: product.itemName,
       price: product.price,
       discountedPrice: product.discount > 0
@@ -310,8 +368,12 @@ const BestSeller = () => {
     addItem(cartItem);
   }, [addItem]);
 
-  const handleProductClick = useCallback((productId) => {
+  const handleProductClick = useCallback((product) => {
     window.scrollTo({ top: 0, behavior: 'instant' });
+    // If product has variants, navigate to first variant, otherwise use product ID
+    const productId = (product.variants && product.variants.length > 0) 
+      ? product.variants[0]._id 
+      : product._id;
     navigate(`/product/${productId}`);
   }, [navigate]);
 
@@ -400,7 +462,7 @@ const BestSeller = () => {
                     >
                       {products.map((p, index) => {
                         if (!p || !p._id) return null;
-                        const pricing = calculatePrice(p.price, p.discount);
+                        const pricing = calculatePrice(p);
 
                         // Add delay class based on index for staggered animation
                         const delayClass = index < 4
@@ -416,7 +478,7 @@ const BestSeller = () => {
                               product={p}
                               pricing={pricing}
                               index={index}
-                              onProductClick={handleProductClick}
+                              onProductClick={() => handleProductClick(p)}
                               onAddToCart={handleAddToCart}
                             />
                           </div>
@@ -473,11 +535,11 @@ const BestSeller = () => {
               : null;
 
             addItem({
-              id: selectedProductForVariant._id,
+              id: activeVariantForSidebar._id, // Use variant ID as product ID
               name: selectedProductForVariant.itemName,
               price: variantPrice,
               discountedPrice: discountedPrice,
-              image: selectedProductForVariant.image,
+              image: activeVariantForSidebar.image || selectedProductForVariant.image,
               company: selectedProductForVariant.company,
               genericName: selectedProductForVariant.genericName,
               discount: variantDiscount,

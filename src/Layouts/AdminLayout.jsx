@@ -10,8 +10,26 @@ import AdminLinks from '../Pages/Admin/AdminLinks';
 import useAxiosSecure from '../hooks/useAxiosSecure';
 
 const AdminLayout = () => {
-  // const { user } = useContext(AuthContext); // Removed to prevent user profile bleeding
+  const { user } = useContext(AuthContext);
   const { privateApi } = useAxiosSecure();
+
+  // ... (keep lines 16-40 same)
+
+  // ...
+
+  <div className="p-4 sm:p-6 border-b border-amber-100 flex items-center gap-2 sm:gap-3">
+    <img
+      src={user?.photoURL || userLogo}
+      alt="Admin"
+      className="w-10 h-10 sm:w-12 sm:h-12 rounded-full shadow object-cover flex-shrink-0"
+    />
+    <div className="min-w-0 flex-1">
+      <div className="font-semibold text-amber-900 text-sm sm:text-base truncate">
+        {user?.displayName || user?.email || 'Administrator'}
+      </div>
+      {user?.email && <div className="text-xs text-amber-600 truncate">{user.email}</div>}
+    </div>
+  </div>
 
   // --- Global Notification Logic ---
   const { data: pendingOrders = [] } = useQuery({

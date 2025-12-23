@@ -1,21 +1,27 @@
-import React, { useContext, useCallback, useMemo } from 'react';
+import React, { useContext, useCallback, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import useAxiosSecure from '../../hooks/useAxiosSecure';
 import { Loader2, ShoppingBag } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { CartContext } from '../../Context/Cart/CartContext';
 import { getProductImage } from '../../utils/productImages';
+import VariantSelectionSidebar from '../../Components/Common/Products/VariantSelectionSidebar';
 
 const LatestProduct = () => {
   const { publicApi } = useAxiosSecure();
   const navigate = useNavigate();
   const { addItem } = useContext(CartContext);
+  
+  // Variant Selection State
+  const [isVariantSidebarOpen, setIsVariantSidebarOpen] = useState(false);
+  const [selectedProductForVariant, setSelectedProductForVariant] = useState(null);
+  const [activeVariantForSidebar, setActiveVariantForSidebar] = useState(null);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['latestProducts'],
     queryFn: async () => {
       try {
-        const response = await publicApi.get('/medicines/latest');
+        const response = await publicApi.get('/medicines/latest?group=true');
         const arr = Array.isArray(response) ? response : (response?.medicines || response?.result || response || []);
         return arr;
       } catch (err) {
@@ -29,19 +35,35 @@ const LatestProduct = () => {
   const latestProducts = useMemo(() => data || [], [data]);
 
   const handleAddToCart = useCallback((product) => {
+    // Check if product has multiple variants
+    if (product.variants && product.variants.length > 1) {
+      setSelectedProductForVariant(product);
+      if (product.variants.length > 0) {
+        setActiveVariantForSidebar(product.variants[0]);
+      }
+      setIsVariantSidebarOpen(true);
+      return;
+    }
+    
+    // Single variant or no variants - add directly
+    const variantToAdd = product.variants && product.variants.length === 1
+      ? product.variants[0]
+      : { size: product.size || 'Standard', _id: product._id, price: product.price, discount: product.discount || 0 };
+    
     addItem({
-      id: product._id,
+      id: variantToAdd._id || product._id,
       name: product.itemName,
-      price: product.price,
-      discountedPrice: product.discount > 0
-        ? (Number(product.price) * (1 - Number(product.discount) / 100)).toFixed(2)
+      price: Number(variantToAdd.price || product.price),
+      discountedPrice: (variantToAdd.discount || product.discount || 0) > 0
+        ? (Number(variantToAdd.price || product.price) * (1 - Number(variantToAdd.discount || product.discount || 0) / 100)).toFixed(2)
         : null,
-      image: product.image,
+      image: variantToAdd.image || product.image,
       company: product.company,
       genericName: product.genericName,
-      discount: product.discount || 0,
+      discount: variantToAdd.discount || product.discount || 0,
       seller: product.seller,
-      variants: product.variants // Pass variants to trigger global selection if needed
+      size: variantToAdd.size,
+      variantId: variantToAdd._id
     });
   }, [addItem]);
 
@@ -115,7 +137,32 @@ const LatestProduct = () => {
                 </p>
                 <div className="flex justify-between items-center gap-1">
                   <span className="text-base font-semibold text-gray-900 lux-price-number">
-                    {product.price?.toLocaleString()} ALL
+                    {(() => {
+                      // If product has variants, find the lowest price variant
+                      if (product.variants && product.variants.length > 0) {
+                        let lowestVariant = product.variants[0];
+                        let lowestFinalPrice = Number(lowestVariant.price) * (1 - (Number(lowestVariant.discount) || 0) / 100);
+                        
+                        product.variants.forEach(variant => {
+                          const variantPrice = Number(variant.price);
+                          const variantDiscount = Number(variant.discount) || 0;
+                          const finalPrice = variantPrice * (1 - variantDiscount / 100);
+                          
+                          if (finalPrice < lowestFinalPrice) {
+                            lowestFinalPrice = finalPrice;
+                            lowestVariant = variant;
+                          }
+                        });
+                        
+                        const variantPrice = Number(lowestVariant.price);
+                        const variantDiscount = Number(lowestVariant.discount) || 0;
+                        const displayPrice = variantDiscount > 0 
+                          ? variantPrice * (1 - variantDiscount / 100)
+                          : variantPrice;
+                        return displayPrice.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+                      }
+                      return (product.price || 0).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+                    })()} ALL
                   </span>
                   <button
                     onClick={() => handleAddToCart(product)}
@@ -139,6 +186,42 @@ const LatestProduct = () => {
           </button>
         </div>
       </div>
+      
+      <VariantSelectionSidebar
+        isOpen={isVariantSidebarOpen}
+        onClose={() => {
+          setIsVariantSidebarOpen(false);
+          setSelectedProductForVariant(null);
+          setActiveVariantForSidebar(null);
+        }}
+        product={selectedProductForVariant}
+        selectedVariant={activeVariantForSidebar}
+        onSelectVariant={setActiveVariantForSidebar}
+        onAddToCart={() => {
+          if (selectedProductForVariant && activeVariantForSidebar) {
+            const variantPrice = Number(activeVariantForSidebar.price);
+            const variantDiscount = Number(activeVariantForSidebar.discount || 0);
+            const discountedPrice = variantDiscount > 0
+              ? (variantPrice * (1 - variantDiscount / 100)).toFixed(2)
+              : null;
+
+            addItem({
+              id: activeVariantForSidebar._id,
+              name: selectedProductForVariant.itemName,
+              price: variantPrice,
+              discountedPrice: discountedPrice,
+              image: activeVariantForSidebar.image || selectedProductForVariant.image,
+              company: selectedProductForVariant.company,
+              genericName: selectedProductForVariant.genericName,
+              discount: variantDiscount,
+              seller: selectedProductForVariant.seller,
+              size: activeVariantForSidebar.size,
+              variantId: activeVariantForSidebar._id
+            });
+          }
+          setIsVariantSidebarOpen(false);
+        }}
+      />
     </section>
   );
 };

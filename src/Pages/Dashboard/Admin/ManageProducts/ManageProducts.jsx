@@ -17,14 +17,14 @@ const ManageProducts = () => {
     const { data: products = [], isLoading } = useQuery({
         queryKey: ['admin-products'],
         queryFn: async () => {
-            const res = await publicApi.get('/medicines');
+            const res = await publicApi.get('/products');
             return res.result || res;
         }
     });
 
     const deleteMutation = useMutation({
         mutationFn: async (id) => {
-            await privateApi.delete(`/medicines/${id}`);
+            await privateApi.delete(`/products/${id}`);
         },
         onSuccess: () => {
             queryClient.invalidateQueries(['admin-products']);
@@ -107,7 +107,8 @@ const ManageProducts = () => {
                                     </td>
                                     <td className="p-4">
                                         <div className="font-medium text-gray-800">{product.itemName}</div>
-                                        <div className="text-xs text-gray-500">{product.company}</div>
+                                        <div className="text-xs text-gray-500">{product.size || 'Standard'}</div>
+                                        <div className="text-xs text-gray-400">{product.company}</div>
                                     </td>
                                     <td className="p-4">
                                         <span className="bg-amber-100 text-amber-800 text-xs px-2 py-1 rounded-full">{product.categoryName}</span>
@@ -115,24 +116,11 @@ const ManageProducts = () => {
                                     </td>
                                     <td className="p-4 font-medium text-amber-700">{product.price} ALL</td>
                                     <td className="p-4">
-                                        {product.variants && product.variants.length > 0 ? (
-                                            <div className="space-y-1">
-                                                {product.variants.map((variant, idx) => (
-                                                    <div key={idx} className={`flex flex-col text-xs px-2 py-1 rounded-md ${variant.stock <= 10 ? 'bg-red-50 text-red-700 border border-red-100' : 'bg-gray-50 text-gray-600'}`}>
-                                                        <div className="flex justify-between items-center w-full">
-                                                            <span className="font-medium">{variant.size}</span>
-                                                            <span className="font-bold">{variant.stock}</span>
-                                                        </div>
-                                                        {variant.stock <= 10 && (
-                                                            <span className="text-[10px] font-bold uppercase tracking-wider mt-0.5">Low on stock</span>
-                                                        )}
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        ) : (
-                                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${product.stock <= 10 ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
-                                                {product.stock} units
-                                            </span>
+                                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${product.stock <= 10 ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
+                                            {product.size || 'Standard'}: {product.stock} units
+                                        </span>
+                                        {product.stock <= 10 && (
+                                            <div className="text-[10px] font-bold uppercase tracking-wider mt-1 text-red-600">Low on stock</div>
                                         )}
                                     </td>
                                     <td className="p-4 text-right">

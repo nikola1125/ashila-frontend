@@ -26,9 +26,10 @@ const Shop = () => {
   const [showFilters, setShowFilters] = useState(false); // Hidden on mobile by default, visible on desktop
 
   // Get all medicines - Moved to top to be available for filterOptions
+  // Use group=true to group variants together
   const { data, isLoading, error } = useQuery({
     queryKey: ['medicines'],
-    queryFn: () => publicApi.get('/medicines'),
+    queryFn: () => publicApi.get('/medicines?group=true'),
     staleTime: 2 * 60 * 1000, // 2 minutes - will use default refetchOnMount
   });
 
@@ -820,8 +821,11 @@ const Shop = () => {
                       handleItemsPerPageChange={handleItemsPerPageChange}
                       onOpenVariantSidebar={(product) => {
                         setSelectedProductForVariant(product);
+                        // Pre-select first variant if available
                         if (product.variants && product.variants.length > 0) {
                           setActiveVariantForSidebar(product.variants[0]);
+                        } else {
+                          setActiveVariantForSidebar(null);
                         }
                         setIsVariantSidebarOpen(true);
                       }}
@@ -853,11 +857,11 @@ const Shop = () => {
               : null;
 
             addItem({
-              id: selectedProductForVariant._id,
+              id: activeVariantForSidebar._id, // Use variant ID as the product ID
               name: selectedProductForVariant.itemName,
               price: variantPrice,
               discountedPrice: discountedPrice,
-              image: selectedProductForVariant.image,
+              image: activeVariantForSidebar.image || selectedProductForVariant.image,
               company: selectedProductForVariant.company,
               genericName: selectedProductForVariant.genericName,
               discount: variantDiscount,
