@@ -64,6 +64,7 @@ const Checkout = () => {
         image: item.image,
         seller: item.seller || null,
         sellerEmail: item.sellerEmail || null,
+        selectedSize: item.selectedSize || null,
       };
     });
   }, [cartItems]);

@@ -43,7 +43,12 @@ const Inventory = () => {
     });
 
     const lowStockThreshold = 10;
-    const lowStockProducts = products.filter(p => p.stock <= lowStockThreshold);
+    const lowStockProducts = products.filter(p => {
+        if (p.variants && p.variants.length > 0) {
+            return p.variants.some(v => (v.stock || 0) <= lowStockThreshold);
+        }
+        return (p.stock || 0) <= lowStockThreshold;
+    });
 
     const displayProducts = filter === 'low' ? lowStockProducts : products;
 
@@ -128,26 +133,53 @@ const Inventory = () => {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-amber-50 text-sm">
-                            {displayProducts.map(product => (
-                                <tr key={product._id} className="hover:bg-amber-50/50">
-                                    <td className="p-4 font-medium text-gray-800 flex items-center gap-3">
-                                        <img src={product.image} className="w-8 h-8 rounded object-cover bg-gray-100" />
-                                        {product.itemName}
-                                    </td>
-                                    <td className="p-4 text-gray-500">{product.categoryName}</td>
-                                    <td className="p-4 text-gray-400 font-mono text-xs">{product._id.slice(-6).toUpperCase()}</td>
-                                    <td className="p-4 text-center">
-                                        {product.stock === 0 ? (
-                                            <span className="inline-block px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full font-semibold">Out of Stock</span>
-                                        ) : product.stock <= lowStockThreshold ? (
-                                            <span className="inline-block px-2 py-1 bg-red-100 text-red-600 text-xs rounded-full font-semibold animate-pulse">Low Stock</span>
-                                        ) : (
-                                            <span className="inline-block px-2 py-1 bg-green-100 text-green-600 text-xs rounded-full font-semibold">In Stock</span>
-                                        )}
-                                    </td>
-                                    <td className="p-4 text-right font-mono font-bold text-gray-700">{product.stock}</td>
-                                </tr>
-                            ))}
+                            {displayProducts.map(product => {
+                                const hasVariants = product.variants && product.variants.length > 0;
+                                let isLowStock = false;
+                                let isOutOfStock = false;
+
+                                if (hasVariants) {
+                                    isLowStock = product.variants.some(v => (v.stock || 0) <= lowStockThreshold);
+                                    isOutOfStock = product.variants.every(v => (v.stock || 0) === 0);
+                                } else {
+                                    isLowStock = (product.stock || 0) <= lowStockThreshold;
+                                    isOutOfStock = (product.stock || 0) === 0;
+                                }
+
+                                return (
+                                    <tr key={product._id} className="hover:bg-amber-50/50">
+                                        <td className="p-4 font-medium text-gray-800 flex items-center gap-3">
+                                            <img src={product.image} className="w-8 h-8 rounded object-cover bg-gray-100" />
+                                            {product.itemName}
+                                        </td>
+                                        <td className="p-4 text-gray-500">{product.categoryName}</td>
+                                        <td className="p-4 text-gray-400 font-mono text-xs">{product._id.slice(-6).toUpperCase()}</td>
+                                        <td className="p-4 text-center">
+                                            {isOutOfStock ? (
+                                                <span className="inline-block px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full font-semibold">Out of Stock</span>
+                                            ) : isLowStock ? (
+                                                <span className="inline-block px-2 py-1 bg-red-100 text-red-600 text-xs rounded-full font-semibold animate-pulse">Low Stock</span>
+                                            ) : (
+                                                <span className="inline-block px-2 py-1 bg-green-100 text-green-600 text-xs rounded-full font-semibold">In Stock</span>
+                                            )}
+                                        </td>
+                                        <td className="p-4 text-right font-mono font-bold text-gray-700">
+                                            {hasVariants ? (
+                                                <div className="flex flex-col gap-1 items-end">
+                                                    {product.variants.map((v, idx) => (
+                                                        <div key={idx} className={`text-xs ${(v.stock || 0) <= lowStockThreshold ? 'text-red-600 bg-red-50 px-2 py-0.5 rounded' : 'text-gray-600'}`}>
+                                                            <span className="font-medium mr-1">{v.size}:</span>
+                                                            <span className={(v.stock || 0) <= lowStockThreshold ? 'font-bold' : ''}>{v.stock || 0}</span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                <span>{product.stock || 0}</span>
+                                            )}
+                                        </td>
+                                    </tr>
+                                );
+                            })}
                         </tbody>
                     </table>
                 </div>
