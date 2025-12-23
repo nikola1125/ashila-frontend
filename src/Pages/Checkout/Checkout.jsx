@@ -229,8 +229,8 @@ const Checkout = () => {
               ) : (
                 <div className="space-y-4">
                   <div className="space-y-3">
-                    {cartItems.map((item) => (
-                      <div key={`${item.id}-${item.selectedSize || 'nosize'}`} className="flex gap-3 border border-gray-100 p-3 bg-gray-50">
+                    {cartItems.map((item, index) => (
+                      <div key={`${item.id}-${item.selectedSize || 'nosize'}-${index}`} className="flex gap-3 border border-gray-100 p-3 bg-gray-50">
                         <div className="w-16 h-16 bg-white border border-gray-200 overflow-hidden shrink-0">
                           <img
                             src={getProductImage(item.image, item.id)}
