@@ -34,6 +34,7 @@ const Checkout = () => {
   const [postalCode, setPostalCode] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [loading, setLoading] = useState(false);
+  const [insufficientStockItems, setInsufficientStockItems] = useState([]);
 
   // Fetch Global Settings for Free Delivery
   const { data: settings } = useQuery({
@@ -113,7 +114,15 @@ const Checkout = () => {
       navigate('/', { replace: true });
     } catch (err) {
       console.error(err);
-      toast.error('Porosia dështoi. Ju lutem provoni përsëri.');
+      
+      // Check if error contains insufficient stock items
+      if (err.response?.data?.insufficientStockItems && Array.isArray(err.response.data.insufficientStockItems)) {
+        setInsufficientStockItems(err.response.data.insufficientStockItems);
+        toast.error('Nuk ka mjaftueshem stok për disa produkte. Shikoni tabelën më poshtë.');
+      } else {
+        toast.error(err.response?.data?.message || 'Porosia dështoi. Ju lutem provoni përsëri.');
+        setInsufficientStockItems([]);
+      }
     } finally {
       setLoading(false);
     }
@@ -219,6 +228,35 @@ const Checkout = () => {
                   {loading ? 'Duke dërguar...' : 'Konfirmo porosinë (Cash on delivery)'}
                 </button>
               </form>
+
+              {/* Insufficient Stock Table */}
+              {insufficientStockItems.length > 0 && (
+                <div className="mt-6 border border-red-300 bg-red-50 p-4 rounded">
+                  <h3 className="text-lg font-bold text-red-800 mb-3">Nuk ka mjaftueshem</h3>
+                  <div className="overflow-x-auto">
+                    <table className="w-full border-collapse">
+                      <thead>
+                        <tr className="bg-red-100 border-b border-red-300">
+                          <th className="text-left py-2 px-3 text-sm font-semibold text-red-900">Produkti</th>
+                          <th className="text-center py-2 px-3 text-sm font-semibold text-red-900">Madhësia</th>
+                          <th className="text-center py-2 px-3 text-sm font-semibold text-red-900">Kërkuar</th>
+                          <th className="text-center py-2 px-3 text-sm font-semibold text-red-900">Në stok</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {insufficientStockItems.map((item, index) => (
+                          <tr key={index} className="border-b border-red-200">
+                            <td className="py-2 px-3 text-sm text-red-800">{item.itemName}</td>
+                            <td className="py-2 px-3 text-sm text-center text-red-800">{item.selectedSize || 'N/A'}</td>
+                            <td className="py-2 px-3 text-sm text-center text-red-800 font-semibold">{item.requestedQuantity}</td>
+                            <td className="py-2 px-3 text-sm text-center text-red-800 font-semibold">{item.availableStock}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Right: Cart summary */}

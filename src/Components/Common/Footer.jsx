@@ -42,7 +42,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 md:gap-8 mb-6 md:mb-8">
           {/* Logo - First on mobile, last on desktop */}
           <div className="flex items-center justify-center md:justify-start md:order-4">
-            <div className="scale-125 md:scale-100">
+            <div className="scale-125 md:scale-125 lg:scale-150">
               <Logo />
             </div>
           </div>
@@ -56,22 +56,22 @@ const Footer = () => {
           </div>
 
           {/* Customer Care */}
-          <div className="md:order-2 mt-6 md:mt-0 md:ml-4">
-            <h3 className="text-sm font-semibold text-[#A67856] mb-3 md:mb-4 uppercase tracking-wide">Kujdesi ndaj Klientit</h3>
-            <div className="space-y-1.5">
+          <div className="md:order-2 mt-6 md:mt-0">
+            <h3 className="text-sm font-semibold text-[#A67856] mb-4 md:mb-5 uppercase tracking-wide">Kujdesi ndaj Klientit</h3>
+            <div className="space-y-3 md:space-y-3.5">
               <a 
                 href="mailto:farmaciashila11@gmail.com" 
-                className="block text-sm text-[#A67856] hover:text-[#8B5A3C] transition-colors underline break-all text-left leading-normal"
+                className="block text-sm text-[#A67856] hover:text-[#8B5A3C] transition-colors underline break-all text-left leading-normal no-underline md:underline"
               >
                 farmaciashila11@gmail.com
               </a>
               
               {/* Phone with dropdown */}
-              <div className="relative block -mt-5" ref={phoneMenuRef}>
+              <div className="relative block" ref={phoneMenuRef}>
                 <button
                   type="button"
                   onClick={() => setPhoneMenuOpen(!phoneMenuOpen)}
-                  className="block text-sm text-[#A67856] hover:text-[#8B5A3C] transition-colors underline text-left w-full p-0 m-0 bg-transparent border-0 appearance-none cursor-pointer leading-normal font-normal"
+                  className="block text-sm text-[#A67856] hover:text-[#8B5A3C] transition-colors underline text-left w-full p-0 m-0 bg-transparent border-0 appearance-none cursor-pointer leading-normal font-normal no-underline md:underline"
                   style={{ textAlign: 'left', padding: 0, margin: 0, lineHeight: 'normal' }}
                 >
                   {phoneDisplay}

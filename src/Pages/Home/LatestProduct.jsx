@@ -63,7 +63,8 @@ const LatestProduct = () => {
       discount: variantToAdd.discount || product.discount || 0,
       seller: product.seller,
       size: variantToAdd.size,
-      variantId: variantToAdd._id
+      variantId: variantToAdd._id,
+      stock: Number(variantToAdd.stock) || Number(product.stock) || 0
     });
   }, [addItem]);
 
@@ -216,7 +217,8 @@ const LatestProduct = () => {
               discount: variantDiscount,
               seller: selectedProductForVariant.seller,
               size: activeVariantForSidebar.size,
-              variantId: activeVariantForSidebar._id
+              variantId: activeVariantForSidebar._id,
+              stock: Number(activeVariantForSidebar.stock) || 0
             });
           }
           setIsVariantSidebarOpen(false);

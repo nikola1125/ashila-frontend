@@ -108,9 +108,13 @@ const Cart = () => {
                   <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-start">
                     <div className="flex items-center gap-2">
                       <button
-                        onClick={() => updateQuantity(item.cartItemId || item.id, item.quantity - 1)}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          updateQuantity(item.cartItemId || item.id, item.quantity - 1);
+                        }}
                         disabled={item.quantity <= 1}
-                        className="p-2 sm:p-2.5 bg-[#faf9f6] hover:bg-[#946259] disabled:opacity-40 text-[#946259] transition-all border-2 border-[#946259] min-w-[44px] min-h-[44px] flex items-center justify-center text-lg leading-none"
+                        className="p-2 sm:p-2.5 bg-[#faf9f6] hover:bg-[#946259] disabled:opacity-40 disabled:cursor-not-allowed text-[#946259] transition-all border-2 border-[#946259] min-w-[44px] min-h-[44px] flex items-center justify-center text-lg leading-none"
                         aria-label="Decrease quantity"
                       >
                         -
@@ -119,8 +123,13 @@ const Cart = () => {
                         {item.quantity}
                       </span>
                       <button
-                        onClick={() => updateQuantity(item.cartItemId || item.id, item.quantity + 1)}
-                        className="p-2 sm:p-2.5 bg-[#faf9f6] hover:bg-[#946259] text-[#946259] transition-all border-2 border-[#946259] min-w-[44px] min-h-[44px] flex items-center justify-center text-lg leading-none"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          updateQuantity(item.cartItemId || item.id, item.quantity + 1);
+                        }}
+                        disabled={item.stock !== undefined && item.stock !== null && item.quantity >= Number(item.stock)}
+                        className="p-2 sm:p-2.5 bg-[#faf9f6] hover:bg-[#946259] disabled:opacity-40 disabled:cursor-not-allowed text-[#946259] transition-all border-2 border-[#946259] min-w-[44px] min-h-[44px] flex items-center justify-center text-lg leading-none"
                         aria-label="Increase quantity"
                       >
                         +

@@ -261,7 +261,8 @@ const ProductDetail = () => {
         discount: variantToAdd.discount || currentDiscount,
         seller: product.seller,
         size: variantToAdd.size,
-        variantId: variantToAdd._id
+        variantId: variantToAdd._id,
+        stock: Number(variantToAdd.stock) || Number(product.stock) || 0
       });
     }
     return true;
@@ -546,16 +547,18 @@ const ProductDetail = () => {
                                   e.target.src = getProductImage(null, relatedProduct._id || index);
                                 }}
                               />
-                              {relatedProduct.discount > 0 && (
-                                <div className="absolute top-2.5 right-2.5 bg-red-500 text-white px-2.5 py-1.5 text-sm font-bold">
-                                  Save {Math.round(relatedProduct.discount)}%
-                                </div>
-                              )}
-                              {relatedProduct.stock === 0 && (
-                                <div className="absolute top-2.5 left-2.5 bg-red-500 text-white px-2.5 py-1.5 text-sm font-bold">
-                                  Sold Out
-                                </div>
-                              )}
+                              <div className="absolute top-2.5 right-2.5 flex flex-col gap-1 items-end z-10">
+                                {relatedProduct.discount > 0 && relatedProduct.stock > 0 && (
+                                  <div className="bg-red-500 text-white px-2.5 py-1.5 text-sm font-bold">
+                                    Save {Math.round(relatedProduct.discount)}%
+                                  </div>
+                                )}
+                                {relatedProduct.stock === 0 && (
+                                  <div className="bg-red-500 text-white px-2.5 py-1.5 text-sm font-bold">
+                                    Sold Out
+                                  </div>
+                                )}
+                              </div>
                             </div>
 
                             <div className="px-1.5 md:px-2.5 pt-1.5 md:pt-4 flex flex-col flex-grow">

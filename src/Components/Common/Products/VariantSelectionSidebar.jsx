@@ -145,9 +145,9 @@ const VariantSelectionSidebar = ({
                                                 {/* Stock Status */}
                                                 <div className="mt-1 text-xs">
                                                     {Number(variant.stock) > 0 ? (
-                                                        <span className="text-green-600 font-medium">In Stock</span>
+                                                        <span className="text-green-600 font-medium">Në stok</span>
                                                     ) : (
-                                                        <span className="text-red-500 font-medium">Out of Stock</span>
+                                                        <span className="text-red-500 font-medium">Sold Out</span>
                                                     )}
                                                 </div>
                                             </div>
@@ -182,7 +182,7 @@ const VariantSelectionSidebar = ({
                                     }`}
                             >
                                 <ShoppingBag size={20} />
-                                {!selectedVariant ? 'Select a size' : Number(selectedVariant.stock) <= 0 ? 'Out of Stock' : 'Shto ne shporte'}
+                                {!selectedVariant ? 'Select a size' : Number(selectedVariant.stock) <= 0 ? 'Sold Out' : 'Shto ne shporte'}
                             </button>
                         </div>
                     </motion.div>

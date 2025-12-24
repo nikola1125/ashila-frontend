@@ -74,26 +74,28 @@ const ProductCard = React.memo(({ product, pricing, index, onProductClick, onAdd
             e.target.src = getProductImage(null, product._id || index);
           }}
         />
-        {pricing.discountPercent > 0 && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: index * 0.1 + 0.3 }}
-            className="absolute top-1.5 md:top-2.5 right-1.5 md:right-2.5 bg-red-500 text-white px-1.5 md:px-2.5 py-1 md:py-1.5 text-xs md:text-sm font-bold"
-          >
-            Save <span className="lux-price-number">{Math.round(pricing.discountPercent)}%</span>
-          </motion.div>
-        )}
-        {(product.totalStock === 0 || product.stock === 0) && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: index * 0.1 + 0.3 }}
-            className="absolute top-1.5 md:top-2.5 left-1.5 md:left-2.5 bg-red-500 text-white px-1.5 md:px-2.5 py-1 md:py-1.5 text-xs md:text-sm font-bold"
-          >
-            Sold Out
-          </motion.div>
-        )}
+        <div className="absolute top-1.5 md:top-2.5 right-1.5 md:right-2.5 flex flex-col gap-1 items-end z-10">
+          {pricing.discountPercent > 0 && (product.totalStock > 0 && product.stock > 0) && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: index * 0.1 + 0.3 }}
+              className="bg-red-500 text-white px-1.5 md:px-2.5 py-1 md:py-1.5 text-xs md:text-sm font-bold"
+            >
+              Save <span className="lux-price-number">{Math.round(pricing.discountPercent)}%</span>
+            </motion.div>
+          )}
+          {(product.totalStock === 0 || product.stock === 0) && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: index * 0.1 + 0.3 }}
+              className="bg-red-500 text-white px-1.5 md:px-2.5 py-1 md:py-1.5 text-xs md:text-sm font-bold"
+            >
+              Sold Out
+            </motion.div>
+          )}
+        </div>
       </motion.div>
 
       {/* Product Info */}
@@ -145,7 +147,7 @@ const ProductCard = React.memo(({ product, pricing, index, onProductClick, onAdd
                 } transition-colors duration-150`}
             >
               <ShoppingBag className="w-3.5 h-3.5 md:w-4 md:h-4" />
-              {(product.totalStock === 0 || product.stock === 0) ? 'Out of stock' : 'Shto ne shporte'}
+              {(product.totalStock === 0 || product.stock === 0) ? 'Sold Out' : 'Shto ne shporte'}
             </button>
           </div>
         </div>
@@ -359,11 +361,11 @@ const BestSeller = () => {
       company: product.company,
       genericName: product.genericName,
       discount: product.discount || 0,
-
       seller: product.seller,
       variants: product.variants,
       size: variantToAdd.size,
-      variantId: variantToAdd._id
+      variantId: variantToAdd._id,
+      stock: Number(variantToAdd.stock) || Number(product.stock) || 0
     };
     addItem(cartItem);
   }, [addItem]);

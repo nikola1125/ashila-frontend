@@ -29,10 +29,21 @@ const cartReducer = (state, action) => {
       let updatedItems;
 
       if (existingItemIndex > -1) {
-        // Increment quantity for existing item
+        // Increment quantity for existing item, but check stock first (only if stock is provided)
+        const existingItem = state.items[existingItemIndex];
+        const stock = action.payload.stock !== undefined && action.payload.stock !== null 
+          ? Number(action.payload.stock) 
+          : (existingItem.stock !== undefined && existingItem.stock !== null ? Number(existingItem.stock) : null);
+        const newQuantity = existingItem.quantity + 1;
+        
+        // Don't increment if it would exceed stock (only if stock is explicitly provided)
+        if (stock !== null && !isNaN(stock) && newQuantity > stock) {
+          return state; // Return unchanged state
+        }
+        
         updatedItems = state.items.map((item, index) =>
           index === existingItemIndex
-            ? { ...item, quantity: item.quantity + 1 }
+            ? { ...item, quantity: newQuantity, stock: stock !== null ? stock : item.stock } // Update stock too if provided
             : item
         );
       } else {
@@ -40,7 +51,8 @@ const cartReducer = (state, action) => {
         const newItem = {
           ...action.payload,
           cartItemId: newItemId,
-          quantity: 1
+          quantity: 1,
+          stock: action.payload.stock !== undefined && action.payload.stock !== null ? Number(action.payload.stock) : undefined // Include stock if available
         };
         updatedItems = [...state.items, newItem];
       }
@@ -94,11 +106,24 @@ const cartReducer = (state, action) => {
     }
 
     case 'UPDATE_QUANTITY': {
-      const updatedItems = state.items.map((item) =>
-        (item.cartItemId || item.id) === action.payload.id
-          ? { ...item, quantity: action.payload.quantity }
-          : item
-      );
+      const updatedItems = state.items.map((item) => {
+        if ((item.cartItemId || item.id) === action.payload.id) {
+          const requestedQuantity = action.payload.quantity;
+          
+          // Only limit quantity if stock is explicitly provided and we're increasing
+          if (item.stock !== undefined && item.stock !== null && requestedQuantity > item.quantity) {
+            const stock = Number(item.stock);
+            if (!isNaN(stock) && stock > 0) {
+              // Don't allow quantity to exceed stock when increasing
+              const newQuantity = Math.min(requestedQuantity, stock);
+              return { ...item, quantity: newQuantity };
+            }
+          }
+          // Allow the quantity update (for decreases or when no stock info)
+          return { ...item, quantity: requestedQuantity };
+        }
+        return item;
+      });
 
       const updatedTotalPrice = updatedItems.reduce(
         (total, item) => total + Number(item.price) * item.quantity,
@@ -192,12 +217,40 @@ export const CartProvider = ({ children }) => {
       return;
     }
 
+    // Check stock before adding to cart (only if stock is explicitly provided)
+    // If stock is undefined/null, allow addition (for backward compatibility)
+    if (item.stock !== undefined && item.stock !== null) {
+      const stock = Number(item.stock);
+      if (isNaN(stock) || stock <= 0) {
+        // Item is out of stock, don't add to cart
+        return;
+      }
+    }
+
     // Check for product with variants without a selected variant
     // We modify this to check if 'variants' array exists and has ANY items (> 0), AND 'variantId' is missing
     if (item.variants && item.variants.length > 0 && !item.variantId) {
       setCurrentProductForVariant(item);
       setVariantModalOpen(true);
       return;
+    }
+
+    // Check if adding this item would exceed available stock (only if stock is provided)
+    const stock = item.stock !== undefined && item.stock !== null ? Number(item.stock) : null;
+    if (stock !== null && !isNaN(stock)) {
+      const existingItemIndex = state.items.findIndex(
+        (cartItem) => (cartItem.cartItemId || cartItem.id) === (item.variantId ? `${item.id}-${item.variantId}` : item.id)
+      );
+
+      if (existingItemIndex > -1) {
+        const existingItem = state.items[existingItemIndex];
+        const existingStock = existingItem.stock !== undefined && existingItem.stock !== null ? Number(existingItem.stock) : stock;
+        const newQuantity = existingItem.quantity + 1;
+        if (existingStock !== null && !isNaN(existingStock) && newQuantity > existingStock) {
+          // Would exceed stock, don't add
+          return;
+        }
+      }
     }
 
     // Default behavior for single variant or already selected variant
@@ -242,6 +295,20 @@ export const CartProvider = ({ children }) => {
   const handleVariantSelect = (variant) => {
     if (!currentProductForVariant) return;
 
+    // Check stock before adding (only if stock is explicitly provided)
+    // If stock is undefined/null, allow addition (for backward compatibility)
+    if (variant.stock !== undefined && variant.stock !== null) {
+      const stock = Number(variant.stock);
+      if (isNaN(stock) || stock <= 0) {
+        // Variant is out of stock, don't add to cart
+        setVariantModalOpen(false);
+        setTimeout(() => {
+          setCurrentProductForVariant(null);
+        }, 400);
+        return;
+      }
+    }
+
     // Construct the new item with variant details
     const price = Number(variant.price);
     const discount = Number(variant.discount || 0);
@@ -255,6 +322,7 @@ export const CartProvider = ({ children }) => {
       size: variant.size,
       variantId: variant._id,
       discount: discount,
+      stock: variant.stock !== undefined && variant.stock !== null ? Number(variant.stock) : undefined, // Include stock in cart item if available
       seller: currentProductForVariant.seller,
       sellerEmail: currentProductForVariant.sellerEmail,
       description: currentProductForVariant.description,

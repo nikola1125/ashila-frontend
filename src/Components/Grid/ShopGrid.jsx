@@ -49,22 +49,20 @@ const ShopGrid = ({
                   }}
                 />
 
-                {/* Discount Badge - Top Right */}
-                {medicine.discount > 0 && (
-                  <div className="absolute top-2.5 right-2.5 bg-red-500 text-white px-2.5 py-1.5 text-sm font-bold">
-                    Save {Math.round(medicine.discount)}%
-                  </div>
-                )}
-
-                {/* Badges Container - Top Left */}
-                <div className="absolute top-2.5 left-2.5 flex flex-col gap-1 items-start z-10">
+                {/* Badges Container - Top Right */}
+                <div className="absolute top-2.5 right-2.5 flex flex-col gap-1 items-end z-10">
+                  {/* Discount Badge */}
+                  {medicine.discount > 0 && (medicine.totalStock > 0 && medicine.stock > 0) && (
+                    <div className="bg-red-500 text-white px-2.5 py-1.5 text-sm font-bold shadow-sm">
+                      Save {Math.round(medicine.discount)}%
+                    </div>
+                  )}
                   {/* Sold Out Badge */}
                   {(medicine.totalStock === 0 || medicine.stock === 0) && (
                     <div className="bg-red-500 text-white px-2.5 py-1.5 text-sm font-bold shadow-sm">
                       Sold Out
                     </div>
                   )}
-
                 </div>
               </div>
 
@@ -169,7 +167,8 @@ const ShopGrid = ({
                             discount: variantDiscount,
                             seller: medicine.seller,
                             size: variant.size,
-                            variantId: variant._id
+                            variantId: variant._id,
+                            stock: Number(variant.stock) || 0
                           });
                         } else {
                           // No variants - add directly
@@ -187,7 +186,8 @@ const ShopGrid = ({
                             discount: medicine.discount || 0,
                             seller: medicine.seller,
                             size: medicine.size || 'Standard',
-                            variantId: medicine._id
+                            variantId: medicine._id,
+                            stock: Number(medicine.stock) || 0
                           });
                         }
                       }}
@@ -196,7 +196,7 @@ const ShopGrid = ({
                         : 'bg-[#8B6F47]/70 border-[#8B6F47]/70 text-white hover:bg-[#7A5F3A]/80 hover:border-[#7A5F3A]/80'
                         } transition-colors duration-150`}
                     >
-                      {(medicine.totalStock === 0 && medicine.stock === 0) ? 'Out of stock' : 'Shto ne shporte'}
+                      {(medicine.totalStock === 0 && medicine.stock === 0) ? 'Sold Out' : 'Shto ne shporte'}
                     </button>
                   </div>
                 </div>

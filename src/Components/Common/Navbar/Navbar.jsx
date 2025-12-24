@@ -392,8 +392,8 @@ const Navbar = () => {
             }`}
         >
           {/* Navbar content: fixed height 64px mobile, 80px desktop */}
-          <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 xl:px-10">
-            <div className="h-[64px] lg:h-[80px] flex items-center gap-1 lg:gap-8 lg:justify-start">
+          <div className="w-full mx-auto px-2 sm:px-4 lg:px-4 xl:px-6">
+            <div className="h-[64px] lg:h-[80px] flex items-center gap-1 lg:gap-2 lg:justify-start">
               {/* Mobile: left menu button */}
               <button
                 onClick={(e) => {
@@ -438,10 +438,10 @@ const Navbar = () => {
               </div>
 
               {/* Desktop: main nav + desktop search/cart */}
-              <div className="hidden lg:flex items-center flex-1">
+              <div className="hidden lg:flex items-center flex-1 ml-2">
                 <div className="w-full flex items-center">
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-start flex-wrap xl:flex-nowrap gap-2 xl:gap-4">
+                    <div className="flex items-center justify-center gap-1.5 xl:gap-2">
                       <NavLink
                         to="/"
                         onClick={() => {
@@ -449,7 +449,7 @@ const Navbar = () => {
                             window.scrollTo({ top: 0, behavior: 'instant' });
                           }
                         }}
-                        className="font-medium transition-colors text-[10px] xl:text-xs uppercase tracking-wide whitespace-nowrap py-1 text-[#5A3F2A] hover:text-[#4A3320]"
+                        className="font-medium transition-colors text-[9px] xl:text-[10px] uppercase tracking-wide whitespace-nowrap py-1 text-[#5A3F2A] hover:text-[#4A3320]"
                       >
                         Kreu
                       </NavLink>
@@ -476,114 +476,114 @@ const Navbar = () => {
                           >
                             <button
                               onClick={() => navigate(defaultPath)}
-                              className="flex items-center gap-1 font-medium transition-colors text-[10px] xl:text-xs uppercase tracking-wide whitespace-nowrap py-1 text-[#5A3F2A] hover:text-[#4A3320]"
+                              className="flex items-center gap-0.5 font-medium transition-colors text-[9px] xl:text-[10px] uppercase tracking-wide whitespace-nowrap py-1 text-[#5A3F2A] hover:text-[#4A3320]"
                             >
                               {category.label}
-                              <ChevronDown className="w-3 h-3" />
+                              <ChevronDown className="w-2.5 h-2.5" />
                             </button>
 
-                            {category.groups && category.groups.length > 0 && (
-                              <div
-                                className={`absolute left-0 mt-2 bg-white rounded-none shadow-md border border-gray-200 py-0 z-[120] transform transition-all duration-200 ${openCategoryId === category.id ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2'
-                                  }`}
-                                onMouseEnter={() => {
-                                  cancelDesktopMenuClose();
-                                  setOpenCategoryId(category.id);
-                                }}
-                                onMouseLeave={() => {
-                                  scheduleDesktopMenuClose();
-                                }}
-                              >
-                                <div className="relative">
-                                  <div className="w-[260px]">
-                                    {category.groups.map((group) => (
-                                      <div key={group.id} className="relative">
-                                        <button
-                                          onMouseEnter={() => {
-                                            if (group.subitems && group.subitems.length > 0) {
-                                              setDesktopOpenGroupId(group.id);
-                                            } else {
-                                              setDesktopOpenGroupId(null);
-                                            }
-                                          }}
-                                          onClick={() => {
-                                            if (group.path) {
-                                              navigate(group.path);
-                                              setOpenCategoryId(null);
-                                              setDesktopOpenGroupId(null);
-                                            } else if (!group.subitems || group.subitems.length === 0) {
-                                              setOpenCategoryId(null);
-                                              setDesktopOpenGroupId(null);
-                                            }
-                                          }}
-                                          className={`flex items-center justify-between w-full text-left text-[11px] py-2 px-5 leading-tight transition-colors duration-150 ${desktopOpenGroupId === group.id
-                                            ? 'bg-gray-50 text-[#5A3F2A]'
-                                            : 'text-[#6B4B3A] hover:bg-gray-50 hover:text-[#5A3F2A]'
+                        {category.groups && category.groups.length > 0 && (
+                          <div
+                            className={`absolute left-0 mt-2 bg-white rounded-none shadow-md border border-gray-200 py-0 z-[120] transform transition-all duration-200 ${openCategoryId === category.id ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2'
+                              }`}
+                            onMouseEnter={() => {
+                              cancelDesktopMenuClose();
+                              setOpenCategoryId(category.id);
+                            }}
+                            onMouseLeave={() => {
+                              scheduleDesktopMenuClose();
+                            }}
+                          >
+                            <div className="relative">
+                              <div className="w-[260px]">
+                                {category.groups.map((group) => (
+                                  <div key={group.id} className="relative">
+                                    <button
+                                      onMouseEnter={() => {
+                                        if (group.subitems && group.subitems.length > 0) {
+                                          setDesktopOpenGroupId(group.id);
+                                        } else {
+                                          setDesktopOpenGroupId(null);
+                                        }
+                                      }}
+                                      onClick={() => {
+                                        if (group.path) {
+                                          navigate(group.path);
+                                          setOpenCategoryId(null);
+                                          setDesktopOpenGroupId(null);
+                                        } else if (!group.subitems || group.subitems.length === 0) {
+                                          setOpenCategoryId(null);
+                                          setDesktopOpenGroupId(null);
+                                        }
+                                      }}
+                                      className={`flex items-center justify-between w-full text-left text-[11px] py-2 px-5 leading-tight transition-colors duration-150 ${desktopOpenGroupId === group.id
+                                        ? 'bg-gray-50 text-[#5A3F2A]'
+                                        : 'text-[#6B4B3A] hover:bg-gray-50 hover:text-[#5A3F2A]'
+                                        }`}
+                                    >
+                                      <span>{group.label}</span>
+                                      {group.subitems && group.subitems.length > 0 && (
+                                        <ChevronRight
+                                          className={`w-4 h-4 ${desktopOpenGroupId === group.id ? 'text-[#5A3F2A]' : 'text-gray-400'
                                             }`}
-                                        >
-                                          <span>{group.label}</span>
-                                          {group.subitems && group.subitems.length > 0 && (
-                                            <ChevronRight
-                                              className={`w-4 h-4 ${desktopOpenGroupId === group.id ? 'text-[#5A3F2A]' : 'text-gray-400'
-                                                }`}
-                                            />
-                                          )}
-                                        </button>
+                                        />
+                                      )}
+                                    </button>
 
-                                        {group.subitems && group.subitems.length > 0 && (
-                                          <div
-                                            className={`absolute top-0 left-full ml-2 w-[320px] z-[130] transition-all duration-300 ease-out ${openCategoryId === category.id && desktopOpenGroupId === group.id
-                                              ? 'opacity-100 visible translate-x-0'
-                                              : 'opacity-0 invisible pointer-events-none -translate-x-2'
-                                              }`}
-                                            onMouseEnter={() => {
-                                              cancelDesktopMenuClose();
-                                              setOpenCategoryId(category.id);
-                                              setDesktopOpenGroupId(group.id);
-                                            }}
-                                            onMouseLeave={() => {
-                                              scheduleDesktopMenuClose();
-                                            }}
-                                          >
-                                            <div className="absolute top-0 -left-4 w-4 h-full" />
-                                            <div className="bg-white rounded-none shadow-md border border-gray-200 py-0">
-                                              <ul className="space-y-0">
-                                                {group.subitems.map((item) => (
-                                                  <li key={item.id}>
-                                                    <button
-                                                      onClick={() => {
-                                                        navigate(item.path || '/shop');
-                                                        setOpenCategoryId(null);
-                                                        setDesktopOpenGroupId(null);
-                                                      }}
-                                                      className="text-[11px] text-[#6B4B3A] hover:text-[#5A3F2A] hover:bg-gray-50 w-full text-left py-2 px-5 leading-tight transition-colors duration-150"
-                                                    >
-                                                      {item.label}
-                                                    </button>
-                                                  </li>
-                                                ))}
-                                              </ul>
-                                            </div>
-                                          </div>
-                                        )}
+                                    {group.subitems && group.subitems.length > 0 && (
+                                      <div
+                                        className={`absolute top-0 left-full ml-2 w-[320px] z-[130] transition-all duration-300 ease-out ${openCategoryId === category.id && desktopOpenGroupId === group.id
+                                          ? 'opacity-100 visible translate-x-0'
+                                          : 'opacity-0 invisible pointer-events-none -translate-x-2'
+                                          }`}
+                                        onMouseEnter={() => {
+                                          cancelDesktopMenuClose();
+                                          setOpenCategoryId(category.id);
+                                          setDesktopOpenGroupId(group.id);
+                                        }}
+                                        onMouseLeave={() => {
+                                          scheduleDesktopMenuClose();
+                                        }}
+                                      >
+                                        <div className="absolute top-0 -left-4 w-4 h-full" />
+                                        <div className="bg-white rounded-none shadow-md border border-gray-200 py-0">
+                                          <ul className="space-y-0">
+                                            {group.subitems.map((item) => (
+                                              <li key={item.id}>
+                                                <button
+                                                  onClick={() => {
+                                                    navigate(item.path || '/shop');
+                                                    setOpenCategoryId(null);
+                                                    setDesktopOpenGroupId(null);
+                                                  }}
+                                                  className="text-[11px] text-[#6B4B3A] hover:text-[#5A3F2A] hover:bg-gray-50 w-full text-left py-2 px-5 leading-tight transition-colors duration-150"
+                                                >
+                                                  {item.label}
+                                                </button>
+                                              </li>
+                                            ))}
+                                          </ul>
+                                        </div>
                                       </div>
-                                    ))}
+                                    )}
                                   </div>
-                                </div>
+                                ))}
                               </div>
-                            )}
+                            </div>
                           </div>
-                        );
-                      })}
+                        )}
+                      </div>
+                    );
+                  })}
                     </div>
                   </div>
 
-                  <div className="flex items-center ml-auto lg:mr-0 flex-shrink-0">
+                  <div className="flex items-center ml-auto lg:mr-0 flex-shrink-0 gap-2 xl:gap-2.5">
                     <button
                       onClick={() => {
                         navigate(user ? '/dashboard' : '/login');
                       }}
-                      className="font-medium transition-colors text-[10px] xl:text-xs uppercase tracking-wide whitespace-nowrap py-1 mr-4 text-[#5A3F2A] hover:text-[#4A3320]"
+                      className="font-medium transition-colors text-[9px] xl:text-[10px] uppercase tracking-wide whitespace-nowrap py-1 text-[#5A3F2A] hover:text-[#4A3320]"
                       aria-label="Account"
                     >
                       {user ? 'Account' : 'Log in'}
@@ -592,17 +592,17 @@ const Navbar = () => {
                     {!isShopPage && (
                       <button
                         onClick={() => setSearchOpen(true)}
-                        className={`transition-colors min-h-[36px] min-w-[36px] flex items-center justify-center mr-1 font-medium text-[10px] xl:text-xs uppercase tracking-wide text-[#5A3F2A] hover:text-[#4A3320]`}
+                        className={`transition-colors flex items-center justify-center font-medium text-[9px] xl:text-[10px] uppercase tracking-wide text-[#5A3F2A] hover:text-[#4A3320]`}
                         aria-label="Search"
                       >
                         <div className="flex items-center gap-1">
-                          <Search size={18} />
+                          <Search size={16} />
                           <span className="hidden xl:inline">Kërko</span>
                         </div>
                       </button>
                     )}
 
-                    <Cart useNavColors onCartClick={() => setCartOpen(true)} iconSize={18} disabled={isTransitioning} />
+                    <Cart useNavColors onCartClick={() => setCartOpen(true)} iconSize={16} disabled={isTransitioning} />
                   </div>
                 </div>
               </div>

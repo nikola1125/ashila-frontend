@@ -4,16 +4,26 @@ class NotificationManager {
     this.hasPermission = false;
     this.isEnabled = true;
     this.selectedSound = 'chime'; // Default sound
-    this.initAudio();
+    this.audioInitialized = false;
+    // Don't initialize audio immediately - wait for user interaction
     this.requestPermission();
   }
 
-  initAudio() {
+  async initAudio() {
+    if (this.audioInitialized && this.audioContext) return;
+    
     try {
-      // Create audio context for cross-tab audio
+      // Create audio context lazily - only when needed and after user interaction
       this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      this.audioInitialized = true;
+      
+      // Resume if suspended (required by browsers)
+      if (this.audioContext.state === 'suspended') {
+        await this.audioContext.resume();
+      }
     } catch (error) {
-      console.warn('Audio context not supported:', error);
+      // Silently fail - audio is optional
+      this.audioContext = null;
     }
   }
 
@@ -22,22 +32,29 @@ class NotificationManager {
     if ('Notification' in window) {
       const permission = await Notification.requestPermission();
       this.hasPermission = permission === 'granted';
-    }
-
-    // Resume audio context if suspended (required by browsers)
-    if (this.audioContext && this.audioContext.state === 'suspended') {
-      try {
-        await this.audioContext.resume();
-      } catch (error) {
-        console.warn('Could not resume audio context:', error);
+      // Initialize audio after user interaction (permission request)
+      if (permission !== 'default') {
+        await this.initAudio();
       }
     }
   }
 
-  playNotificationSound(type = 'order') {
-    if (!this.isEnabled || !this.audioContext) return;
+  async playNotificationSound(type = 'order') {
+    if (!this.isEnabled) return;
+    
+    // Initialize audio context if not already done (lazy initialization)
+    if (!this.audioInitialized) {
+      await this.initAudio();
+    }
+    
+    if (!this.audioContext) return;
 
     try {
+      // Ensure audio context is running
+      if (this.audioContext.state === 'suspended') {
+        await this.audioContext.resume();
+      }
+      
       const oscillator = this.audioContext.createOscillator();
       const gainNode = this.audioContext.createGain();
 
@@ -53,7 +70,7 @@ class NotificationManager {
       oscillator.start(this.audioContext.currentTime);
       oscillator.stop(this.audioContext.currentTime + 0.5);
     } catch (error) {
-      console.warn('Could not play notification sound:', error);
+      // Silently fail - audio is optional
     }
   }
 

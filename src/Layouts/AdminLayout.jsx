@@ -45,12 +45,42 @@ const AdminLayout = () => {
   });
 
   const prevPendingCount = useRef(0);
-  const audioRef = useRef(new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3'));
+  const audioRef = useRef(null);
+  const userInteracted = useRef(false);
+
+  // Initialize audio only after user interaction
+  useEffect(() => {
+    const handleUserInteraction = () => {
+      if (!userInteracted.current) {
+        userInteracted.current = true;
+        audioRef.current = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+        // Preload but don't play
+        audioRef.current.load();
+      }
+    };
+
+    // Listen for any user interaction
+    window.addEventListener('click', handleUserInteraction, { once: true });
+    window.addEventListener('keydown', handleUserInteraction, { once: true });
+    window.addEventListener('touchstart', handleUserInteraction, { once: true });
+
+    return () => {
+      window.removeEventListener('click', handleUserInteraction);
+      window.removeEventListener('keydown', handleUserInteraction);
+      window.removeEventListener('touchstart', handleUserInteraction);
+    };
+  }, []);
 
   useEffect(() => {
     // If pending orders INCREASED, play sound
     if (pendingOrders.length > prevPendingCount.current) {
-      audioRef.current.play().catch(e => console.warn("Audio blocked:", e));
+      if (audioRef.current && userInteracted.current) {
+        // Reset audio to beginning and play
+        audioRef.current.currentTime = 0;
+        audioRef.current.play().catch(() => {
+          // Silently fail - audio is optional
+        });
+      }
       toast.info('New Order Received! 🔔', { position: 'top-right' });
     }
     prevPendingCount.current = pendingOrders.length;
