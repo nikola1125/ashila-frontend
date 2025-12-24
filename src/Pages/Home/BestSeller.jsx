@@ -57,7 +57,7 @@ const ProductCard = React.memo(({ product, pricing, index, onProductClick, onAdd
     >
       {/* Product Image Container */}
       <motion.div
-        className="relative w-full overflow-hidden bg-white cursor-pointer h-[185px] md:h-[240px]"
+        className="relative w-full overflow-hidden bg-white cursor-pointer h-[185px] md:h-[240px] pt-4 md:pt-6"
         onClick={() => onProductClick(product)}
         whileHover={{ scale: 1.02 }}
         transition={{ duration: 0.2 }}
@@ -75,7 +75,7 @@ const ProductCard = React.memo(({ product, pricing, index, onProductClick, onAdd
           }}
         />
         <div className="absolute top-1.5 md:top-2.5 right-1.5 md:right-2.5 flex flex-col gap-1 items-end z-10">
-          {pricing.discountPercent > 0 && (product.totalStock > 0 && product.stock > 0) && (
+          {pricing.discountPercent > 0 && (product.totalStock > 0 &&(product.variants?.some(v => v.stock > 0) || product.stock > 0)) && (
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -272,26 +272,23 @@ const BestSeller = () => {
   }, []);
 
   const calculatePrice = useCallback((product) => {
-    // Handle grouped products with variants - find lowest price variant
+    // Handle grouped products with variants - find smallest variant by price
     if (product.variants && product.variants.length > 0) {
-      // Find the variant with the lowest final price (after discount)
-      let lowestVariant = product.variants[0];
-      let lowestFinalPrice = Number(lowestVariant.price) * (1 - (Number(lowestVariant.discount) || 0) / 100);
-      
+      // Find the variant with the lowest original price
+      let smallestVariant = product.variants[0];
+      let lowestOriginalPrice = Number(smallestVariant.price);
+
       product.variants.forEach(variant => {
         const variantPrice = Number(variant.price);
-        const variantDiscount = Number(variant.discount) || 0;
-        const finalPrice = variantPrice * (1 - variantDiscount / 100);
-        
-        if (finalPrice < lowestFinalPrice) {
-          lowestFinalPrice = finalPrice;
-          lowestVariant = variant;
+        if (variantPrice < lowestOriginalPrice) {
+          lowestOriginalPrice = variantPrice;
+          smallestVariant = variant;
         }
       });
-      
-      const variantPrice = Number(lowestVariant.price);
-      const variantDiscount = Number(lowestVariant.discount) || 0;
-      
+
+      const variantPrice = Number(smallestVariant.price);
+      const variantDiscount = Number(smallestVariant.discount) || 0;
+
       if (variantDiscount > 0) {
         const discountedPrice = variantPrice * (1 - variantDiscount / 100);
         return {
@@ -300,7 +297,7 @@ const BestSeller = () => {
           discountPercent: variantDiscount
         };
       }
-      
+
       return {
         original: variantPrice,
         discounted: null,

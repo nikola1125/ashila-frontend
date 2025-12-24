@@ -1,5 +1,6 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import { createPortal } from 'react-dom';
 import { X, ShoppingBag } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getProductImage } from '../../../utils/productImages';
@@ -12,9 +13,6 @@ const VariantSelectionSidebar = ({
     onSelectVariant,
     onAddToCart
 }) => {
-    const location = useLocation();
-    const isShopPage = location.pathname === '/shop';
-
     useEffect(() => {
         if (isOpen) {
             document.body.style.overflow = 'hidden';
@@ -33,32 +31,37 @@ const VariantSelectionSidebar = ({
         };
     }, [isOpen, product, selectedVariant, onSelectVariant]);
 
-    return (
+    const content = (
         <AnimatePresence>
             {isOpen && (
-                <div className="fixed inset-0 z-[200] flex justify-end">
-                    {/* Backdrop */}
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.3 }}
-                        className="fixed inset-0 bg-black/50 backdrop-blur-sm"
-                        onClick={onClose}
-                        aria-hidden="true"
-                    />
+                <div 
+                    className="fixed inset-0" 
+                    style={{ zIndex: 9999999 }}
+                >
+                    <div 
+                        className="fixed inset-0" 
+                        style={{ zIndex: 10000000 }}
+                    >
+                        {/* Backdrop */}
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.3 }}
+                            className="fixed inset-0 bg-black/50"
+                            onClick={onClose}
+                            aria-hidden="true"
+                        />
+                    </div>
 
                     {/* Sidebar Panel */}
                     <motion.div
                         initial={{ x: '100%' }}
                         animate={{ x: 0 }}
                         exit={{ x: '100%' }}
-                        transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                        className={`relative w-full max-w-md sm:max-w-lg bg-[#faf9f6] shadow-2xl flex flex-col pointer-events-auto ${
-                            isShopPage 
-                                ? 'h-full' 
-                                : 'mt-[64px] lg:mt-[80px] h-[calc(100vh-64px)] lg:h-[calc(100vh-80px)]'
-                        }`}
+                        transition={{ duration: 0.3 }}
+                        className="fixed top-0 right-0 w-full max-w-[320px] sm:max-w-[400px] bg-[#faf9f6] shadow-2xl flex flex-col h-screen"
+                        style={{ zIndex: 10000001 }}
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* Header */}
@@ -190,6 +193,9 @@ const VariantSelectionSidebar = ({
             )}
         </AnimatePresence>
     );
+
+    if (typeof document === 'undefined') return null;
+    return createPortal(content, document.body);
 };
 
 export default VariantSelectionSidebar;

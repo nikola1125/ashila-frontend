@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
   Users,
@@ -23,13 +23,35 @@ const divider = 'my-2 border-t border-amber-100';
 
 const AdminLinks = () => {
   const { signOutUser } = useContext(AuthContext);
+  const navigate = useNavigate();
 
-  const handleSignOut = () => {
-    signOutUser()
-      .then(() => {
-        toast.success('LogOut successful');
-      })
-      .catch((err) => console.log(err.message));
+  const handleSignOut = async () => {
+    try {
+      try {
+        localStorage.removeItem('adminToken');
+      } catch {
+        // ignore
+      }
+      try {
+        sessionStorage.removeItem('adminToken');
+      } catch {
+        // ignore
+      }
+
+      // If a Firebase user is also signed in, sign them out as well.
+      // This keeps behavior consistent across the app.
+      try {
+        await signOutUser();
+      } catch {
+        // ignore
+      }
+
+      toast.success('LogOut successful');
+      navigate('/admin-login', { replace: true });
+    } catch (err) {
+      console.log(err?.message || err);
+      toast.error('Logout failed');
+    }
   };
 
   return (

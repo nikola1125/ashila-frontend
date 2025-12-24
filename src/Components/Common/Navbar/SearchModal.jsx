@@ -4,6 +4,44 @@ import { useNavigate } from 'react-router-dom';
 import useAxiosSecure from '../../../hooks/useAxiosSecure';
 import { getProductImage } from '../../../utils/productImages';
 
+const getGroupKey = (product) => {
+    const name = (product?.itemName || '').trim().toLowerCase();
+    const company = (product?.company || '').trim().toLowerCase();
+    const genericName = (product?.genericName || '').trim().toLowerCase();
+    return `${name}__${company}__${genericName}`;
+};
+
+const groupVariantSearchResults = (products) => {
+    const list = Array.isArray(products) ? products : [];
+    const map = new Map();
+
+    for (const p of list) {
+        if (!p) continue;
+        const key = getGroupKey(p);
+        if (!map.has(key)) {
+            map.set(key, { base: p, variants: [p] });
+        } else {
+            map.get(key).variants.push(p);
+        }
+    }
+
+    return Array.from(map.values()).map(({ base, variants }) => {
+        const prices = variants
+            .map(v => Number(v?.price))
+            .filter(n => Number.isFinite(n));
+
+        const minPrice = prices.length ? Math.min(...prices) : null;
+        const maxPrice = prices.length ? Math.max(...prices) : null;
+
+        return {
+            ...base,
+            variants,
+            __minPrice: minPrice,
+            __maxPrice: maxPrice,
+        };
+    });
+};
+
 const SearchModal = ({ isOpen, onClose }) => {
     const [query, setQuery] = useState('');
     const [results, setResults] = useState([]);
@@ -44,7 +82,8 @@ const SearchModal = ({ isOpen, onClose }) => {
                     // Interceptor returns response.data directly
                     const data = res;
                     const products = Array.isArray(data) ? data : (data.result || data.products || data.medicines || []);
-                    setResults(products.slice(0, 5));
+                    const grouped = groupVariantSearchResults(products);
+                    setResults(grouped.slice(0, 5));
                 } catch (error) {
                     console.error('Search error:', error);
                 } finally {
@@ -99,9 +138,14 @@ const SearchModal = ({ isOpen, onClose }) => {
                             <div className="px-5 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">Rezultatet</div>
                             {results.map(product => (
                                 <div
-                                    key={product._id}
+                                    key={product._id || getGroupKey(product)}
                                     onClick={() => {
-                                        navigate(`/product/${product._id}`);
+                                        const productId = (product.variants && product.variants.length > 0)
+                                            ? (product.variants[0]?._id || product._id)
+                                            : product._id;
+                                        if (productId) {
+                                            navigate(`/product/${productId}`);
+                                        }
                                         onClose();
                                     }}
                                     className="flex items-center gap-4 px-5 py-3 hover:bg-gray-50 cursor-pointer transition-colors border-b border-gray-50 last:border-0"
@@ -116,7 +160,9 @@ const SearchModal = ({ isOpen, onClose }) => {
                                     <div className="flex-1 min-w-0">
                                         <h4 className="text-sm font-medium text-gray-900 truncate">{product.itemName}</h4>
                                         <div className="text-xs text-brand-brown font-semibold">
-                                            {Number(product.price).toLocaleString()} ALL
+                                            {Number.isFinite(product.__minPrice) && Number.isFinite(product.__maxPrice) && product.__minPrice !== product.__maxPrice
+                                                ? `${Number(product.__minPrice).toLocaleString()} - ${Number(product.__maxPrice).toLocaleString()} ALL`
+                                                : Number(product.price).toLocaleString() + ' ALL'}
                                         </div>
                                     </div>
                                     <ChevronRight className="w-4 h-4 text-gray-300" />

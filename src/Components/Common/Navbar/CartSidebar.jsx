@@ -80,7 +80,7 @@ const CartSidebar = ({ isOpen, onClose }) => {
     <>
       {/* Backdrop */}
       <div
-        className={`fixed inset-0 bg-black/50 z-[9998] transition-opacity duration-300 ${isOpen ? 'opacity-100 visible' : 'opacity-0 invisible'
+        className={`ixed left-0 right-0 bottom-0 top-[64px] bg-black/50 z-[9998] transition-opacity duration-300 ${isOpen ? 'opacity-100 visible' : 'opacity-0 invisible'
           }`}
         aria-hidden="true"
       />
@@ -88,7 +88,7 @@ const CartSidebar = ({ isOpen, onClose }) => {
       {/* Sidebar Panel */}
       <aside
         ref={sidebarRef}
-        className={`fixed top-0 right-0 h-full w-full sm:w-[400px] md:w-[450px] bg-white z-[9999] shadow-2xl transform transition-transform duration-300 ease-out flex flex-col ${isOpen ? 'translate-x-0' : 'translate-x-full'
+        className={`fixed right-0 top-[64px] h-[calc(100vh-64px)] w-full sm:w-[400px] md:w-[450px] bg-white z-[9999] shadow-2xl transform transition-transform duration-300 ease-out flex flex-col ${isOpen ? 'translate-x-0' : 'translate-x-full'
           }`}
       >
         {/* Header */}

@@ -518,9 +518,30 @@ const ProductDetail = () => {
                     }}
                   >
                     {relatedProducts.map((relatedProduct, index) => {
-                      const relatedDiscountedPrice = relatedProduct.discount > 0
-                        ? Number(relatedProduct.price) * (1 - Number(relatedProduct.discount) / 100)
-                        : Number(relatedProduct.price);
+                      // Find smallest variant by price
+                      let displayPrice = Number(relatedProduct.price);
+                      let displayDiscount = Number(relatedProduct.discount) || 0;
+
+                      if (relatedProduct.variants && relatedProduct.variants.length > 0) {
+                        // Find variant with lowest original price
+                        let smallestVariant = relatedProduct.variants[0];
+                        let lowestOriginalPrice = Number(smallestVariant.price);
+
+                        relatedProduct.variants.forEach(variant => {
+                          const variantPrice = Number(variant.price);
+                          if (variantPrice < lowestOriginalPrice) {
+                            lowestOriginalPrice = variantPrice;
+                            smallestVariant = variant;
+                          }
+                        });
+
+                        displayPrice = Number(smallestVariant.price);
+                        displayDiscount = Number(smallestVariant.discount) || 0;
+                      }
+
+                      const relatedDiscountedPrice = displayDiscount > 0
+                        ? displayPrice * (1 - displayDiscount / 100)
+                        : displayPrice;
 
                       return (
                         <div
@@ -538,7 +559,7 @@ const ProductDetail = () => {
                               navigate(`/product/${productId}`);
                             }}
                           >
-                            <div className="relative w-full overflow-hidden bg-white h-[185px] md:h-[240px] pt-4 md:pt-0">
+                            <div className="relative w-full overflow-hidden bg-white h-[185px] md:h-[240px] pt-4 md:pt-6">
                               <img
                                 src={getProductImage(relatedProduct.image, relatedProduct._id || index)}
                                 alt={relatedProduct.itemName}
@@ -548,9 +569,9 @@ const ProductDetail = () => {
                                 }}
                               />
                               <div className="absolute top-2.5 right-2.5 flex flex-col gap-1 items-end z-10">
-                                {relatedProduct.discount > 0 && relatedProduct.stock > 0 && (
+                                {displayDiscount > 0 && (relatedProduct.totalStock > 0 && (relatedProduct.variants?.some(v => v.stock > 0) || relatedProduct.stock > 0)) && (
                                   <div className="bg-red-500 text-white px-2.5 py-1.5 text-sm font-bold">
-                                    Save {Math.round(relatedProduct.discount)}%
+                                    Save {Math.round(displayDiscount)}%
                                   </div>
                                 )}
                                 {relatedProduct.stock === 0 && (
@@ -573,18 +594,18 @@ const ProductDetail = () => {
 
                               <div className="mt-auto">
                                 <div className="flex items-center justify-center gap-2.5">
-                                  {relatedProduct.discount > 0 ? (
+                                  {displayDiscount > 0 ? (
                                     <>
                                       <span className="lux-price-number text-sm md:text-lg font-medium text-black">
                                         {relatedDiscountedPrice.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
                                       </span>
                                       <span className="lux-price-number text-xs md:text-sm text-gray-400 line-through">
-                                        {Number(relatedProduct.price).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
+                                        {displayPrice.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
                                       </span>
                                     </>
                                   ) : (
                                     <span className="lux-price-number text-sm md:text-lg font-medium text-black">
-                                      {Number(relatedProduct.price).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
+                                      {displayPrice.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ALL
                                     </span>
                                   )}
                                 </div>
