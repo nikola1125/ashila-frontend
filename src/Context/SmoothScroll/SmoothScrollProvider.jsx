@@ -1,10 +1,19 @@
-import React, { createContext, useContext, useRef, useEffect } from 'react';
+import React, { createContext, useContext, useRef, useEffect, useState } from 'react';
 
 const SmoothScrollContext = createContext();
 
 export const useSmoothScroll = () => useContext(SmoothScrollContext);
 
 export const SmoothScrollProvider = ({ children }) => {
+  const [value, setValue] = useState(() => ({
+    lenis: null,
+    scrollTo: () => { },
+    scrollToTop: () => { },
+    getScroll: () => 0,
+    stop: () => { },
+    start: () => { },
+  }));
+
   const valueRef = useRef({
     lenis: null,
     scrollTo: () => { },
@@ -38,6 +47,8 @@ export const SmoothScrollProvider = ({ children }) => {
         stop: () => { },
         start: () => { },
       };
+
+      setValue(valueRef.current);
 
       return;
     }
@@ -78,6 +89,8 @@ export const SmoothScrollProvider = ({ children }) => {
         stop: () => lenisInstance.stop(),
         start: () => lenisInstance.start(),
       };
+
+      setValue(valueRef.current);
     });
 
     return () => {
@@ -86,7 +99,7 @@ export const SmoothScrollProvider = ({ children }) => {
   }, []);
 
   return (
-    <SmoothScrollContext.Provider value={valueRef.current}>
+    <SmoothScrollContext.Provider value={value}>
       {children}
     </SmoothScrollContext.Provider>
   );
