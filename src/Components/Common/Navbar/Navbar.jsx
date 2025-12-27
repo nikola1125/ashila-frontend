@@ -356,7 +356,7 @@ const Navbar = () => {
                             <ChevronDown className="w-2.5 h-2.5" />
                           </button>
                           {category.groups && (
-                            <div className={`absolute left-0 mt-2 bg-white shadow-md border py-0 z-[120] transition-all ${openCategoryId === category.id ? 'opacity-100 visible' : 'opacity-0 invisible'}`}>
+                            <div className={`absolute left-0 mt-2 bg-white shadow-md py-0 z-[120] transition-all ${openCategoryId === category.id ? 'opacity-100 visible' : 'opacity-0 invisible'}`}>
                               <div className="w-[260px]">
                                 {category.groups.map(group => (
                                   <div key={group.id} className="relative">
@@ -369,7 +369,7 @@ const Navbar = () => {
                                       {group.subitems && <ChevronRight className="w-4 h-4" />}
                                     </button>
                                     {group.subitems && desktopOpenGroupId === group.id && (
-                                      <div className="absolute top-0 left-full ml-2 w-[320px] bg-white shadow-md border py-0">
+                                      <div className="absolute top-0 left-full ml-2 w-[320px] bg-white shadow-md py-0">
                                         <ul className="space-y-0">
                                           {group.subitems.map(sub => (
                                             <li key={sub.id}>
@@ -401,41 +401,113 @@ const Navbar = () => {
           </div>
         </div>
 
-        <div className={`lg:hidden fixed top-full left-0 right-0 border-t bg-white overflow-hidden z-40 transition-all duration-500 ${mobileMenuOpen ? 'max-h-screen' : 'max-h-0'}`}>
+        <div className={`lg:hidden fixed top-full left-0 right-0 bg-white overflow-hidden z-40 transition-all duration-500 ${mobileMenuOpen ? 'max-h-screen' : 'max-h-0'}`}>
           <div className="py-4 flex flex-col max-h-[80vh] overflow-y-auto">
-            <NavLink to="/" onClick={() => setMobileMenuOpen(false)} className="text-[#5A3F2A] font-medium text-sm uppercase px-4 py-3 border-b">Kreu</NavLink>
-            {NAV_CATEGORIES.map(category => (
-              <div key={category.id} className="border-b">
-                <button onClick={() => { setMobileOpenCategoryId(mobileOpenCategoryId === category.id ? null : category.id); setMobileOpenGroupId(null); }} className="w-full text-left font-medium text-sm uppercase px-4 py-3 flex items-center justify-between">
-                  <span>{category.label}</span>
-                  <ChevronRight className={`w-4 h-4 transition-transform ${mobileOpenCategoryId === category.id ? 'rotate-90' : ''}`} />
-                </button>
-                {mobileOpenCategoryId === category.id && (
-                  <div className="bg-gray-50 border-t">
-                    {category.groups.map(group => (
-                      <div key={group.id} className="border-b">
-                        <button onClick={() => { if (group.subitems) setMobileOpenGroupId(mobileOpenGroupId === group.id ? null : group.id); else if (group.path) { navigate(group.path); setMobileMenuOpen(false); } }} className="w-full text-left text-gray-700 px-4 py-3 flex items-center justify-between">
-                          <span className="text-[13px]">{group.label}</span>
-                          {group.subitems && <ChevronRight className={`w-4 h-4 transition-transform ${mobileOpenGroupId === group.id ? 'rotate-90' : ''}`} />}
-                        </button>
-                        {group.subitems && mobileOpenGroupId === group.id && (
-                          <ul className="bg-white border-t">
-                            {group.subitems.map(sub => <li key={sub.id}><button onClick={() => { navigate(sub.path); setMobileMenuOpen(false); }} className="w-full text-left text-[13px] px-6 py-2">{sub.label}</button></li>)}
-                          </ul>
-                        )}
-                      </div>
-                    ))}
+            <NavLink to="/" onClick={() => setMobileMenuOpen(false)} className="text-[#5A3F2A] font-medium text-sm uppercase px-4 py-3">Kreu</NavLink>
+            {NAV_CATEGORIES.map((category) => {
+              const isCategoryOpen = mobileOpenCategoryId === category.id;
+              return (
+                <div key={category.id}>
+                  <button
+                    onClick={() => {
+                      setMobileOpenCategoryId(isCategoryOpen ? null : category.id);
+                      setMobileOpenGroupId(null);
+                    }}
+                    className="w-full text-left font-medium text-sm uppercase px-4 py-3 flex items-center justify-between"
+                  >
+                    <span>{category.label}</span>
+                    <ChevronRight className={`w-4 h-4 transition-transform duration-200 ${isCategoryOpen ? 'rotate-90' : ''}`} />
+                  </button>
+
+                  <div
+                    className={`bg-gray-50 overflow-hidden transition-[max-height,opacity,transform] duration-300 ease-out ${
+                      isCategoryOpen ? 'max-h-[1000px] opacity-100 translate-y-0' : 'max-h-0 opacity-0 -translate-y-1'
+                    }`}
+                  >
+                    {category.groups.map((group) => {
+                      const isGroupOpen = mobileOpenGroupId === group.id;
+                      return (
+                        <div key={group.id}>
+                          <button
+                            onClick={() => {
+                              if (group.subitems) {
+                                setMobileOpenGroupId(isGroupOpen ? null : group.id);
+                              } else if (group.path) {
+                                navigate(group.path);
+                                setMobileMenuOpen(false);
+                              }
+                            }}
+                            className="w-full text-left text-gray-700 px-4 py-3 flex items-center justify-between"
+                          >
+                            <span className="text-[13px]">{group.label}</span>
+                            {group.subitems && (
+                              <ChevronRight className={`w-4 h-4 transition-transform duration-200 ${isGroupOpen ? 'rotate-90' : ''}`} />
+                            )}
+                          </button>
+
+                          {group.subitems && (
+                            <div
+                              className={`bg-white overflow-hidden transition-[max-height,opacity,transform] duration-300 ease-out ${
+                                isCategoryOpen && isGroupOpen
+                                  ? 'max-h-[800px] opacity-100 translate-y-0'
+                                  : 'max-h-0 opacity-0 -translate-y-1'
+                              }`}
+                            >
+                              <ul>
+                                {group.subitems.map((sub) => (
+                                  <li key={sub.id}>
+                                    <button
+                                      onClick={() => {
+                                        navigate(sub.path);
+                                        setMobileMenuOpen(false);
+                                      }}
+                                      className="w-full text-left text-[13px] px-6 py-2"
+                                    >
+                                      {sub.label}
+                                    </button>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
-                )}
-              </div>
-            ))}
-            <div className="mt-2 border-t">
+                </div>
+              );
+            })}
+            <div className="mt-2">
               {user ? (
                 <>
-                  <NavLink to="/dashboard" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 font-medium text-sm uppercase px-4 py-3 border-b"><img src={user.photoURL || userLogo} alt="Account" className="w-6 h-6 rounded-full" />Account</NavLink>
-                  <button onClick={async () => { await signOutUser(); setMobileMenuOpen(false); navigate('/'); }} className="w-full text-left font-medium text-sm uppercase px-4 py-3 border-b">Log out</button>
+                  <NavLink
+                    to="/dashboard"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-2 font-medium text-sm uppercase px-4 py-3"
+                  >
+                    <img src={user.photoURL || userLogo} alt="Account" className="w-6 h-6 rounded-full" />
+                    Account
+                  </NavLink>
+                  <button
+                    onClick={async () => {
+                      await signOutUser();
+                      setMobileMenuOpen(false);
+                      navigate('/');
+                    }}
+                    className="w-full text-left font-medium text-sm uppercase px-4 py-3"
+                  >
+                    Log out
+                  </button>
                 </>
-              ) : <NavLink to="/login" onClick={() => setMobileMenuOpen(false)} className="block font-medium text-sm uppercase px-4 py-3 border-b">Log in</NavLink>}
+              ) : (
+                <NavLink
+                  to="/login"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block font-medium text-sm uppercase px-4 py-3"
+                >
+                  Log in
+                </NavLink>
+              )}
             </div>
           </div>
         </div>

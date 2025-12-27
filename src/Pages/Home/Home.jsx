@@ -21,8 +21,12 @@ const Home = memo(() => {
       </div>
       
       <div className="relative z-10 bg-white">
-        <BestSeller />
-        <AcneCategories />
+        <div className="mb-12 md:mb-0">
+          <BestSeller />
+        </div>
+        <div className="mt-12 md:mt-0">
+          <AcneCategories />
+        </div>
         <HydrationSection />
         <FluSection />
         <InteractiveProductSelector />
