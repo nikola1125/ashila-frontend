@@ -275,8 +275,15 @@ const ProductDetail = () => {
   }, [handleAddToCart, navigate]);
 
   const handleQuantityChange = useCallback((change) => {
-    setQuantity(prev => Math.max(1, prev + change));
-  }, []);
+    setQuantity(prev => {
+      const newQuantity = Math.max(1, prev + change);
+      // Don't allow quantity to exceed available stock
+      if (currentStock > 0 && newQuantity > currentStock) {
+        return currentStock; // Cap at available stock
+      }
+      return newQuantity;
+    });
+  }, [currentStock]);
 
   if (isLoading) {
     return <DataLoading label="Product Details" />;
@@ -364,6 +371,11 @@ const ProductDetail = () => {
               <label className="block text-xs font-semibold text-[#4A3628] uppercase tracking-wide mb-2">
                 QUANTITY
               </label>
+              {currentStock <= 10 && currentStock > 0 && (
+                <div className="mb-2 text-sm text-orange-600 font-medium">
+                  Only {currentStock} left in stock!
+                </div>
+              )}
               <div className="flex items-center gap-2 sm:gap-3">
                 <button
                   onClick={() => handleQuantityChange(-1)}
@@ -378,7 +390,8 @@ const ProductDetail = () => {
                   value={quantity}
                   onChange={(e) => {
                     const val = parseInt(e.target.value) || 1;
-                    setQuantity(Math.max(1, val));
+                    const maxQuantity = currentStock > 0 ? currentStock : val;
+                    setQuantity(Math.min(Math.max(1, val), maxQuantity));
                   }}
                   className="w-20 h-12 sm:w-16 sm:h-10 text-center border-2 border-[#4A3628] focus:outline-none bg-white text-[#4A3628] font-medium text-base sm:text-sm min-h-[44px] sm:min-h-0"
                   min="1"
@@ -386,7 +399,7 @@ const ProductDetail = () => {
                 />
                 <button
                   onClick={() => handleQuantityChange(1)}
-                  disabled={!isInStock}
+                  disabled={!isInStock || quantity >= currentStock}
                   className="w-12 h-12 sm:w-10 sm:h-10 flex items-center justify-center border-2 border-[#4A3628] hover:bg-[#EBD8C8] disabled:opacity-50 disabled:cursor-not-allowed transition-all bg-white min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 text-lg leading-none text-[#4A3628]"
                   aria-label="Increase quantity"
                 >

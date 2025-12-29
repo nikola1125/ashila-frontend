@@ -261,8 +261,8 @@ const BestSeller = () => {
       // Mobile: scroll by one full page (the visible width that contains 2 products)
       scrollAmount = container.clientWidth || 1;
     } else {
-      // Desktop: scroll by approximately one product card + gap
-      scrollAmount = 280;
+      // Desktop: scroll by two products (2 * 227px + 1 * 20px gap = 474px)
+      scrollAmount = 474;
     }
 
     container.scrollBy({

@@ -1,5 +1,6 @@
-import React, { useReducer, useEffect, useMemo } from 'react';
+import React, { useReducer, useEffect, useMemo, useRef } from 'react';
 import { CartContext } from './CartContext';
+import useAxiosSecure from '../../hooks/useAxiosSecure';
 
 const CART_KEY = 'medimart_cart';
 
@@ -11,7 +12,21 @@ const initialState = {
   discountedTotal: 0,
 };
 
-// Reducer function
+const parseStockValue = (value) => {
+  if (value === undefined || value === null) return null;
+  if (typeof value === 'number') return Number.isFinite(value) ? value : null;
+  const matches = String(value).match(/\d+/g);
+  if (!matches || matches.length === 0) return null;
+  const n = Number(matches[matches.length - 1]);
+  return Number.isFinite(n) ? n : null;
+};
+
+const clampQuantity = (quantity, stock) => {
+  const q = Math.max(1, Number(quantity) || 1);
+  if (stock === null) return q;
+  return Math.min(q, stock);
+};
+
 // Reducer function
 const cartReducer = (state, action) => {
   switch (action.type) {
@@ -29,35 +44,69 @@ const cartReducer = (state, action) => {
       let updatedItems;
 
       if (existingItemIndex > -1) {
-        // Increment quantity for existing item, but check stock first (only if stock is provided)
         const existingItem = state.items[existingItemIndex];
-        const stock = action.payload.stock !== undefined && action.payload.stock !== null 
-          ? Number(action.payload.stock) 
-          : (existingItem.stock !== undefined && existingItem.stock !== null ? Number(existingItem.stock) : null);
+        const payloadStock = parseStockValue(action.payload.stock);
+        const existingStock = parseStockValue(existingItem.stock);
+        const stock = payloadStock ?? existingStock;
         const newQuantity = existingItem.quantity + 1;
-        
-        // Don't increment if it would exceed stock (only if stock is explicitly provided)
-        if (stock !== null && !isNaN(stock) && newQuantity > stock) {
-          return state; // Return unchanged state
+
+        if (stock !== null && newQuantity > stock) {
+          return state;
         }
-        
+
         updatedItems = state.items.map((item, index) =>
           index === existingItemIndex
-            ? { ...item, quantity: newQuantity, stock: stock !== null ? stock : item.stock } // Update stock too if provided
+            ? { ...item, quantity: newQuantity, stock: stock ?? item.stock }
             : item
         );
       } else {
         // Add new item with unique cartItemId
+        const payloadStock = parseStockValue(action.payload.stock);
         const newItem = {
           ...action.payload,
           cartItemId: newItemId,
           quantity: 1,
-          stock: action.payload.stock !== undefined && action.payload.stock !== null ? Number(action.payload.stock) : undefined // Include stock if available
+          stock: payloadStock ?? undefined
         };
         updatedItems = [...state.items, newItem];
       }
 
       // Calculate totals
+      const updatedTotalPrice = updatedItems.reduce(
+        (total, item) => total + Number(item.price) * item.quantity,
+        0
+      );
+      const updatedDiscountedTotal = updatedItems.reduce(
+        (total, item) => total + (item.discountedPrice ? Number(item.discountedPrice) * item.quantity : Number(item.price) * item.quantity),
+        0
+      );
+      const updatedTotalQuantity = updatedItems.reduce(
+        (qty, item) => qty + item.quantity,
+        0
+      );
+
+      return {
+        ...state,
+        items: updatedItems,
+        totalQuantity: updatedTotalQuantity,
+        totalPrice: updatedTotalPrice,
+        discountedTotal: updatedDiscountedTotal,
+      };
+    }
+
+    case 'UPDATE_QUANTITY': {
+      const updatedItems = state.items.map((item) => {
+        if ((item.cartItemId || item.id) === action.payload.id) {
+          const requestedQuantity = action.payload.quantity;
+          const stock = action.payload.stock !== undefined
+            ? parseStockValue(action.payload.stock)
+            : parseStockValue(item.stock);
+          const nextQuantity = clampQuantity(requestedQuantity, stock);
+          return { ...item, quantity: nextQuantity, stock: stock ?? item.stock };
+        }
+        return item;
+      });
+
       const updatedTotalPrice = updatedItems.reduce(
         (total, item) => total + Number(item.price) * item.quantity,
         0
@@ -105,48 +154,6 @@ const cartReducer = (state, action) => {
       };
     }
 
-    case 'UPDATE_QUANTITY': {
-      const updatedItems = state.items.map((item) => {
-        if ((item.cartItemId || item.id) === action.payload.id) {
-          const requestedQuantity = action.payload.quantity;
-          
-          // Only limit quantity if stock is explicitly provided and we're increasing
-          if (item.stock !== undefined && item.stock !== null && requestedQuantity > item.quantity) {
-            const stock = Number(item.stock);
-            if (!isNaN(stock) && stock > 0) {
-              // Don't allow quantity to exceed stock when increasing
-              const newQuantity = Math.min(requestedQuantity, stock);
-              return { ...item, quantity: newQuantity };
-            }
-          }
-          // Allow the quantity update (for decreases or when no stock info)
-          return { ...item, quantity: requestedQuantity };
-        }
-        return item;
-      });
-
-      const updatedTotalPrice = updatedItems.reduce(
-        (total, item) => total + Number(item.price) * item.quantity,
-        0
-      );
-
-      const updatedDiscountedTotal = updatedItems.reduce(
-        (total, item) => total + (item.discountedPrice ? Number(item.discountedPrice) * item.quantity : Number(item.price) * item.quantity),
-        0
-      );
-      const updatedTotalQuantity = updatedItems.reduce(
-        (qty, item) => qty + item.quantity,
-        0
-      );
-      return {
-        ...state,
-        items: updatedItems,
-        totalQuantity: updatedTotalQuantity,
-        totalPrice: Number(updatedTotalPrice),
-        discountedTotal: updatedDiscountedTotal,
-      };
-    }
-
     case 'CLEAR_CART': {
       return initialState;
     }
@@ -164,9 +171,42 @@ import { useState } from 'react';
 
 // Cart Provider component
 export const CartProvider = ({ children }) => {
+  const { publicApi } = useAxiosSecure();
   const [variantModalOpen, setVariantModalOpen] = useState(false);
   const [currentProductForVariant, setCurrentProductForVariant] = useState(null);
   const [isAnimating, setIsAnimating] = useState(false);
+  const stockCacheRef = useRef(new Map());
+
+  const getLatestStock = async (productId) => {
+    if (!productId) return null;
+    const cache = stockCacheRef.current;
+    const now = Date.now();
+    const existing = cache.get(productId);
+
+    if (existing?.value !== undefined && now - existing.ts < 5000) {
+      return existing.value;
+    }
+
+    if (existing?.promise) {
+      return existing.promise;
+    }
+
+    const promise = publicApi
+      .get(`/products/${productId}`)
+      .then((product) => {
+        const stock = Number(product?.stock);
+        const value = Number.isFinite(stock) ? stock : null;
+        cache.set(productId, { value, ts: Date.now() });
+        return value;
+      })
+      .catch(() => {
+        cache.delete(productId);
+        return null;
+      });
+
+    cache.set(productId, { promise });
+    return promise;
+  };
 
   const [state, dispatch] = useReducer(cartReducer, initialState, (initial) => {
     try {
@@ -186,11 +226,36 @@ export const CartProvider = ({ children }) => {
 
               return {
                 ...item,
-                cartItemId: newItemId
+                cartItemId: newItemId,
+                stock: parseStockValue(item.stock) ?? undefined,
+                quantity: clampQuantity(item.quantity, parseStockValue(item.stock))
               };
             }
-            return item;
+            const stock = parseStockValue(item.stock);
+            return {
+              ...item,
+              stock: stock ?? undefined,
+              quantity: clampQuantity(item.quantity, stock)
+            };
           });
+
+          const totalPrice = parsed.items.reduce(
+            (total, item) => total + Number(item.price) * item.quantity,
+            0
+          );
+          const discountedTotal = parsed.items.reduce(
+            (total, item) => total + (item.discountedPrice ? Number(item.discountedPrice) * item.quantity : Number(item.price) * item.quantity),
+            0
+          );
+          const totalQuantity = parsed.items.reduce(
+            (qty, item) => qty + item.quantity,
+            0
+          );
+
+          parsed.totalPrice = totalPrice;
+          parsed.discountedTotal = discountedTotal;
+          parsed.totalQuantity = totalQuantity;
+
           return parsed;
         }
       }
@@ -220,8 +285,8 @@ export const CartProvider = ({ children }) => {
     // Check stock before adding to cart (only if stock is explicitly provided)
     // If stock is undefined/null, allow addition (for backward compatibility)
     if (item.stock !== undefined && item.stock !== null) {
-      const stock = Number(item.stock);
-      if (isNaN(stock) || stock <= 0) {
+      const stock = parseStockValue(item.stock);
+      if (stock === null || stock <= 0) {
         // Item is out of stock, don't add to cart
         return;
       }
@@ -235,8 +300,44 @@ export const CartProvider = ({ children }) => {
       return;
     }
 
+    const addWithLiveStock = async () => {
+      const dbStock = await getLatestStock(item.id);
+      const fallbackStock = item.stock !== undefined && item.stock !== null ? parseStockValue(item.stock) : null;
+      const stockToUse = dbStock ?? fallbackStock;
+
+      if (stockToUse !== null && stockToUse <= 0) {
+        return;
+      }
+
+      const cartKey = item.variantId ? `${item.id}-${item.variantId}` : item.id;
+      const existingItemIndex = state.items.findIndex(
+        (cartItem) => (cartItem.cartItemId || cartItem.id) === cartKey
+      );
+      if (existingItemIndex > -1) {
+        const existingItem = state.items[existingItemIndex];
+        const existingQty = Number(existingItem.quantity) || 0;
+        if (stockToUse !== null && existingQty + 1 > stockToUse) {
+          return;
+        }
+      }
+
+      dispatch({
+        type: 'ADD_ITEM',
+        payload: {
+          ...item,
+          stock: stockToUse ?? item.stock,
+        },
+      });
+
+      setIsAnimating(true);
+      setTimeout(() => setIsAnimating(false), 300);
+    };
+
+    void addWithLiveStock();
+    return;
+
     // Check if adding this item would exceed available stock (only if stock is provided)
-    const stock = item.stock !== undefined && item.stock !== null ? Number(item.stock) : null;
+    const stock = item.stock !== undefined && item.stock !== null ? parseStockValue(item.stock) : null;
     if (stock !== null && !isNaN(stock)) {
       const existingItemIndex = state.items.findIndex(
         (cartItem) => (cartItem.cartItemId || cartItem.id) === (item.variantId ? `${item.id}-${item.variantId}` : item.id)
@@ -244,7 +345,7 @@ export const CartProvider = ({ children }) => {
 
       if (existingItemIndex > -1) {
         const existingItem = state.items[existingItemIndex];
-        const existingStock = existingItem.stock !== undefined && existingItem.stock !== null ? Number(existingItem.stock) : stock;
+        const existingStock = parseStockValue(existingItem.stock);
         const newQuantity = existingItem.quantity + 1;
         if (existingStock !== null && !isNaN(existingStock) && newQuantity > existingStock) {
           // Would exceed stock, don't add
@@ -263,23 +364,26 @@ export const CartProvider = ({ children }) => {
     // If logic is consistent: if 1 variant, treat as main product.
     // Let's ensure we don't block 1-variant products.
 
-    dispatch({ type: 'ADD_ITEM', payload: item });
-
-    // Trigger animation
-    setIsAnimating(true);
-    setTimeout(() => setIsAnimating(false), 300);
   };
 
   const removeItem = (id) => {
     dispatch({ type: 'REMOVE_ITEM', payload: { id } });
   };
 
-  const updateQuantity = (id, quantity) => {
+  const updateQuantity = (id, quantity, stockOverride) => {
     if (quantity < 1) {
       removeItem(id);
       return;
     }
-    dispatch({ type: 'UPDATE_QUANTITY', payload: { id, quantity } });
+    
+    // Check stock limit before updating quantity
+    const item = state.items.find(item => (item.cartItemId || item.id) === id);
+    const stock = stockOverride !== undefined
+      ? parseStockValue(stockOverride)
+      : (item ? parseStockValue(item.stock) : null);
+    const nextQuantity = clampQuantity(quantity, stock);
+    
+    dispatch({ type: 'UPDATE_QUANTITY', payload: { id, quantity: nextQuantity, stock: stockOverride } });
   };
 
   const clearCart = () => {
@@ -309,35 +413,48 @@ export const CartProvider = ({ children }) => {
       }
     }
 
-    // Construct the new item with variant details
-    const price = Number(variant.price);
-    const discount = Number(variant.discount || 0);
-    const itemToAdd = {
-      id: variant._id, // Use variant ID as the product ID
-      name: currentProductForVariant.name || currentProductForVariant.itemName,
-      itemName: currentProductForVariant.itemName || currentProductForVariant.name,
-      image: variant.image || currentProductForVariant.image,
-      price: price,
-      discountedPrice: discount > 0 ? (price * (1 - discount / 100)).toFixed(2) : null,
-      size: variant.size,
-      variantId: variant._id,
-      discount: discount,
-      stock: variant.stock !== undefined && variant.stock !== null ? Number(variant.stock) : undefined, // Include stock in cart item if available
-      seller: currentProductForVariant.seller,
-      sellerEmail: currentProductForVariant.sellerEmail,
-      description: currentProductForVariant.description,
-      category: currentProductForVariant.category,
-      categoryName: currentProductForVariant.categoryName,
-      categoryPath: currentProductForVariant.categoryPath
+    const addVariantWithLiveStock = async () => {
+      const dbStock = await getLatestStock(variant._id);
+      const fallbackStock = variant.stock !== undefined && variant.stock !== null ? parseStockValue(variant.stock) : null;
+      const stockToUse = dbStock ?? fallbackStock;
+      if (stockToUse !== null && stockToUse <= 0) {
+        setVariantModalOpen(false);
+        setTimeout(() => {
+          setCurrentProductForVariant(null);
+        }, 400);
+        return;
+      }
+
+      const price = Number(variant.price);
+      const discount = Number(variant.discount || 0);
+      const itemToAdd = {
+        id: variant._id,
+        name: currentProductForVariant.name || currentProductForVariant.itemName,
+        itemName: currentProductForVariant.itemName || currentProductForVariant.name,
+        image: variant.image || currentProductForVariant.image,
+        price: price,
+        discountedPrice: discount > 0 ? (price * (1 - discount / 100)).toFixed(2) : null,
+        size: variant.size,
+        variantId: variant._id,
+        discount: discount,
+        stock: stockToUse ?? undefined,
+        seller: currentProductForVariant.seller,
+        sellerEmail: currentProductForVariant.sellerEmail,
+        description: currentProductForVariant.description,
+        category: currentProductForVariant.category,
+        categoryName: currentProductForVariant.categoryName,
+        categoryPath: currentProductForVariant.categoryPath
+      };
+
+      dispatch({ type: 'ADD_ITEM', payload: itemToAdd });
+      setVariantModalOpen(false);
+
+      setTimeout(() => {
+        setCurrentProductForVariant(null);
+      }, 400);
     };
 
-    dispatch({ type: 'ADD_ITEM', payload: itemToAdd });
-    setVariantModalOpen(false);
-
-    // Delay clearing product to allow exit animation
-    setTimeout(() => {
-      setCurrentProductForVariant(null);
-    }, 400);
+    void addVariantWithLiveStock();
   };
 
   const value = {

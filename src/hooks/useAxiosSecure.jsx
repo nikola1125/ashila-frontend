@@ -25,7 +25,7 @@ const createClient = ({ baseURL, timeoutMs }) => {
 
 const useAxiosSecure = () => {
   const baseURL = normalizeBaseUrl(import.meta.env.VITE_BASE_API);
-  const timeoutMs = 15000;
+  const timeoutMs = 30000; // Increased from 15s to 30s for Render cold starts
 
   const publicApi = useMemo(() => createClient({ baseURL, timeoutMs }), [baseURL]);
 

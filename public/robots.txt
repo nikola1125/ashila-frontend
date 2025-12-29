@@ -1,0 +1,18 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://www.farmaciashila.com/sitemap.xml
+
+# Block admin areas
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /api
+
+# Allow specific important pages
+Allow: /shop
+Allow: /product
+Allow: /contact-us
+
+# Crawl delay for respectful crawling
+Crawl-delay: 1

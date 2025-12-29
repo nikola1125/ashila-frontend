@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useRef, useState } from 'react';
 import { FaTrash, FaPlus, FaMinus } from 'react-icons/fa';
 import { CartContext } from '../../Context/Cart/CartContext';
 import { AuthContext } from '../../Context/Auth/AuthContext';
@@ -8,9 +8,20 @@ import { groupItemsBySeller } from '../../utils/groupItemsBySeller';
 import { Helmet } from 'react-helmet-async';
 import { useLocation, useNavigate } from 'react-router-dom';
 
+ const parseStockValue = (value) => {
+   if (value === undefined || value === null) return null;
+   if (typeof value === 'number') return Number.isFinite(value) ? value : null;
+   const matches = String(value).match(/\d+/g);
+   if (!matches || matches.length === 0) return null;
+   const n = Number(matches[matches.length - 1]);
+   return Number.isFinite(n) ? n : null;
+ };
+
 const Cart = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const stockCacheRef = useRef(new Map());
+  const [pendingById, setPendingById] = useState({});
   const {
     items,
     totalQuantity,
@@ -22,6 +33,72 @@ const Cart = () => {
   } = useContext(CartContext);
   const { user } = useContext(AuthContext);
   const { publicApi, privateApi } = useAxiosSecure();
+
+  const getLatestStock = async (productId) => {
+    if (!productId) return null;
+    const cache = stockCacheRef.current;
+    const now = Date.now();
+    const existing = cache.get(productId);
+
+    if (existing?.value !== undefined && now - existing.ts < 5000) {
+      return existing.value;
+    }
+
+    if (existing?.promise) {
+      return existing.promise;
+    }
+
+    const promise = publicApi
+      .get(`/products/${productId}`)
+      .then((product) => {
+        const stock = Number(product?.stock);
+        const value = Number.isFinite(stock) ? stock : null;
+        cache.set(productId, { value, ts: Date.now() });
+        return value;
+      })
+      .catch(() => {
+        cache.delete(productId);
+        return null;
+      });
+
+    cache.set(productId, { promise });
+    return promise;
+  };
+
+  const handleIncrease = async (item) => {
+    const cartKey = item.cartItemId || item.id;
+    if (pendingById[cartKey]) return;
+
+    setPendingById((prev) => ({ ...prev, [cartKey]: true }));
+    const latestStock = await getLatestStock(item.id);
+
+    try {
+      if (latestStock !== null) {
+        if (latestStock <= 0) {
+          toast.error('Out of stock');
+          updateQuantity(cartKey, 0, latestStock);
+          return;
+        }
+
+        if (item.quantity >= latestStock) {
+          toast.error(`Only ${latestStock} left in stock`);
+          updateQuantity(cartKey, latestStock, latestStock);
+          return;
+        }
+
+        updateQuantity(cartKey, item.quantity + 1, latestStock);
+        return;
+      }
+
+      updateQuantity(cartKey, item.quantity + 1);
+    } finally {
+      setPendingById((prev) => {
+        const next = { ...prev };
+        delete next[cartKey];
+        return next;
+      });
+    }
+  };
 
   const handleCheckout = async () => {
     try {
@@ -103,6 +180,15 @@ const Cart = () => {
                             Discounted price: {Number(item.discountedPrice).toLocaleString()} ALL
                           </p>
                         )}
+                      {(() => {
+                        const stock = parseStockValue(item.stock);
+                        if (stock === null) return null;
+                        return (
+                          <p className={`text-xs font-medium ${stock <= 5 ? 'text-orange-600' : 'text-green-600'}`}>
+                            {stock <= 5 ? `Only ${stock} left!` : `${stock} available`}
+                          </p>
+                        );
+                      })()}
                     </div>
                   </div>
                   <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-start">
@@ -126,13 +212,20 @@ const Cart = () => {
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          updateQuantity(item.cartItemId || item.id, item.quantity + 1);
+                          handleIncrease(item);
                         }}
-                        disabled={item.stock !== undefined && item.stock !== null && item.quantity >= Number(item.stock)}
+                        disabled={(() => {
+                          const stock = parseStockValue(item.stock);
+                          return pendingById[item.cartItemId || item.id] || (stock !== null && item.quantity >= stock);
+                        })()}
                         className="p-2 sm:p-2.5 bg-[#faf9f6] hover:bg-[#946259] disabled:opacity-40 disabled:cursor-not-allowed text-[#946259] transition-all border-2 border-[#946259] min-w-[44px] min-h-[44px] flex items-center justify-center text-lg leading-none"
                         aria-label="Increase quantity"
                       >
-                        +
+                        {pendingById[item.cartItemId || item.id] ? (
+                          <span className="inline-block w-4 h-4 border-2 border-[#946259] border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                          '+'
+                        )}
                       </button>
                     </div>
                     <button

@@ -1,15 +1,36 @@
 // Hero with full screen background video
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const Hero = () => {
   const navigate = useNavigate();
   const heroRef = useRef(null);
+  const [videoLoaded, setVideoLoaded] = useState(false);
+  const [videoError, setVideoError] = useState(false);
+
+  useEffect(() => {
+    // Preload video
+    const video = document.createElement('video');
+    video.src = '/images/backg.mp4';
+    video.muted = true;
+    video.playsInline = true;
+    
+    video.addEventListener('canplaythrough', () => {
+      setVideoLoaded(true);
+    });
+    
+    video.addEventListener('error', () => {
+      setVideoError(true);
+    });
+    
+    // Start loading
+    video.load();
+  }, []);
 
   return (
     <section
       ref={heroRef}
-      className="relative w-full h-[60vh] sm:h-[70vh] md:h-screen overflow-hidden z-0 bg-cover bg-center bg-gray-100"
+      className="relative w-full h-[60vh] sm:h-[70vh] md:h-screen overflow-hidden z-0 bg-cover bg-center"
       style={{
         opacity: 1,
         transform: 'translateZ(0)',
@@ -24,24 +45,34 @@ const Hero = () => {
         touchAction: 'pan-y',
         WebkitOverflowScrolling: 'touch',
         overscrollBehavior: 'contain',
-        // backgroundImage: 'url(/images/background.png)' - Removed as per user request to avoid flash before video
+        // Show background image immediately while video loads
+        backgroundImage: videoLoaded ? 'none' : 'url(/images/background.png)',
+        backgroundColor: videoError ? '#f3f4f6' : 'transparent'
       }}
     >
       {/* Background video with fallback */}
-      <video
-        className="absolute inset-0 w-full h-full object-cover"
-        src="/images/backg.mp4"
-        autoPlay
-        loop
-        muted
-        playsInline
-        preload="auto"
-        aria-hidden="true"
-        onError={(e) => {
-          console.log('Video failed to load, using background image');
-          e.target.style.display = 'none';
-        }}
-      />
+      {(videoLoaded || !videoError) && (
+        <video
+          className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300"
+          src="/images/backg.mp4"
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="metadata"
+          aria-hidden="true"
+          style={{
+            opacity: videoLoaded ? 1 : 0,
+            transform: 'translateZ(0)',
+            willChange: 'transform'
+          }}
+          onCanPlayThrough={() => setVideoLoaded(true)}
+          onError={() => {
+            console.log('Video failed to load, using background image');
+            setVideoError(true);
+          }}
+        />
+      )}
       {/* Dark overlay */}
       <div
         className="absolute inset-0 bg-black/35 z-0"

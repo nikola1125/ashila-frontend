@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { X, Trash2, Plus, Minus, ShoppingBag } from 'lucide-react';
 import { CartContext } from '../../../Context/Cart/CartContext';
@@ -7,6 +7,15 @@ import useAxiosSecure from '../../../hooks/useAxiosSecure';
 import { getProductImage } from '../../../utils/productImages';
 import { groupItemsBySeller } from '../../../utils/groupItemsBySeller';
 import { toast } from 'react-toastify';
+
+ const parseStockValue = (value) => {
+   if (value === undefined || value === null) return null;
+   if (typeof value === 'number') return Number.isFinite(value) ? value : null;
+   const matches = String(value).match(/\d+/g);
+   if (!matches || matches.length === 0) return null;
+   const n = Number(matches[matches.length - 1]);
+   return Number.isFinite(n) ? n : null;
+ };
 
 const CartSidebar = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
@@ -20,6 +29,74 @@ const CartSidebar = ({ isOpen, onClose }) => {
   const { user } = useContext(AuthContext);
   const { publicApi, privateApi } = useAxiosSecure();
   const sidebarRef = useRef(null);
+  const stockCacheRef = useRef(new Map());
+  const [pendingById, setPendingById] = useState({});
+
+  const getLatestStock = async (productId) => {
+    if (!productId) return null;
+    const cache = stockCacheRef.current;
+    const now = Date.now();
+    const existing = cache.get(productId);
+
+    if (existing?.value !== undefined && now - existing.ts < 5000) {
+      return existing.value;
+    }
+
+    if (existing?.promise) {
+      return existing.promise;
+    }
+
+    const promise = publicApi
+      .get(`/products/${productId}`)
+      .then((product) => {
+        const stock = Number(product?.stock);
+        const value = Number.isFinite(stock) ? stock : null;
+        cache.set(productId, { value, ts: Date.now() });
+        return value;
+      })
+      .catch(() => {
+        cache.delete(productId);
+        return null;
+      });
+
+    cache.set(productId, { promise });
+    return promise;
+  };
+
+  const handleIncrease = async (item) => {
+    const cartKey = item.cartItemId || item.id;
+    if (pendingById[cartKey]) return;
+
+    setPendingById((prev) => ({ ...prev, [cartKey]: true }));
+    const latestStock = await getLatestStock(item.id);
+
+    try {
+      if (latestStock !== null) {
+        if (latestStock <= 0) {
+          toast.error('Out of stock');
+          updateQuantity(cartKey, 0, latestStock);
+          return;
+        }
+
+        if (item.quantity >= latestStock) {
+          toast.error(`Only ${latestStock} left in stock`);
+          updateQuantity(cartKey, latestStock, latestStock);
+          return;
+        }
+
+        updateQuantity(cartKey, item.quantity + 1, latestStock);
+        return;
+      }
+
+      updateQuantity(cartKey, item.quantity + 1);
+    } finally {
+      setPendingById((prev) => {
+        const next = { ...prev };
+        delete next[cartKey];
+        return next;
+      });
+    }
+  };
 
   // Handle body scroll locking
   useEffect(() => {
@@ -80,7 +157,7 @@ const CartSidebar = ({ isOpen, onClose }) => {
     <>
       {/* Backdrop */}
       <div
-        className={`ixed left-0 right-0 bottom-0 top-[64px] bg-black/50 z-[9998] transition-opacity duration-300 ${isOpen ? 'opacity-100 visible' : 'opacity-0 invisible'
+        className={`fixed left-0 right-0 bottom-0 top-[64px] bg-black/50 z-[9998] transition-opacity duration-300 ${isOpen ? 'opacity-100 visible' : 'opacity-0 invisible'
           }`}
         aria-hidden="true"
       />
@@ -182,7 +259,7 @@ const CartSidebar = ({ isOpen, onClose }) => {
                       <div className="flex items-center border border-gray-200 rounded-lg bg-white">
                         <button
                           onClick={() => updateQuantity(item.cartItemId || item.id, Math.max(1, item.quantity - 1))}
-                          className="p-1.5 hover:bg-gray-50 text-gray-600 disabled:opacity-50"
+                          className="p-2.5 sm:p-1.5 hover:bg-gray-50 text-gray-600 disabled:opacity-50 min-w-[44px] min-h-[44px] flex items-center justify-center transition active:scale-[0.98]"
                           disabled={item.quantity <= 1}
                         >
                           <Minus className="w-3.5 h-3.5" />
@@ -191,10 +268,18 @@ const CartSidebar = ({ isOpen, onClose }) => {
                           {item.quantity}
                         </span>
                         <button
-                          onClick={() => updateQuantity(item.cartItemId || item.id, item.quantity + 1)}
-                          className="p-1.5 hover:bg-gray-50 text-gray-600"
+                          onClick={() => handleIncrease(item)}
+                          className="p-2.5 sm:p-1.5 hover:bg-gray-50 text-gray-600 min-w-[44px] min-h-[44px] flex items-center justify-center transition active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                          disabled={(() => {
+                            const stock = parseStockValue(item.stock);
+                            return pendingById[item.cartItemId || item.id] || (stock !== null && item.quantity >= stock);
+                          })()}
                         >
-                          <Plus className="w-3.5 h-3.5" />
+                          {pendingById[item.cartItemId || item.id] ? (
+                            <span className="inline-block w-3.5 h-3.5 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
+                          ) : (
+                            <Plus className="w-3.5 h-3.5" />
+                          )}
                         </button>
                       </div>
 
