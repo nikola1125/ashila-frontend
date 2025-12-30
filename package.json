@@ -5,9 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host",
-    "build": "vite build",
+    "build": "vite build && node generate-dynamic-sitemap.js",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "keep-alive": "concurrently \"npm run dev\" \"ping -t 8.8.8.8\"",
+    "sitemap": "node generate-dynamic-sitemap.js"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.4",

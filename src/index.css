@@ -1,4 +1,11 @@
 @import 'tailwindcss';
+@font-face {
+  font-family: 'Polyglot';
+  src: url('./Polyglot.otf') format('opentype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
 @plugin "daisyui" {
   themes: light;
 }
@@ -1021,6 +1028,24 @@ select {
   
   .text-responsive-lg {
     font-size: 1.125rem;
+  }
+}
+
+/* Polyglot font for elegant signature text - consistent across all devices */
+.tomatoes-text {
+  font-family: 'Polyglot', cursive !important;
+  font-weight: 300 !important;
+  letter-spacing: 0.02em !important;
+  /* Ensure font loads consistently */
+  font-display: swap !important;
+}
+
+/* Ensure Polyglot font works on desktop too */
+@media (min-width: 769px) {
+  .tomatoes-text {
+    font-family: 'Polyglot', cursive !important;
+    font-weight: 300 !important;
+    letter-spacing: 0.02em !important;
   }
 }
 

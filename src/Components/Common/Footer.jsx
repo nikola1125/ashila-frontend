@@ -114,9 +114,13 @@ const Footer = () => {
         </div>
 
         {/* Copyright */}
-        <div className="border-t border-gray-200 pt-4 md:pt-8 text-center">
-          <p className="text-sm text-[#4A3628] font-medium">
+        <div className="border-t border-gray-200 text-center">
+          <p className="text-sm text-[#4A3628] font-medium mt-1">
             © {new Date().getFullYear()} Ashila. Të gjitha të drejtat e rezervuara.
+          </p>
+          <hr className="w-64 mx-auto mt-3 border-gray-600" style={{ transform: 'translateY(8px)' }} />
+          <p className="text-xs text-black font-medium mt-3 tomatoes-text" style={{ fontSize: '13px', transform: 'translateY(16px)' }}>
+            Crafted by N & S Tech Studio
           </p>
         </div>
       </div>
