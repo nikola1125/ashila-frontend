@@ -12,7 +12,7 @@ export const ADMIN_CATEGORY_TREE = [
       },
       {
         label: 'Per floke',
-        children: [],
+        children: ['Skalp i thate', 'Skalp i yndyrshem', 'Skalp sensitive', 'Renia e flokut', 'Aksesore'],
       },
     ],
   },
@@ -22,7 +22,16 @@ export const ADMIN_CATEGORY_TREE = [
   },
   {
     label: 'Nena & femije',
-    children: [],
+    children: [
+      {
+        label: 'Kujdesi per nenen',
+        children: ['Shtatezania', 'Pas lindjes', 'Ushqyerja me gji'],
+      },
+      {
+        label: 'Kujdesi per femije',
+        children: ['Ushqim per femije', 'Pelena', 'Aksesore'],
+      },
+    ],
   },
   {
     label: 'Suplemente & vitamina',

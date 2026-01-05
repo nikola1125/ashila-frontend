@@ -73,8 +73,116 @@ const Shop = () => {
   const [activeVariantForSidebar, setActiveVariantForSidebar] = useState(null);
 
 
-  // Helper helper to normalize text for comparison
-  const normalizeText = useCallback((text) => text ? text.toLowerCase().replace(/[^a-z0-9]/g, '') : '', []);
+  // Helper to normalize text for comparison
+  const normalizeText = useCallback((text) => {
+    if (!text) return '';
+    // Systemic normalization for ALL products:
+    // 1. Remove accents/Albanian specifics
+    // 2. Remove all non-alphanumeric chars
+    // 3. Handle specific group synonyms systematically
+    let normalized = text.toLowerCase()
+        .replace(/[ëèé]/g, 'e')
+        .replace(/[ç]/g, 'c')
+        .replace(/fytyre/g, 'lekure')
+        .replace(/trupin/g, 'trupi')
+        .replace(/floke/g, 'flokë') // align potential mismatches
+        .replace(/[^a-z0-9]/g, '');
+    return normalized;
+  }, []);
+
+  // Create mapping from actual form values to filter slugs
+  const optionToSlugMap = {
+    // Tipi i lekures
+    "Te gjitha": "te-gjitha",
+    "Lekure normale": "lekure-normale", 
+    "Lekure e yndyrshme": "lekure-e-yndyrshme",
+    "Lekure e thate": "lekure-e-thate",
+    "Lekure mikes": "lekure-mikes",
+    "Lekure sensitive": "lekure-sensitive",
+
+    // Synonyms for slug matching
+    "fytyre-normale": "lekure-normale",
+    "fytyre-e-yndyrshme": "lekure-e-yndyrshme",
+    "fytyre-e-thate": "lekure-e-thate",
+    "fytyre-mikes": "lekure-mikes",
+    "fytyre-sensitive": "lekure-sensitive",
+    
+    // Problematikat e fytyres
+    "Akne": "akne",
+    "Rrudha": "rrudha", 
+    "Hiperpigmentim": "hiperpigmentim",
+    "Balancim yndyre/pore evidente": "balancim-yndyre-pore-evidente",
+    "Pikat e zeza": "pika-te-zeza",
+    "Dehidratim": "dehidratim",
+    "Skuqje": "skuqje",
+    "Rozacea": "rozacea",
+    
+    // Per trupin
+    "Lares trupi": "lares-trupi",
+    "Hidratues trupi": "hidratues-trupi",
+    "Scrub trupi": "scrub-trupi",
+    "Akne ne trup": "akne-ne-trup",
+    "Kujdesi ndaj diellit": "kujdesi-ndaj-diellit",
+    "Deodorant": "deodorant",
+    "Vaj per trupin": "vaj-per-trupin",
+    "Krem per duart & këmbet": "krem-per-duart-kembet",
+    
+    // Per flokë
+    "Skalp i thate": "skalp-i-thate",
+    "Skalp i yndyrshem": "skalp-i-yndyrshem", 
+    "Skalp sensitive": "skalp-sensitive",
+    "Renia e flokut": "renia-e-flokut",
+    "Aksesore": "aksesore-floke",
+    
+    // Higjene
+    "Lares intim": "lares-intim",
+    "Peceta intime": "peceta-intime",
+    "Furce dhembesh": "furce-dhembesh",
+    "Paste dhembesh": "paste-dhembesh",
+    "Fill dentar/furca interdentare": "fill-dentar-furca-interdentare",
+    
+    // Nena dhe femije
+    "Shtatezania": "shtatezania",
+    "Pas lindjes": "pas-lindjes",
+    "Ushqyerja me gji": "ushqyerja-me-gji",
+    "Ushqim per femije": "ushqim-per-femije",
+    "Pelena": "pelena",
+    "Aksesore femije": "aksesore-femije",
+    
+    // Suplemente
+    "Vitamina": "vitamina",
+    "Suplemente per shendetin": "suplemente-per-shendetin",
+    "Minerale": "minerale", 
+    "Suplemente bimore": "suplemente-bimore",
+    
+    // Monitoruesit e shendetit
+    "Peshore": "peshore",
+    "Aparat tensioni": "aparat-tensioni",
+    "Termometer": "termometer",
+    "Monitorues te diabetit": "monitorues-te-diabetit",
+    "Oksimeter": "oksimeter",
+    "Paisje ortopedike": "paisje-ortopedike",
+    
+    // Product types
+    "Lares vajor": "lares-vajor",
+    "Lares ujor": "lares-ujor",
+    "Toner": "toner",
+    "Exfoliant": "exfoliant",
+    "Serume": "serume",
+    "Krem per syte": "krem-per-syte",
+    "Vitamin C/antioxidant": "vitamin-c-antioxidant",
+    "Hidratues": "hidratues",
+    "Retinol": "retinol",
+    "SPF": "spf",
+    "Eye patches": "eye-patches",
+    "Acne patches": "acne-patches",
+    "Maske fytyre": "maske-fytyre",
+    "Spot treatment": "spot-treatment",
+    "Uje termal": "uje-termal",
+    "Peeling Pads": "peeling-pads",
+    "Lipbalm": "lipbalm",
+    "Set me produkte": "set-me-produkte"
+  };
 
   // Calculate dynamic filter counts based on allMedicines
   const filterOptions = useMemo(() => {
@@ -85,28 +193,34 @@ const Shop = () => {
     const filterGroups = {
       problematica: ['akne', 'rrudha', 'hiperpigmentim', 'balancim-yndyre-pore-evidente', 'pika-te-zeza', 'dehidratim', 'skuqje', 'rozacea'],
       skinTypes: ['lekure-normale', 'lekure-e-yndyrshme', 'lekure-e-thate', 'lekure-mikes', 'lekure-sensitive'],
-      bodyHair: ['lares-trupi', 'hidratues-trupi', 'scrub-trupi', 'akne-ne-trup', 'kujdesi-ndaj-diellit', 'deodorant', 'vaj-per-trupin', 'krem-per-duart-dhe-kembet', 'skalp-i-thate', 'skalp-i-yndyrshem', 'skalp-sensitive', 'renia-e-flokut'],
+      bodyHair: ['lares-trupi', 'hidratues-trupi', 'scrub-trupi', 'akne-ne-trup', 'kujdesi-ndaj-diellit', 'deodorant', 'vaj-per-trupin', 'krem-per-duart-dhe-kembet', 'skalp-i-thate', 'skalp-i-yndyrshem', 'skalp-sensitive', 'renia-e-flokut', 'aksesore-floke'],
       hygiene: ['lares-intim', 'peceta-intime', 'furce-dhembesh', 'paste-dhembesh', 'fill-dentar-furca-interdentare'],
-      motherChild: ['shtatezania', 'pas-lindjes', 'ushqyerja-me-gji', 'kujdesi-per-femijen'],
+      motherChild: ['shtatezania', 'pas-lindjes', 'ushqyerja-me-gji', 'ushqim-per-femije', 'pelena', 'aksesore'],
       supplements: ['vitamina', 'suplemente-per-shendetin', 'minerale', 'suplemente-bimore'],
       healthMonitors: ['peshore', 'aparat-tensioni', 'termometer', 'monitorues-te-diabetit', 'oksimeter', 'paisje-ortopedike'],
       productTypes: ['lares-vajor', 'lares-ujor', 'toner', 'exfoliant', 'serume', 'krem-per-syte', 'vitamin-c-antioxidant', 'hidratues', 'retinol', 'spf', 'eye-patches', 'acne-patches', 'maske-fytyre', 'spot-treatment', 'uje-termal', 'peeling-pads', 'lipbalm', 'set-me-produkte']
     };
 
-    // Helper to check match (reused logic from matchesFilter but for counting)
+    // Helper to check match (Synchronized with matchesFilter for 100% accuracy)
     const checkMatch = (item, filterId) => {
       const normalizedFilter = normalizeText(filterId);
       const itemSub = normalizeText(item.subcategory);
       const itemOpt = normalizeText(item.option);
-      const itemDesc = normalizeText(item.description);
-      const itemType = normalizeText(item.bestsellerCategory);
+      const itemOpts = item.options ? item.options.map(opt => normalizeText(opt)) : [];
+      const itemOptSlugs = item.options ? item.options.map(opt => normalizeText(optionToSlugMap[opt] || opt)) : [];
       const itemProdType = normalizeText(item.productType);
+      const itemType = normalizeText(item.bestsellerCategory);
+      const itemPath = normalizeText(item.categoryName);
+      const itemProblem = normalizeText(item.skinProblem);
 
       return itemSub.includes(normalizedFilter) ||
         itemOpt.includes(normalizedFilter) ||
-        (itemDesc && itemDesc.includes(normalizedFilter)) ||
-        itemType.includes(normalizedFilter) ||
-        itemProdType.includes(normalizedFilter);
+        itemOpts.some(opt => opt.includes(normalizedFilter)) ||
+        itemOptSlugs.some(slug => slug.includes(normalizedFilter)) ||
+        itemProdType.includes(normalizedFilter) ||
+        itemPath.includes(normalizedFilter) ||
+        itemProblem.includes(normalizedFilter) ||
+        itemType.includes(normalizedFilter);
     };
 
     // Calculate actual counts
@@ -130,11 +244,11 @@ const Shop = () => {
         { id: 'rozacea', label: 'Rozacea' },
       ].map(opt => ({ ...opt, count: counts[opt.id] || 0 })),
       skinTypes: [
-        { id: 'lekure-normale', label: 'Lëkurë normale' },
-        { id: 'lekure-e-yndyrshme', label: 'Lëkurë e yndyrshme' },
-        { id: 'lekure-e-thate', label: 'Lëkurë e thate' },
-        { id: 'lekure-mikes', label: 'Lëkurë mikes' },
-        { id: 'lekure-sensitive', label: 'Lëkurë sensitive' },
+        { id: 'lekure-normale', label: 'Lekure normale' },
+        { id: 'lekure-e-yndyrshme', label: 'Lekure e yndyrshme' },
+        { id: 'lekure-e-thate', label: 'Lekure e thate' },
+        { id: 'lekure-mikes', label: 'Lekure mikes' },
+        { id: 'lekure-sensitive', label: 'Lekure sensitive' },
       ].map(opt => ({ ...opt, count: counts[opt.id] || 0 })),
       bodyHair: [
         { id: 'lares-trupi', label: 'Larës trupi' },
@@ -149,6 +263,7 @@ const Shop = () => {
         { id: 'skalp-i-yndyrshem', label: 'Skalp i yndyrshem' },
         { id: 'skalp-sensitive', label: 'Skalp sensitive' },
         { id: 'renia-e-flokut', label: 'Renia e flokut' },
+        { id: 'aksesore-floke', label: 'Aksesore' },
       ].map(opt => ({ ...opt, count: counts[opt.id] || 0 })),
       hygiene: [
         { id: 'lares-intim', label: 'Larës intim' },
@@ -161,7 +276,9 @@ const Shop = () => {
         { id: 'shtatezania', label: 'Shtatezania' },
         { id: 'pas-lindjes', label: 'Pas lindjes' },
         { id: 'ushqyerja-me-gji', label: 'Ushqyerja me gji' },
-        { id: 'kujdesi-per-femijen', label: 'Kujdesi per femijen' },
+        { id: 'ushqim-per-femije', label: 'Ushqim per femije' },
+        { id: 'pelena', label: 'Pelena' },
+        { id: 'aksesore', label: 'Aksesore' },
       ].map(opt => ({ ...opt, count: counts[opt.id] || 0 })),
       supplements: [
         { id: 'vitamina', label: 'Vitamina' },
@@ -184,7 +301,7 @@ const Shop = () => {
         { id: 'exfoliant', label: 'Exfoliant' },
         { id: 'serume', label: 'Serume' },
         { id: 'krem-per-syte', label: 'Krem per syte' },
-        { id: 'vitamin-c-antioxidant', label: 'Vitamin C/antioxidant' },
+        { id: 'vitamin-cantioxidant', label: 'Vitamin C/antioxidant' },
         { id: 'hidratues', label: 'Hidratues' },
         { id: 'retinol', label: 'Retinol' },
         { id: 'spf', label: 'SPF' },
@@ -198,7 +315,7 @@ const Shop = () => {
         { id: 'set-me-produkte', label: 'Set me produkte' },
       ].map(opt => ({ ...opt, count: counts[opt.id] || 0 })),
     };
-  }, [allMedicines, normalizeText]);
+  }, [allMedicines, normalizeText, optionToSlugMap]);
 
   // Handle filter toggles
   const toggleFilter = useCallback((filterType, id) => {
@@ -283,18 +400,20 @@ const Shop = () => {
     setSearchTerm(searchParam || '');
   }, [searchParam]);
 
-  // Filter and sort medicines
-  const filteredAndSortedMedicines = useMemo(() => {
-    let filtered = [...allMedicines];
+    // Filter and sort medicines
+    const filteredAndSortedMedicines = useMemo(() => {
+        let filtered = [...allMedicines];
 
-    // 0. Skin Problem Filter (Strict)
-    if (skinProblemParam) {
-      filtered = filtered.filter(item =>
-        item.skinProblem?.toLowerCase() === skinProblemParam.toLowerCase()
-      );
-    }
+        // 0. Skin Problem Filter (Strict but with fallback for hyphenated URLs)
+        if (skinProblemParam) {
+            const normalizedParam = skinProblemParam.toLowerCase().replace(/-/g, '');
+            filtered = filtered.filter(item => {
+                const prob = item.skinProblem?.toLowerCase().replace(/-/g, '') || '';
+                return prob === normalizedParam;
+            });
+        }
 
-    // 1. URL Category Filter
+        // 1. URL Category Filter
     if (categoryParam) {
       // Handle slug-to-name matching safely
       const normalizedCatParam = categoryParam.toLowerCase().replace(/-/g, ' ');
@@ -305,22 +424,33 @@ const Shop = () => {
       );
     }
 
-    // 2. URL Subcategory Filter
+    // 2. URL Subcategory Filter (Also matches options)
     if (subcategoryParam) {
-      // Create a map of slugs to exact DB strings if needed, or use broad matching
-      const normalizedSubParam = subcategoryParam.toLowerCase().replace(/-/g, ' ');
+      const normalizedSubParam = normalizeText(subcategoryParam);
 
       filtered = filtered.filter(item => {
-        // Check against subcategory, option fields
-        const sub = item.subcategory?.toLowerCase() || '';
-        const opt = item.option?.toLowerCase() || '';
-        const type = item.bestsellerCategory?.toLowerCase() || ''; // sometimes used for grouping
+        const sub = normalizeText(item.subcategory);
+        const opt = normalizeText(item.option);
+        const opts = item.options ? item.options.map(o => normalizeText(o)) : [];
+        const optSlugs = item.options ? item.options.map(o => normalizeText(optionToSlugMap[o] || o)) : [];
+        const prodType = normalizeText(item.productType);
+        const type = normalizeText(item.bestsellerCategory);
+        const path = normalizeText(item.categoryName);
+        const name = normalizeText(item.itemName);
 
-        // Try matching against various product fields
-        return sub.includes(normalizedSubParam) ||
+        // SYSTEMIC MATCHING:
+        // We look for the parameter anywhere in the product's classification tree
+        const matchesAnywhere = 
+          sub.includes(normalizedSubParam) ||
           opt.includes(normalizedSubParam) ||
-          opt.replace(/\s+/g, '-').includes(subcategoryParam) ||
-          type.includes(normalizedSubParam);
+          opts.some(o => o.includes(normalizedSubParam)) ||
+          optSlugs.some(slug => slug.includes(normalizedSubParam)) ||
+          prodType.includes(normalizedSubParam) ||
+          path.includes(normalizedSubParam) ||
+          type.includes(normalizedSubParam) ||
+          name.includes(normalizedSubParam);
+
+        return matchesAnywhere;
       });
     }
 
@@ -336,26 +466,30 @@ const Shop = () => {
     }
 
     // 4. Sidebar Checkbox Filters
-    const normalizeText = (text) => text ? text.toLowerCase().replace(/[^a-z0-9]/g, '') : '';
-
     // Helper to check if item matches any selected filter in a group
     const matchesFilter = (selectedFilters, item) => {
       if (selectedFilters.length === 0) return true;
+      
       const itemSub = normalizeText(item.subcategory);
       const itemOpt = normalizeText(item.option);
-      const itemDesc = normalizeText(item.description);
-      const itemType = normalizeText(item.bestsellerCategory); // fallback
+      const itemOpts = item.options ? item.options.map(opt => normalizeText(opt)) : [];
+      const itemOptSlugs = item.options ? item.options.map(opt => normalizeText(optionToSlugMap[opt] || opt)) : [];
       const itemProdType = normalizeText(item.productType);
+      const itemType = normalizeText(item.bestsellerCategory);
+      const itemPath = normalizeText(item.categoryName);
 
       return selectedFilters.some(filterId => {
-        const normalizedFilter = normalizeText(filterId); // e.g., 'akne', 'lekurenormale'
+        const normalizedFilter = normalizeText(filterId);
 
-        // Exact-ish match preference, but loose check for description/multiple tags
+        // We use .includes for maximum discovery cross-compatibility
+        // but normalize both sides to ensure slugs like 'lekure-normale' match 'Lekure normale'
         return itemSub.includes(normalizedFilter) ||
           itemOpt.includes(normalizedFilter) ||
-          (itemDesc && itemDesc.includes(normalizedFilter)) ||
-          itemType.includes(normalizedFilter) ||
-          itemProdType.includes(normalizedFilter);
+          itemOpts.some(opt => opt.includes(normalizedFilter)) ||
+          itemOptSlugs.some(slug => slug.includes(normalizedFilter)) ||
+          itemProdType.includes(normalizedFilter) ||
+          itemPath.includes(normalizedFilter) ||
+          itemType.includes(normalizedFilter);
       });
     };
 
@@ -402,7 +536,7 @@ const Shop = () => {
     }
 
     return filtered;
-  }, [allMedicines, searchTerm, sortBy, categoryParam, subcategoryParam, selectedProblems, selectedSkinTypes, selectedProductTypes, selectedBodyHair, selectedHygiene, selectedMotherChild, selectedSupplements, selectedHealthMonitors]);
+  }, [allMedicines, searchTerm, sortBy, categoryParam, subcategoryParam, selectedProblems, selectedSkinTypes, selectedProductTypes, selectedBodyHair, selectedHygiene, selectedMotherChild, selectedSupplements, selectedHealthMonitors, normalizeText, optionToSlugMap]);
 
   // Pagination
   const totalFilteredItems = filteredAndSortedMedicines.length;
@@ -417,10 +551,24 @@ const Shop = () => {
   if (isLoading) return <DataLoading label="Medicines" />;
   if (error) return <LoadingError label="Medicines" />;
 
+  // Determine SEO title/description based on active filters
+  const seoDetails = useMemo(() => {
+    let title = "Produktet | Farmacia Shila";
+    let description = "Eksploroni gamën tonë të gjerë të produkteve farmaceutike dhe kozmetike.";
+    
+    if (subcategoryParam) {
+      const displaySub = subcategoryParam.replace(/-/g, ' ');
+      title = `${displaySub.charAt(0).toUpperCase() + displaySub.slice(1)} | Farmacia Shila`;
+    }
+    
+    return { title, description };
+  }, [subcategoryParam]);
+
   return (
     <>
       <Helmet key={location.pathname}>
-        <title>Shop</title>
+        <title>{seoDetails.title}</title>
+        <meta name="description" content={seoDetails.description} />
       </Helmet>
       <section className="min-h-[80vh] pt-20 lg:pt-[84px] pb-4 sm:pt-24 sm:pb-8 bg-white relative overflow-x-hidden">
         <div className="max-w-full mx-auto px-4 md:px-4 lg:px-6 relative">

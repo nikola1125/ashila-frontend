@@ -1,7 +1,7 @@
 @import 'tailwindcss';
 @font-face {
   font-family: 'Polyglot';
-  src: url('./Polyglot.otf') format('opentype');
+  src: url('/Polyglot.otf') format('opentype');
   font-weight: 300;
   font-style: normal;
   font-display: swap;
@@ -9,7 +9,7 @@
 
 @font-face {
   font-family: 'VampireHeart';
-  src: url('./VampireHeart-W26G.ttf') format('truetype');
+  src: url('/VampireHeart-W26G.ttf') format('truetype');
   font-weight: 300;
   font-style: normal;
   font-display: swap;
@@ -1039,7 +1039,7 @@ select {
   }
 }
 
-/* Polyglot font for mobile, VampireHeart for desktop - crafted signature text */
+/* Polyglot font for crafted signature text - consistent across all devices */
 .tomatoes-text {
   font-family: 'Polyglot', cursive !important;
   font-weight: 300 !important;
@@ -1048,10 +1048,10 @@ select {
   font-display: swap !important;
 }
 
-/* Use VampireHeart font on desktop for crafted text */
+/* Ensure Polyglot font works on desktop too */
 @media (min-width: 769px) {
   .tomatoes-text {
-    font-family: 'VampireHeart', cursive !important;
+    font-family: 'Polyglot', cursive !important;
     font-weight: 300 !important;
     letter-spacing: 0.02em !important;
   }

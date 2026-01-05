@@ -1,6 +1,6 @@
-import { Button } from '@headlessui/react';
 import React, { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { generateDirectProductUrl } from '../../utils/productUrls';
 import { CartContext } from '../../Context/Cart/CartContext';
 
 const ShopTable = ({
@@ -40,13 +40,28 @@ const ShopTable = ({
                   <td>
                     <div className="flex items-center gap-3">
                       <div className="avatar">
-                        <div className="mask mask-squircle h-12 w-12 cursor-pointer" onClick={() => {
+                        <div className="h-12 w-12 cursor-pointer flex-shrink-0 bg-gray-100 overflow-hidden relative" style={{ borderRadius: '999px' }} onClick={() => {
                           window.scrollTo({ top: 0, behavior: 'instant' });
-                          navigate(`/product/${medicine._id}`);
+                          navigate(generateDirectProductUrl(medicine));
                         }}>
+                          {/* Discount Badge */}
+                          {medicine.discount && Number(medicine.discount) > 0 && (
+                            <div className="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold px-1.5 py-0.5" style={{ borderRadius: '999px' }}>
+                              -{Math.round(medicine.discount)}%
+                            </div>
+                          )}
                           <img
                             src={medicine.image}
-                            alt="Avatar Tailwind CSS Component"
+                            alt={medicine.itemName  }
+                            className="w-full h-full object-cover"
+                            style={{
+                              objectPosition: 'center',
+                              transform: 'scale(1.1)'
+                            }}
+                            onError={(e) => {
+                              // Fallback to placeholder if image fails
+                              e.target.src = '/images/placeholder-product.svg';
+                            }}
                           />
                         </div>
                       </div>
@@ -55,7 +70,7 @@ const ShopTable = ({
                           className="font-bold cursor-pointer hover:text-gray-600 transition-colors"
                           onClick={() => {
                             window.scrollTo({ top: 0, behavior: 'instant' });
-                            navigate(`/product/${medicine._id}`);
+                            navigate(generateDirectProductUrl(medicine));
                           }}
                         >
                           {medicine.itemName}

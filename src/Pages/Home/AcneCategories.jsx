@@ -245,7 +245,7 @@ const AcneCategories = () => {
           {items.map((item, index) => (
             <button
               key={item.key}
-              onClick={() => navigate(`/shop?category=${item.key}`)}
+              onClick={() => navigate(`/shop?skinProblem=${item.key}`)}
               className={`group flex flex-col items-center scale-in stagger-${Math.min(index + 1, 4)}`}
             >
               {/* Circular Image Frame */}

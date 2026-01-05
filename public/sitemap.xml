@@ -2,120 +2,264 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://www.farmaciashila.com/</loc>
-    <lastmod>2025-12-30</lastmod>
+    <lastmod>2026-01-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://www.farmaciashila.com/shop</loc>
-    <lastmod>2025-12-30</lastmod>
+    <lastmod>2026-01-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://www.farmaciashila.com/contact-us</loc>
-    <lastmod>2025-12-30</lastmod>
+    <lastmod>2026-01-05</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.farmaciashila.com/about-us</loc>
-    <lastmod>2025-12-30</lastmod>
+    <lastmod>2026-01-05</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://www.farmaciashila.com/privacy-policy</loc>
-    <lastmod>2025-12-30</lastmod>
+    <lastmod>2026-01-05</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://www.farmaciashila.com/terms-conditions</loc>
-    <lastmod>2025-12-30</lastmod>
+    <lastmod>2026-01-05</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://www.farmaciashila.com/product/product-694b12c0b481a211bbce7bbd</loc>
-    <lastmod>2025-12-24</lastmod>
+    <loc>https://www.farmaciashila.com/product/vitamina/eye-defence-together-health-30-kapsula</loc>
+    <lastmod>2026-01-05</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://www.farmaciashila.com/product/product-694b12c1b481a211bbce7bc0</loc>
-    <lastmod>2025-12-23</lastmod>
+    <loc>https://www.farmaciashila.com/product/vitamina/folate-together-health-30-kapsula</loc>
+    <lastmod>2026-01-05</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://www.farmaciashila.com/product/product-694bdffe3a15630ad4eb3e2e</loc>
-    <lastmod>2025-12-24</lastmod>
+    <loc>https://www.farmaciashila.com/product/vitamina/organic-bio-zinc-together-health-30-kapsula</loc>
+    <lastmod>2026-01-05</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://www.farmaciashila.com/product/product-6952859f513e37776f2faa00</loc>
-    <lastmod>2025-12-29</lastmod>
+    <loc>https://www.farmaciashila.com/product/suplemente-per-shendetin/vitamine-k2-together-health-30-kapsula</loc>
+    <lastmod>2026-01-05</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://www.farmaciashila.com/product/product-6952859f513e37776f2faa04</loc>
-    <lastmod>2025-12-29</lastmod>
+    <loc>https://www.farmaciashila.com/product/suplemente-per-shendetin/organic-ashwagandha-together-health-30-kaspula</loc>
+    <lastmod>2026-01-05</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://www.farmaciashila.com/category/category-5ee44e</loc>
+    <loc>https://www.farmaciashila.com/product/vitamina/multibiotic-together-health-30-kapsula</loc>
+    <lastmod>2026-01-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.farmaciashila.com/product/general/stress-aid-together-health-30-kapsula</loc>
+    <lastmod>2026-01-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.farmaciashila.com/product/suplemente-per-shendetin/immune-together-health-30-kapsula</loc>
+    <lastmod>2026-01-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.farmaciashila.com/product/vitamina/bone-aid-together-health-60-kapsula</loc>
+    <lastmod>2026-01-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.farmaciashila.com/product/vitamina/vitamin-d3-together-health-30-kapsula</loc>
+    <lastmod>2026-01-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.farmaciashila.com/product/vitamina/vitamin-c-together-health-30-kapsula</loc>
+    <lastmod>2026-01-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.farmaciashila.com/product/vitamina/organic-vitamin-b12-together-health-30-kapsula</loc>
+    <lastmod>2026-01-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.farmaciashila.com/product/vitamina/menopause-together-health-60-kapsula</loc>
+    <lastmod>2026-01-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.farmaciashila.com/product/vitamina/joint-aid-together-health-30-kapsula</loc>
+    <lastmod>2026-01-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.farmaciashila.com/product/vitamina/gentle-iron-together-health-30-kapsula</loc>
+    <lastmod>2026-01-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.farmaciashila.com/product/vitamina/women-s-together-health-30-kapsula</loc>
+    <lastmod>2026-01-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.farmaciashila.com/product/vitamina/pregnancy-together-health-60-kapsula</loc>
+    <lastmod>2026-01-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.farmaciashila.com/product/vitamina/night-time-together-health-60-kapsula</loc>
+    <lastmod>2026-01-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.farmaciashila.com/product/vitamina/b-complex-together-health-30-kapsula</loc>
+    <lastmod>2026-01-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.farmaciashila.com/product/vitamina/men-s-multi-together-health-30-kapsule</loc>
+    <lastmod>2026-01-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.farmaciashila.com/product/vitamina/multivitamin-together-health-30-kapsula</loc>
+    <lastmod>2026-01-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.farmaciashila.com/product/vitamina/omega-3-together-health-30-kapsula</loc>
+    <lastmod>2026-01-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.farmaciashila.com/product/vitamina/beautiful-together-health-60-kapsula</loc>
+    <lastmod>2026-01-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.farmaciashila.com/product/vitamina/magnesium-together-health-30-kapsula</loc>
+    <lastmod>2026-01-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.farmaciashila.com/product/general/bright-c-cleanser-youth-lab-300-ml</loc>
+    <lastmod>2026-01-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.farmaciashila.com/product/general/hydro-cleanser-youth-lab-300-ml</loc>
+    <lastmod>2026-01-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.farmaciashila.com/product/general/pore-refine-cleanser-youth-lab-300-ml</loc>
+    <lastmod>2026-01-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.farmaciashila.com/product/general/peptides-reload-first-wrinkles-cream-youth-lab-50-ml</loc>
+    <lastmod>2026-01-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.farmaciashila.com/product/general/azelac-ru-cream-gel-sesderma-50-ml</loc>
+    <lastmod>2026-01-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.farmaciashila.com/category/kujdesi-ndaj-fytyres</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.farmaciashila.com/category/category-5ee45f</loc>
+    <loc>https://www.farmaciashila.com/category/trupi-dhe-floke</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.farmaciashila.com/category/category-5ee46c</loc>
+    <loc>https://www.farmaciashila.com/category/nena-dhe-femija</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.farmaciashila.com/category/category-e0059c</loc>
+    <loc>https://www.farmaciashila.com/category/kujdesi-per-fytyren</loc>
     <lastmod>2025-12-21</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.farmaciashila.com/category/category-e0059f</loc>
+    <loc>https://www.farmaciashila.com/category/kujdesi-per-trupin-dhe-floke</loc>
     <lastmod>2025-12-21</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.farmaciashila.com/category/category-e005a2</loc>
+    <loc>https://www.farmaciashila.com/category/higjene</loc>
     <lastmod>2025-12-21</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.farmaciashila.com/category/category-e005a5</loc>
+    <loc>https://www.farmaciashila.com/category/nena-dhe-femije</loc>
     <lastmod>2025-12-21</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.farmaciashila.com/category/category-e005a8</loc>
+    <loc>https://www.farmaciashila.com/category/suplemente-dhe-vitamina</loc>
     <lastmod>2025-12-21</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.farmaciashila.com/category/category-e005ab</loc>
+    <loc>https://www.farmaciashila.com/category/monitoruesit-e-shendetit</loc>
     <lastmod>2025-12-21</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>

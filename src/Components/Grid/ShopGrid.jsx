@@ -1,5 +1,6 @@
 import React, { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { generateDirectProductUrl } from '../../utils/productUrls';
 import { CartContext } from '../../Context/Cart/CartContext';
 import { getProductImage } from '../../utils/productImages';
 
@@ -27,23 +28,21 @@ const ShopGrid = ({
             >
               {/* Product Image Container */}
               <div
-                className="relative w-full overflow-hidden bg-white cursor-pointer h-[160px] md:h-[200px] pt-4 md:pt-6"
+                className="relative w-full overflow-hidden bg-white cursor-pointer h-[160px] md:h-[200px] flex items-center justify-center"
                 onClick={(e) => {
                   e.stopPropagation(); // Prevent any parent click handlers
                   window.scrollTo({ top: 0, behavior: 'instant' });
-                  // If product has variants, navigate to first variant, otherwise use product ID
-                  const productId = (medicine.variants && medicine.variants.length > 0) 
-                    ? medicine.variants[0]._id 
-                    : (medicine._id || medicine.id);
-                  if (productId) {
-                    navigate(`/product/${productId}`);
-                  }
+                  navigate(generateDirectProductUrl(medicine));
                 }}
               >
                 <img
                   src={getProductImage(medicine.image, medicine._id || index)}
                   alt={medicine.itemName}
-                  className="w-full h-full object-contain p-1 md:p-5"
+                  className="w-full h-full object-cover"
+                  style={{
+                    objectPosition: 'center',
+                    transform: 'scale(1.05)'
+                  }}
                   onError={(e) => {
                     e.target.src = getProductImage(null, medicine._id || index);
                   }}
@@ -95,13 +94,7 @@ const ShopGrid = ({
                   onClick={(e) => {
                     e.stopPropagation(); // Prevent any parent click handlers
                     window.scrollTo({ top: 0, behavior: 'instant' });
-                    // If product has variants, navigate to first variant, otherwise use product ID
-                    const productId = (medicine.variants && medicine.variants.length > 0) 
-                      ? medicine.variants[0]._id 
-                      : (medicine._id || medicine.id);
-                    if (productId) {
-                      navigate(`/product/${productId}`);
-                    }
+                    navigate(generateDirectProductUrl(medicine));
                   }}
                 >
                   {medicine.itemName}

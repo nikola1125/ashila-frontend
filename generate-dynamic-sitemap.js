@@ -30,22 +30,60 @@ const staticPages = [
   { url: '/terms-conditions', priority: '0.3', changefreq: 'yearly' },
 ];
 
+// Mapping for primary options (matching frontend/src/utils/productUrls.js)
+const optionToSlugMap = {
+  "Te gjitha": "te-gjitha", "Lekure normale": "lekure-normale", "Lekure e yndyrshme": "lekure-e-yndyrshme",
+  "Lekure e thate": "lekure-e-thate", "Lekure mikes": "lekure-mikes", "Lekure sensitive": "lekure-sensitive",
+  "Akne": "akne", "Rrudha": "rrudha", "Hiperpigmentim": "hiperpigmentim",
+  "Balancim yndyre/pore evidente": "balancim-yndyre-pore-evidente", "Pika te zeza": "pika-te-zeza",
+  "Dehidratim": "dehidratim", "Skuqje": "skuqje", "Rozacea": "rozacea",
+  "Lares trupi": "lares-trupi", "Hidratues trupi": "hidratues-trupi", "Scrub trupi": "scrub-trupi",
+  "Akne ne trup": "akne-ne-trup", "Kujdesi ndaj diellit": "kujdesi-ndaj-diellit", "Deodorant": "deodorant",
+  "Vaj per trupin": "vaj-per-trupin", "Krem per duart & kembet": "krem-per-duart-dhe-kembet",
+  "Skalp i thate": "skalp-i-thate", "Skalp i yndyrshem": "skalp-i-yndyrshem", "Skalp sensitive": "skalp-sensitive",
+  "Renia e flokut": "renia-e-flokut", "Aksesore": "aksesore-floke",
+  "Lares intim": "lares-intim", "Peceta": "peceta-intime", "Furce dhembesh": "furce-dhembesh",
+  "Paste dhembesh": "paste-dhembesh", "Fill dentar/furca interdentare": "fill-dentar-furca-interdentare",
+  "Shtatezania": "shtatezania", "Pas lindjes": "pas-lindjes", "Ushqyerja me gji": "ushqyerja-me-gji",
+  "Ushqim per femije": "ushqim-per-femije", "Pelena": "pelena",
+  "Vitamina": "vitamina", "Suplemente per shendetin": "suplemente-per-shendetin", "Minerale": "minerale",
+  "Suplemente bimore": "suplemente-bimore", "Peshore": "peshore", "Aparat tensioni": "aparat-tensioni",
+  "Termometer": "termometer", "Monitorues te diabetit": "monitorues-te-diabetit", "Oksimeter": "oksimeter",
+  "Paisje ortopedike": "paisje-ortopedike"
+};
+
 // Function to fetch products from API
 async function fetchProducts() {
   try {
-    const response = await fetch('https://ashila-backend.onrender.com/products');
+    const response = await fetch('https://ashila-backend.onrender.com/medicines');
     if (!response.ok) return [];
     const data = await response.json();
     const products = data.result || data;
     
     return (Array.isArray(products) ? products : []).map(product => {
-      // Create SEO-friendly URL
-      const productSlug = product.name ? 
-        `${createSlug(product.name)}-${product._id.slice(-6)}` : 
-        `product-${product._id}`;
+      const productName = product.itemName || product.genericName || 'product';
+      const companyName = product.company || '';
+      
+      // Determine primary category slug for path /product/:category/:slug
+      let primaryOption = '';
+      if (product.options && product.options.length > 0) {
+        primaryOption = product.options[0];
+      } else if (product.option) {
+        primaryOption = product.option;
+      }
+      const categorySlug = optionToSlugMap[primaryOption] || createSlug(primaryOption) || 'general';
+
+      let descriptiveName = productName.toLowerCase();
+      if (companyName && companyName !== productName) {
+        descriptiveName += `-${companyName.toLowerCase()}`;
+      }
+      if (product.size) {
+        descriptiveName += `-${product.size.toLowerCase().replace(/\s+/g, '-')}`;
+      }
+      const productSlug = createSlug(descriptiveName);
       
       return {
-        url: `/product/${productSlug}`,
+        url: `/product/${categorySlug}/${productSlug}`,
         priority: '0.7',
         changefreq: 'weekly',
         lastmod: product.updatedAt ? 
@@ -68,10 +106,9 @@ async function fetchCategories() {
     const categories = data.result || data;
     
     return (Array.isArray(categories) ? categories : []).map(category => {
-      // Create SEO-friendly URL
-      const categorySlug = category.name ? 
-        createSlug(category.name) : 
-        `category-${category._id.slice(-6)}`;
+      // Use actual category name for SEO-friendly URL
+      const categoryName = category.categoryName || 'category';
+      const categorySlug = createSlug(categoryName);
       
       return {
         url: `/category/${categorySlug}`,

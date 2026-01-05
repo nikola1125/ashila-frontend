@@ -8,13 +8,13 @@ const CATEGORY_HIERARCHY = {
     "Kujdesi per fytyren": {
         subcategories: {
             "Tipi i lekures": ["Te gjitha", "Lekure normale", "Lekure e yndyrshme", "Lekure e thate", "Lekure mikes", "Lekure sensitive"],
-            "Problematikat e lekures": ["Akne", "Rrudha", "Hiperpigmentim", "Balancim yndyre/pore evidente", "Pika te zeza", "Dehidratim", "Skuqje", "Rozacea"]
+            "Problematikat e fytyres": ["Akne", "Rrudha", "Hiperpigmentim", "Balancim yndyre/pore evidente", "Pika te zeza", "Dehidratim", "Skuqje", "Rozacea"]
         }
     },
     "Kujdesi per trupin dhe floke": {
         subcategories: {
             "Per trupin": ["Lares trupi", "Hidratues trupi", "Scrub trupi", "Akne ne trup", "Kujdesi ndaj diellit", "Deodorant", "Vaj per trupin", "Krem per duart & kembet"],
-            "Per floke": ["Skalp i thate", "Skalp i yndyrshem", "Skalp sensitive", "Renia e flokut"]
+            "Per floke": ["Skalp i thate", "Skalp i yndyrshem", "Skalp sensitive", "Renia e flokut", "Aksesore"]
         }
     },
     "Higjene": {
@@ -26,7 +26,7 @@ const CATEGORY_HIERARCHY = {
     "Nena dhe femije": {
         subcategories: {
             "Kujdesi per nenen": ["Shtatezania", "Pas lindjes", "Ushqyerja me gji"],
-            "Kujdesi per femije": [] // User listed this but provided no specific options
+            "Kujdesi per femije": ["Ushqim per femije", "Pelena", "Aksesore"]
         }
     },
     "Suplemente dhe vitamina": {
@@ -40,6 +40,14 @@ const CATEGORY_HIERARCHY = {
         }
     }
 };
+
+// Additional options that match sidebar filters exactly
+const ADDITIONAL_PRODUCT_OPTIONS = [
+    "Lares vajor", "Lares ujor", "Toner", "Exfoliant", "Serume", "Krem per syte",
+    "Vitamin C/antioxidant", "Hidratues", "Retinol", "SPF", "Eye patches",
+    "Acne patches", "Maske fytyre", "Spot treatment", "Uje termal",
+    "Peeling Pads", "Lipbalm", "Set me produkte"
+];
 
 const PRODUCT_TYPE_OPTIONS = [
     "Lares vajor", "Lares ujor", "Toner", "Exfoliant", "Serume", "Krem per syte",
@@ -63,6 +71,7 @@ const CreateProductModal = ({ isOpen, onClose, productToEdit, refetch, isBestsel
         categoryName: productToEdit?.categoryName || Object.keys(CATEGORY_HIERARCHY)[0],
         subcategory: productToEdit?.subcategory || '',
         option: productToEdit?.option || '',
+        options: productToEdit?.options || [], // New: Multiple options support
         productType: productToEdit?.productType || '',
         skinProblem: productToEdit?.skinProblem || '',
         description: productToEdit?.description || '',
@@ -71,8 +80,9 @@ const CreateProductModal = ({ isOpen, onClose, productToEdit, refetch, isBestsel
         discountPrice: (productToEdit?.price && productToEdit?.discount > 0)
             ? Math.round(productToEdit.price * (1 - productToEdit.discount / 100))
             : '',
+        isBestseller: productToEdit?.isBestseller || false,
         variants: productToEdit?.variants?.length > 0
-            ? productToEdit.variants.map(v => ({
+            ? productToEdit.variants.map(v =>({
                 ...v,
                 discountPrice: v.price && v.discount ? (v.price - (v.price * v.discount / 100)).toFixed(2) : ''
             }))
@@ -87,7 +97,10 @@ const CreateProductModal = ({ isOpen, onClose, productToEdit, refetch, isBestsel
             }] : []),
     });
 
-    // Derived state for dropdowns
+    // Validation state for optional fields
+    const [showOptionalFields, setShowOptionalFields] = useState(false);
+
+    // Derived state for dropdowns - FULLY LINKED SYSTEM
     const currentCategoryData = CATEGORY_HIERARCHY[formData.categoryName];
     const availableSubcategories = currentCategoryData ? Object.keys(currentCategoryData.subcategories) : [];
 
@@ -95,6 +108,28 @@ const CreateProductModal = ({ isOpen, onClose, productToEdit, refetch, isBestsel
     const availableOptions = (formData.subcategory && currentCategoryData?.subcategories[formData.subcategory])
         ? currentCategoryData.subcategories[formData.subcategory]
         : [];
+
+    // Dynamic product type options based on selected subcategory
+    const getDynamicProductTypes = () => {
+        if (!formData.subcategory) return PRODUCT_TYPE_OPTIONS;
+        
+        // Return relevant product types based on subcategory
+        const subcategoryTypes = {
+            "Problematikat e fytyres": ["Serume", "Krem per syte", "Retinol", "Spot treatment", "Eye patches", "Acne patches"],
+            "Tipi i lekures": ["Lares vajor", "Lares ujor", "Toner", "Exfoliant", "Hidratues", "SPF"],
+            "Per trupin": ["Hidratues trupi", "Scrub trupi", "Vaj per trupin", "Krem per duart & kembet", "Deodorant"],
+            "Per floke": ["Skalp i thate", "Skalp i yndyrshem", "Skalp sensitive", "Renia e flokut", "Aksesore"],
+            "Higjena intime": ["Lares intim", "Peceta"],
+            "Higjena orale": ["Furce dhembesh", "Paste dhembesh", "Fill dentar/furca interdentare"],
+            "Kujdesi per nenen": ["Shtatezania", "Pas lindjes", "Ushqyerja me gji"],
+            "Kujdesi per femije": ["Ushqim per femije", "Pelena", "Aksesore"],
+            "Kategorite": ["Vitamina", "Suplemente per shendetin", "Minerale", "Suplemente bimore", "Peshore", "Aparat tensioni", "Termometer"]
+        };
+        
+        return subcategoryTypes[formData.subcategory] || PRODUCT_TYPE_OPTIONS;
+    };
+
+    const dynamicProductTypes = getDynamicProductTypes();
 
     useEffect(() => {
         // Reset sub-selections when category changes if they aren't valid anymore
@@ -146,21 +181,46 @@ const CreateProductModal = ({ isOpen, onClose, productToEdit, refetch, isBestsel
         e.preventDefault();
         setLoading(true);
 
-        // Find the database ID for the selected category name
+        // Find database ID for selected category name
         const selectedDbCategory = categories.find(c => c.categoryName === formData.categoryName);
 
         if (!selectedDbCategory) {
-            toast.error(`Error: Category "${formData.categoryName}" does not exist in the database!`);
+            toast.error(`Error: Category "${formData.categoryName}" does not exist in database!`);
             setLoading(false);
             return; // Stop submission
         }
 
+        // Construct category path for searching/filtering
+        // Path format: "Category > Subcategory > Option1, Option2"
+        const optionsString = formData.options.length > 0 ? ` > ${formData.options.join(', ')}` : '';
+        const categoryPath = `${formData.categoryName} > ${formData.subcategory}${optionsString}`;
+
         try {
-            // Validate Variants
+            // Validate only required fields
+            if (!formData.itemName || formData.itemName.trim() === '') {
+                toast.error('Product name is required.');
+                setLoading(false);
+                return;
+            }
+
             if (!formData.variants || formData.variants.length === 0) {
                 toast.error('Please add at least one product variant (size, price, stock).');
                 setLoading(false);
                 return;
+            }
+
+            // Validate variants have required fields
+            for (const variant of formData.variants) {
+                if (!variant.price || variant.price <= 0) {
+                    toast.error('Each variant must have a valid price.');
+                    setLoading(false);
+                    return;
+                }
+                if (!variant.stock || variant.stock < 0) {
+                    toast.error('Each variant must have valid stock (0 or more).');
+                    setLoading(false);
+                    return;
+                }
             }
 
             // Calculate derived main fields from variants
@@ -171,8 +231,14 @@ const CreateProductModal = ({ isOpen, onClose, productToEdit, refetch, isBestsel
             const data = new FormData();
             Object.keys(formData).forEach(key => {
                 // Skip price/stock/discount keys from main formData as we manually append derived ones
-                if (key !== 'price' && key !== 'stock' && key !== 'discount' && key !== 'discountPrice' && key !== 'variants') {
-                    data.append(key, formData[key]);
+                // Also skip single option as we now use multiple options
+                // IMPORTANT: skip 'categoryName' here because we append it manually as a string later
+                if (key !== 'price' && key !== 'stock' && key !== 'discount' && key !== 'discountPrice' && key !== 'variants' && key !== 'option' && key !== 'categoryName') {
+                    if (key === 'options') {
+                        data.append(key, JSON.stringify(formData[key]));
+                    } else {
+                        data.append(key, formData[key]);
+                    }
                 }
             });
 
@@ -181,8 +247,12 @@ const CreateProductModal = ({ isOpen, onClose, productToEdit, refetch, isBestsel
             data.append('stock', totalStock);
             data.append('discount', mainDiscount);
 
-            // Append the correct MongoDB _id for the category
+            // Append correct MongoDB _id for category
             data.append('category', selectedDbCategory._id);
+            
+            // Save the full path string in categoryName for easier retrieval/filtering as requested
+            // We ensure it is a string to avoid cast errors
+            data.append('categoryName', String(categoryPath));
 
             // Add other required fields
             data.append('genericName', formData.itemName);
@@ -326,19 +396,33 @@ const CreateProductModal = ({ isOpen, onClose, productToEdit, refetch, isBestsel
                                     </div>
 
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Option / Type</label>
-                                        <select
-                                            name="option"
-                                            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none"
-                                            value={formData.option}
-                                            onChange={handleChange}
-                                            disabled={availableOptions.length === 0}
-                                        >
-                                            <option value="">Select...</option>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Product Options</label>
+                                        <div className="space-y-2 max-h-32 overflow-y-auto border border-gray-200 rounded-lg p-3 bg-white">
                                             {availableOptions.map(opt => (
-                                                <option key={opt} value={opt}>{opt}</option>
+                                                <label key={opt} className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                                                    <input
+                                                        type="checkbox"
+                                                        name="options"
+                                                        value={opt}
+                                                        checked={formData.options.includes(opt)}
+                                                        onChange={(e) => {
+                                                            const { value, checked } = e.target;
+                                                            setFormData(prev => ({
+                                                                ...prev,
+                                                                options: checked
+                                                                    ? [...prev.options, value]
+                                                                    : prev.options.filter(o => o !== value)
+                                                            }));
+                                                        }}
+                                                        className="w-4 h-4 text-amber-600 border-gray-300 rounded focus:ring-2 focus:ring-amber-500"
+                                                    />
+                                                    <span className="text-sm text-gray-700">{opt}</span>
+                                                </label>
                                             ))}
-                                        </select>
+                                        </div>
+                                        <p className="text-xs text-gray-500 mt-1">
+                                            {formData.options.length} option{formData.options.length !== 1 ? 's' : ''} selected
+                                        </p>
                                     </div>
                                 </div>
 
@@ -351,15 +435,15 @@ const CreateProductModal = ({ isOpen, onClose, productToEdit, refetch, isBestsel
                                         onChange={handleChange}
                                     >
                                         <option value="">Select Type...</option>
-                                        {PRODUCT_TYPE_OPTIONS.map(opt => (
+                                        {dynamicProductTypes.map(opt => (
                                             <option key={opt} value={opt}>{opt}</option>
                                         ))}
                                     </select>
                                 </div>
 
-                                {formData.subcategory === 'Problematikat e lekures' && formData.option === 'Akne' && (
+                                {(formData.subcategory === 'Problematikat e fytyres' && formData.options.includes('Akne')) && (
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Lloji i problematikës</label>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Lloji i problematikës (Acne Type)</label>
                                         <select
                                             name="skinProblem"
                                             className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none"
@@ -380,11 +464,16 @@ const CreateProductModal = ({ isOpen, onClose, productToEdit, refetch, isBestsel
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
                                     <textarea
                                         name="description"
-                                        rows="3"
-                                        className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                                        rows="4"
+                                        className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none resize-y"
+                                        placeholder="Enter product description...&#10;&#10;• Type Enter for new line&#10;• Double Enter for new paragraph&#10;• Copy-paste text preserves formatting"
                                         value={formData.description}
                                         onChange={handleChange}
+                                        style={{ whiteSpace: 'pre-wrap' }}
                                     ></textarea>
+                                    <p className="text-xs text-gray-500 mt-1">
+                                        💡 Tip: Paste text with existing formatting - line breaks and paragraphs will be preserved
+                                    </p>
                                 </div>
                             </div>
                         </div>

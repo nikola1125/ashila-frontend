@@ -10,14 +10,16 @@ import LoadingError from '../../Components/Common/States/LoadingError';
 import { getProductImage } from '../../utils/productImages';
 import { useThrottle } from '../../hooks/useThrottle';
 import VariantSelectionSidebar from '../../Components/Common/Products/VariantSelectionSidebar';
+import { generateDirectProductUrl, getProductOptionSlugs } from '../../utils/productUrls';
 
 const ProductDetail = () => {
-  const { id } = useParams();
+  const { id, category, slug } = useParams();
   const navigate = useNavigate();
   const { publicApi } = useAxiosSecure();
   const { addItem } = useContext(CartContext);
   const [quantity, setQuantity] = useState(1);
   const [activeVariant, setActiveVariant] = useState(null);
+  const [showFullDescription, setShowFullDescription] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // State for related product variant sidebar
@@ -25,13 +27,40 @@ const ProductDetail = () => {
   const [relatedSidebarProduct, setRelatedSidebarProduct] = useState(null);
   const [relatedSidebarVariant, setRelatedSidebarVariant] = useState(null);
 
+  // Determine if we're using the new SEO URL structure
+  const isSeoUrl = !!category && !!slug;
+  
+  // Query function to find product by ID or by category+slug
+  const fetchProduct = async () => {
+    if (isSeoUrl) {
+      // Find product by category and slug
+      const response = await publicApi.get('/medicines');
+      const allProducts = response.data.result || response.data || [];
+      
+      // Find product matching the category and slug
+      const matchedProduct = allProducts.find(product => {
+        const optionSlugs = getProductOptionSlugs(product);
+        const productSlug = `${product.itemName?.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-') || 'product'}`;
+        
+        return optionSlugs.includes(category) && productSlug === slug;
+      });
+      
+      if (!matchedProduct) {
+        throw new Error('Product not found');
+      }
+      
+      return matchedProduct;
+    } else {
+      // Original behavior: fetch by ID
+      const response = await publicApi.get(`/medicines/${id}`);
+      return response.data;
+    }
+  };
+
   const { data: product, isLoading, error } = useQuery({
-    queryKey: ['product', id],
-    queryFn: async () => {
-      const response = await publicApi.get(`/products/${id}`);
-      return response;
-    },
-    enabled: !!id,
+    queryKey: ['product', id, category, slug],
+    queryFn: fetchProduct,
+    enabled: !!(id || (category && slug)),
   });
 
   // Fetch all variants of the same product using variantGroupId
@@ -296,7 +325,12 @@ const ProductDetail = () => {
   return (
     <div className="min-h-screen bg-[#faf9f6]">
       <Helmet>
-        <title>{product.itemName} - Product Details</title>
+        <title>{product.itemName} {product.company ? `nga ${product.company}` : ''} | Farmacia Shila</title>
+        <meta name="description" content={`Bli ${product.itemName} ${product.company ? `nga ${product.company}` : ''} në Farmacia Shila. ${product.description?.substring(0, 150) || 'Produkt cilësor për përkujdesjen tuaj shëndetësore.'}`} />
+        <meta property="og:title" content={`${product.itemName} | Farmacia Shila`} />
+        <meta property="og:description" content={product.description?.substring(0, 160)} />
+        {product.image && <meta property="og:image" content={product.image} />}
+        <meta name="twitter:card" content="summary_large_image" />
       </Helmet>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 sm:pt-32 md:pt-40 pb-10">
@@ -445,7 +479,31 @@ const ProductDetail = () => {
           <h2 className="lux-serif-text text-xl font-semibold text-[#4A3628] mb-4">Description</h2>
           <div className="prose max-w-none text-[#4A3628] leading-relaxed lux-serif-text">
             {product.description ? (
-              <p>{product.description}</p>
+              <div>
+                {/* Desktop: Show full description */}
+                <div className="hidden md:block whitespace-pre-wrap">
+                  {product.description}
+                </div>
+                
+                {/* Mobile: Show truncated description with See More */}
+                <div className="md:hidden">
+                  <div 
+                    className={`whitespace-pre-wrap transition-all duration-300 ease-in-out ${
+                      showFullDescription ? 'max-h-none' : 'max-h-24 overflow-hidden'
+                    }`}
+                  >
+                    {product.description}
+                  </div>
+                  {product.description.length > 150 && (
+                    <button
+                      onClick={() => setShowFullDescription(!showFullDescription)}
+                      className="text-[#4A3628] font-medium hover:text-[#A67856] transition-colors duration-200 mt-2 text-sm underline"
+                    >
+                      {showFullDescription ? 'See Less' : 'See More'}
+                    </button>
+                  )}
+                </div>
+              </div>
             ) : (
               <p>
                 {product.genericName && (

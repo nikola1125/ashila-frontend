@@ -1,305 +1,252 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { X, Trash2, Plus, Minus, ShoppingBag } from 'lucide-react';
 import { CartContext } from '../../../Context/Cart/CartContext';
 import { AuthContext } from '../../../Context/Auth/AuthContext';
 import useAxiosSecure from '../../../hooks/useAxiosSecure';
-import { getProductImage } from '../../../utils/productImages';
-import { groupItemsBySeller } from '../../../utils/groupItemsBySeller';
 import { toast } from 'react-toastify';
-
- const parseStockValue = (value) => {
-   if (value === undefined || value === null) return null;
-   if (typeof value === 'number') return Number.isFinite(value) ? value : null;
-   const matches = String(value).match(/\d+/g);
-   if (!matches || matches.length === 0) return null;
-   const n = Number(matches[matches.length - 1]);
-   return Number.isFinite(n) ? n : null;
- };
+import { groupItemsBySeller } from '../../../utils/groupItemsBySeller';
+import { X, Plus, Minus, Trash2, Bell } from 'lucide-react';
 
 const CartSidebar = ({ isOpen, onClose }) => {
-  const navigate = useNavigate();
-  const {
-    items,
-    totalQuantity,
-    discountedTotal,
-    updateQuantity,
-    removeItem
-  } = useContext(CartContext);
-  const { user } = useContext(AuthContext);
-  const { publicApi, privateApi } = useAxiosSecure();
-  const sidebarRef = useRef(null);
-  const stockCacheRef = useRef(new Map());
-  const [pendingById, setPendingById] = useState({});
-
-  const getLatestStock = async (productId) => {
-    if (!productId) return null;
-    const cache = stockCacheRef.current;
-    const now = Date.now();
-    const existing = cache.get(productId);
-
-    if (existing?.value !== undefined && now - existing.ts < 5000) {
-      return existing.value;
-    }
-
-    if (existing?.promise) {
-      return existing.promise;
-    }
-
-    const promise = publicApi
-      .get(`/products/${productId}`)
-      .then((product) => {
-        const stock = Number(product?.stock);
-        const value = Number.isFinite(stock) ? stock : null;
-        cache.set(productId, { value, ts: Date.now() });
-        return value;
-      })
-      .catch(() => {
-        cache.delete(productId);
-        return null;
-      });
-
-    cache.set(productId, { promise });
-    return promise;
-  };
-
-  const handleIncrease = async (item) => {
-    const cartKey = item.cartItemId || item.id;
-    if (pendingById[cartKey]) return;
-
-    setPendingById((prev) => ({ ...prev, [cartKey]: true }));
-    const latestStock = await getLatestStock(item.id);
-
-    try {
-      if (latestStock !== null) {
-        if (latestStock <= 0) {
-          toast.error('Out of stock');
-          updateQuantity(cartKey, 0, latestStock);
-          return;
-        }
-
-        if (item.quantity >= latestStock) {
-          toast.error(`Only ${latestStock} left in stock`);
-          updateQuantity(cartKey, latestStock, latestStock);
-          return;
-        }
-
-        updateQuantity(cartKey, item.quantity + 1, latestStock);
-        return;
-      }
-
-      updateQuantity(cartKey, item.quantity + 1);
-    } finally {
-      setPendingById((prev) => {
-        const next = { ...prev };
-        delete next[cartKey];
-        return next;
-      });
-    }
-  };
-
-  // Handle body scroll locking
+  // Prevent body scroll when cart is open
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
+      // Prevent backdrop clicks from triggering multiple times
+      document.body.style.pointerEvents = 'none';
+      const sidebar = document.querySelector('[data-cart-sidebar]');
+      if (sidebar) {
+        sidebar.style.pointerEvents = 'auto';
+      }
     } else {
       document.body.style.overflow = 'unset';
+      document.body.style.pointerEvents = 'auto';
     }
     return () => {
       document.body.style.overflow = 'unset';
+      document.body.style.pointerEvents = 'auto';
     };
   }, [isOpen]);
 
-  // Handle click outside to close
+  const navigate = useNavigate();
+  const {
+    items: rawItems,
+    totalQuantity,
+    totalPrice,
+    discountedTotal,
+    removeItem,
+    updateQuantity,
+  } = useContext(CartContext);
+  const { user } = useContext(AuthContext);
+  const { privateApi } = useAxiosSecure();
+
+  // Ensure items is always an array
+  const cartItems = useMemo(() => {
+    if (!rawItems) return [];
+    return Array.isArray(rawItems) ? rawItems : [];
+  }, [rawItems]);
+
+  const handleCheckout = async () => {
+    try {
+      if (!user) {
+        toast.warn('Please log in to proceed with checkout');
+        onClose();
+        navigate('/login');
+        return;
+      }
+      const sellersGroup = groupItemsBySeller(cartItems);
+      const response = await privateApi.post('/checkout', sellersGroup);
+      if (response) {
+        window.location.href = response;
+      } else {
+        throw new Error('Invalid response from checkout API');
+      }
+    } catch (error) {
+      console.error('Checkout error:', error);
+      toast.warn(error.message || 'An error occurred during checkout');
+    }
+  };
+
+  const backdropRef = useRef(null);
+  const sidebarRef = useRef(null);
+
+  const handleBackdropClick = useCallback((e) => {
+    // Only close if clicking directly on backdrop, not on sidebar content
+    // Use refs for more reliable checking on mobile
+    if (
+      e.target === backdropRef.current ||
+      (backdropRef.current && backdropRef.current.contains(e.target) && 
+       !(sidebarRef.current && sidebarRef.current.contains(e.target)))
+    ) {
+      onClose();
+    }
+  }, [onClose]);
+
+  // Prevent cart from opening/closing unintentionally
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (isOpen && sidebarRef.current && !sidebarRef.current.contains(event.target)) {
+    if (!isOpen) return;
+    
+    const handleEscape = (e) => {
+      if (e.key === 'Escape') {
         onClose();
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    // Add touchstart for mobile responsiveness
-    document.addEventListener('touchstart', handleClickOutside);
-
+    window.addEventListener('keydown', handleEscape);
+    
+    // Prevent body scroll and ensure cart stays stable
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('touchstart', handleClickOutside);
+      window.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = originalOverflow;
     };
   }, [isOpen, onClose]);
-
-  // Handle Escape key to close
-  useEffect(() => {
-    const handleEsc = (e) => {
-      if (e.key === 'Escape') onClose();
-    };
-    window.addEventListener('keydown', handleEsc);
-    return () => window.removeEventListener('keydown', handleEsc);
-  }, [onClose]);
-
-  const handleCheckout = async () => {
-    // Ensure items is an array before checking length
-    const currentItems = Array.isArray(items) ? items : [];
-    if (currentItems.length === 0) return;
-
-    try {
-      onClose();
-      navigate('/checkout');
-    } catch (error) {
-      console.error('Checkout error:', error);
-      toast.error('Could not initiate checkout. Please try again.');
-    }
-  };
-
-  const cartItems = Array.isArray(items) ? items : [];
 
   return (
     <>
       {/* Backdrop */}
-      <div
-        className={`fixed left-0 right-0 bottom-0 top-[64px] bg-black/50 z-[9998] transition-opacity duration-300 ${isOpen ? 'opacity-100 visible' : 'opacity-0 invisible'
-          }`}
-        aria-hidden="true"
-      />
+      {isOpen && (
+        <div
+          ref={backdropRef}
+          className="fixed inset-0 bg-black/50 z-40 transition-opacity animate-in fade-in duration-300"
+          onClick={handleBackdropClick}
+          // Prevent accidental closes on mobile touch
+          onTouchMove={(e) => {
+            // Prevent closing during touch move (swiping)
+            e.stopPropagation();
+          }}
+        />
+      )}
 
-      {/* Sidebar Panel */}
-      <aside
+      {/* Sidebar */}
+      <div 
         ref={sidebarRef}
-        className={`fixed right-0 top-[64px] h-[calc(100vh-64px)] w-full sm:w-[400px] md:w-[450px] bg-white z-[9999] shadow-2xl transform transition-transform duration-300 ease-out flex flex-col ${isOpen ? 'translate-x-0' : 'translate-x-full'
-          }`}
+        data-cart-sidebar
+        className={`fixed right-0 top-0 h-screen w-full max-w-md bg-white shadow-2xl z-50 flex flex-col transform transition-transform duration-300 ease-in-out overflow-y-auto ${
+          isOpen ? 'translate-x-0' : 'translate-x-full'
+        }`}
+        onClick={(e) => {
+          // Prevent clicks inside sidebar from closing it
+          e.stopPropagation();
+        }}
+        onTouchStart={(e) => {
+          // Stop touch events from bubbling to backdrop
+          e.stopPropagation();
+        }}
       >
         {/* Header */}
-        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-white shrink-0">
-          <div className="flex items-center gap-3">
-            <ShoppingBag className="w-5 h-5 text-[#5A3F2A]" />
-            <h2 className="text-lg font-semibold text-[#5A3F2A] tracking-wide">
-              Shporta (<span className="lux-price-number">{totalQuantity}</span>)
-            </h2>
-          </div>
+        <div className="flex items-center justify-between p-6 border-b border-[#D9BFA9]">
+          <h2 className="text-xl font-serif font-normal text-[#A67856] uppercase tracking-wide">SHPORTA E BLERJEVE</h2>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-500 hover:text-gray-800"
+            className="p-2 hover:bg-[#EBD8C8] transition-all"
             aria-label="Close cart"
           >
-            <X className="w-6 h-6" />
+            <X size={20} className="text-[#4A3628]" />
           </button>
         </div>
 
-        {/* Cart Items Content */}
-        <div className="flex-1 overflow-y-auto overflow-x-hidden p-6">
+        {/* Announcement Banner */}
+        <div className="px-6 py-3 bg-white border-b border-[#D9BFA9] flex items-center gap-2">
+          <Bell size={16} className="text-[#A67856]" />
+          <p className="text-sm text-[#4A3628] font-light">
+            Announce discount codes, free shipping etc
+          </p>
+        </div>
+
+        {/* Cart Items */}
+        <div className="flex-1 px-6 py-4">
           {cartItems.length === 0 ? (
-            <div className="h-full flex flex-col items-center justify-center text-center space-y-4">
-              <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center">
-                <ShoppingBag className="w-8 h-8 text-gray-300" />
-              </div>
-              <div>
-                <p className="text-gray-900 font-medium text-lg">Your cart is empty</p>
-                <p className="text-gray-500 text-sm mt-1">Looks like you haven't added anything yet.</p>
-              </div>
-              <button
-                onClick={() => {
-                  onClose();
-                  navigate('/shop');
-                }}
-                className="mt-4 px-6 py-2 bg-[#5A3F2A] text-white rounded-full hover:bg-[#4A3320] transition-colors text-sm font-medium"
-              >
-                Start Shopping
-              </button>
+            <div className="flex flex-col items-center justify-center min-h-[200px] text-center">
+              <p className="text-[#4A3628] mb-2 font-medium">Your cart is empty</p>
+              <p className="text-sm text-[#4A3628]">Add some items to get started!</p>
             </div>
           ) : (
-            <div className="space-y-6">
+            <div className="space-y-4">
               {cartItems.map((item) => (
-                <div key={item.cartItemId || item.id} className="flex gap-4 group">
+                <div
+                  key={item.id}
+                  className="flex gap-4 pb-4 border-b border-[#D9BFA9] last:border-0"
+                >
                   {/* Product Image */}
-                  <div
-                    className="w-24 h-24 bg-gray-50 rounded-lg overflow-hidden border border-gray-100 shrink-0 cursor-pointer"
-                    onClick={() => {
-                      onClose();
-                      navigate(`/product/${item.slug || item.id}`);
-                    }}
-                  >
+                  <div className="w-20 h-20 flex-shrink-0 overflow-hidden bg-[#EFEEED] border border-[#D9BFA9]">
                     <img
-                      src={getProductImage(item.image, item.id)}
+                      src={item.image || '/placeholder.png'}
                       alt={item.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      className="w-full h-full object-cover"
                       onError={(e) => {
-                        e.currentTarget.src = getProductImage(null, item.id);
+                        e.target.src = '/placeholder.png';
                       }}
                     />
                   </div>
 
                   {/* Product Details */}
-                  <div className="flex-1 min-w-0 flex flex-col justify-between py-1">
-                    <div>
-                      <div className="flex justify-between items-start gap-2">
-                        <h3
-                          className="text-[9px] sm:text-[12px] font-medium text-[#5A3F2A] leading-tight whitespace-normal break-words cursor-pointer hover:underline"
-                          onClick={() => {
-                            onClose();
-                            navigate(`/product/${item.slug || item.id}`);
-                          }}
-                        >
-                          {item.name}
-                        </h3>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-sm font-medium text-[#4A3628] mb-1 line-clamp-2">
+                      {item.name}
+                    </h3>
+                    {item.size && (
+                      <p className="text-xs text-[#4A3628] mb-2">{item.size}</p>
+                    )}
+                    
+                    {/* Quantity and Remove */}
+                    <div className="flex items-center justify-between mt-2">
+                      <div className="flex items-center gap-2 sm:gap-2">
                         <button
-                          onClick={() => removeItem(item.cartItemId || item.id)}
-                          className="text-gray-400 hover:text-red-500 transition-colors p-1 -mr-1"
-                          aria-label="Remove item"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                      {item.size && (
-                        <p className="text-sm text-gray-500 mt-1">Size: {item.size}</p>
-                      )}
-                    </div>
-
-                    <div className="flex items-center justify-between mt-3">
-                      {/* Quantity Controls */}
-                      <div className="flex items-center border border-gray-200 rounded-lg bg-white">
-                        <button
-                          onClick={() => updateQuantity(item.cartItemId || item.id, Math.max(1, item.quantity - 1))}
-                          className="p-2.5 sm:p-1.5 hover:bg-gray-50 text-gray-600 disabled:opacity-50 min-w-[44px] min-h-[44px] flex items-center justify-center transition active:scale-[0.98]"
+                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
                           disabled={item.quantity <= 1}
+
+                          className="w-10 h-10 sm:w-8 sm:h-8 flex items-center justify-center border-2 border-[#D9BFA9] hover:bg-[#EBD8C8] disabled:opacity-50 disabled:cursor-not-allowed transition-all bg-white min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 text-lg leading-none text-[#4A3628]"
+                          aria-label="Decrease quantity"
                         >
-                          <Minus className="w-3.5 h-3.5" />
+                          -
+
+                          className="w-10 h-10 sm:w-8 sm:h-8 flex items-center justify-center border-2 border-[#D9BFA9] hover:bg-[#EBD8C8] disabled:opacity-50 disabled:cursor-not-allowed transition-all bg-white min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0"
+                          aria-label="Decrease quantity"
+                        
+                          <Minus size={18} className="sm:w-3.5 sm:h-3.5 text-[#4A3628]" />
+
                         </button>
-                        <span className="w-8 text-center text-sm font-medium text-gray-900 select-none">
+                        <span className="w-10 sm:w-8 text-center text-base sm:text-sm font-medium text-[#4A3628] min-h-[44px] sm:min-h-0 flex items-center justify-center">
                           {item.quantity}
                         </span>
                         <button
-                          onClick={() => handleIncrease(item)}
-                          className="p-2.5 sm:p-1.5 hover:bg-gray-50 text-gray-600 min-w-[44px] min-h-[44px] flex items-center justify-center transition active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
-                          disabled={(() => {
-                            const stock = parseStockValue(item.stock);
-                            return pendingById[item.cartItemId || item.id] || (stock !== null && item.quantity >= stock);
-                          })()}
+                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
+
+                          className="w-10 h-10 sm:w-8 sm:h-8 flex items-center justify-center border-2 border-[#D9BFA9] hover:bg-[#EBD8C8] transition-all bg-white min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 text-lg leading-none text-[#4A3628]"
+                          aria-label="Increase quantity"
                         >
-                          {pendingById[item.cartItemId || item.id] ? (
-                            <span className="inline-block w-3.5 h-3.5 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
-                          ) : (
-                            <Plus className="w-3.5 h-3.5" />
-                          )}
+                          +
+
+                          className="w-10 h-10 sm:w-8 sm:h-8 flex items-center justify-center border-2 border-[#D9BFA9] hover:bg-[#EBD8C8] transition-all bg-white min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0"
+                          aria-label="Increase quantity"
+                       
+                          <Plus size={18} className="sm:w-3.5 sm:h-3.5 text-[#4A3628]" />
+
                         </button>
                       </div>
+                      <button
+                        onClick={() => removeItem(item.id)}
+                        className="p-2 sm:p-1.5 hover:bg-red-50 transition-all min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 flex items-center justify-center"
+                        aria-label="Remove item"
+                      >
+                        <Trash2 size={18} className="sm:w-4 sm:h-4 text-[#4A3628] hover:text-red-600" />
+                      </button>
+                    </div>
 
-                      {/* Price */}
-                      <div className="text-right">
-                        {item.discountedPrice && Number(item.discountedPrice) < Number(item.price) ? (
-                          <div className="flex flex-col items-end">
-                            <span className="lux-price-number font-semibold text-[#5A3F2A]">
-                              {(Number(item.discountedPrice) * item.quantity).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} ALL
-                            </span>
-                            <span className="lux-price-number text-xs text-gray-400 line-through">
-                              {(Number(item.price) * item.quantity).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} ALL
-                            </span>
-                          </div>
-                        ) : (
-                          <span className="lux-price-number font-semibold text-[#5A3F2A]">
-                            {(Number(item.price) * item.quantity).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} ALL
-                          </span>
-                        )}
-                      </div>
+                    {/* Price - Show total price for this quantity */}
+                    <div className="mt-2">
+                      {item.discountedPrice && Number(item.discountedPrice) < Number(item.price) ? (
+                        <p className="text-sm font-semibold text-[#4A3628]">
+                          {(Number(item.discountedPrice) * (item.quantity || 1)).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} ALL
+                        </p>
+                      ) : (
+                        <p className="text-sm font-semibold text-[#4A3628]">
+                          {(Number(item.price) * (item.quantity || 1)).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} ALL
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -308,32 +255,30 @@ const CartSidebar = ({ isOpen, onClose }) => {
           )}
         </div>
 
-        {/* Footer Actions */}
+        {/* Footer */}
         {cartItems.length > 0 && (
-          <div className="border-t border-gray-100 bg-gray-50/50 p-6 space-y-4 shrink-0">
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-sm text-gray-600">
-                <span>Nentotali</span>
-                <span className="font-medium text-gray-900 lux-price-number">
-                  {Number(discountedTotal).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} ALL
-                </span>
-              </div>
-              <p className="text-xs text-gray-500 text-center">
-                Taksat dhe transporti llogariten në arkë.
-              </p>
+          <div className="border-t border-[#D9BFA9] p-6 bg-white">
+            <p className="text-xs text-[#4A3628] mb-4 text-center font-light">
+              Taksat dhe transporti llogariten në arkë.
+            </p>
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-sm font-semibold text-[#4A3628] uppercase tracking-wide">NËNTOTALI</span>
+              <span className="text-lg font-semibold text-[#4A3628]">
+                {Number(discountedTotal).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} ALL
+              </span>
             </div>
-
             <button
               onClick={handleCheckout}
-              className="w-full py-3.5 bg-[#5A3F2A] hover:bg-[#4A3320] text-white font-semibold rounded-xl transition-all shadow-lg hover:shadow-xl active:scale-[0.98] uppercase tracking-wide text-sm"
+              className="w-full bg-[#A67856] hover:bg-[#8B6345] text-white py-3 px-6 font-semibold transition-all duration-200 uppercase tracking-wide"
             >
-              Checkout
+              CHECK OUT
             </button>
           </div>
         )}
-      </aside>
+      </div>
     </>
   );
 };
 
 export default CartSidebar;
+
