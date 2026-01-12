@@ -80,7 +80,7 @@ const ProductCard = React.memo(({ product, pricing, index, onProductClick, onAdd
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: index * 0.1 + 0.3 }}
-              className="bg-red-500 text-white px-1.5 md:px-2.5 py-1 md:py-1.5 text-xs md:text-sm font-bold"
+              className="bg-red-500 text-white pill-badge px-3 py-1 text-xs md:text-sm font-bold shadow-sm"
             >
               Save <span className="lux-price-number">{Math.round(pricing.discountPercent)}%</span>
             </motion.div>
@@ -90,7 +90,7 @@ const ProductCard = React.memo(({ product, pricing, index, onProductClick, onAdd
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: index * 0.1 + 0.3 }}
-              className="bg-red-500 text-white px-1.5 md:px-2.5 py-1 md:py-1.5 text-xs md:text-sm font-bold"
+              className="bg-red-500 text-white pill-badge px-3 py-1 text-xs md:text-sm font-bold shadow-sm"
             >
               Sold Out
             </motion.div>
@@ -368,7 +368,7 @@ const BestSeller = () => {
   }, [addItem]);
 
   const handleProductClick = useCallback((product) => {
-    window.scrollTo({ top: 0, behavior: 'instant' });
+    window.scrollTo({ top: 0, behavior: 'auto' });
     // If product has variants, navigate to first variant, otherwise use product ID
     const productId = (product.variants && product.variants.length > 0) 
       ? product.variants[0]._id 

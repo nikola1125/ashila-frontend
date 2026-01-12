@@ -119,6 +119,11 @@ export const generateProductUrl = (product) => {
   
   // Get the slug for the primary option
   const optionSlug = optionToSlugMap[primaryOption] || createSlug(primaryOption);
+
+  if (!optionSlug) {
+    const fallbackId = product._id || product.id;
+    return fallbackId ? `/product/${fallbackId}` : '/product';
+  }
   
   // Create product name slug
   const productName = product.itemName || product.genericName || 'product';

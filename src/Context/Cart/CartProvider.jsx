@@ -1,6 +1,7 @@
 import React, { useReducer, useEffect, useMemo, useRef } from 'react';
 import { CartContext } from './CartContext';
 import useAxiosSecure from '../../hooks/useAxiosSecure';
+import { toast } from 'react-toastify';
 
 const CART_KEY = 'medimart_cart';
 
@@ -288,6 +289,7 @@ export const CartProvider = ({ children }) => {
       const stock = parseStockValue(item.stock);
       if (stock === null || stock <= 0) {
         // Item is out of stock, don't add to cart
+        toast.error('Nuk ka stok');
         return;
       }
     }
@@ -306,6 +308,7 @@ export const CartProvider = ({ children }) => {
       const stockToUse = dbStock ?? fallbackStock;
 
       if (stockToUse !== null && stockToUse <= 0) {
+        toast.error('Nuk ka stok');
         return;
       }
 
@@ -317,6 +320,7 @@ export const CartProvider = ({ children }) => {
         const existingItem = state.items[existingItemIndex];
         const existingQty = Number(existingItem.quantity) || 0;
         if (stockToUse !== null && existingQty + 1 > stockToUse) {
+          toast.error(`Vetëm ${stockToUse} në stok`);
           return;
         }
       }

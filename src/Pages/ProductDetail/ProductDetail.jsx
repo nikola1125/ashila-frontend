@@ -35,14 +35,36 @@ const ProductDetail = () => {
     if (isSeoUrl) {
       // Find product by category and slug
       const response = await publicApi.get('/medicines');
-      const allProducts = response.data.result || response.data || [];
+      const allProducts = Array.isArray(response)
+        ? response
+        : (response?.result || response?.medicines || response || []);
       
       // Find product matching the category and slug
       const matchedProduct = allProducts.find(product => {
         const optionSlugs = getProductOptionSlugs(product);
-        const productSlug = `${product.itemName?.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-') || 'product'}`;
+        const productName = product.itemName || product.genericName || 'product';
+        const company = product.company || '';
+        let descriptiveName = productName.toLowerCase();
+        if (company && company !== productName) {
+          descriptiveName += `-${company.toLowerCase()}`;
+        }
+        if (product.size) {
+          descriptiveName += `-${String(product.size).toLowerCase().replace(/\s+/g, '-')}`;
+        }
+
+        const productSlug = `${descriptiveName
+          .toLowerCase()
+          .replace(/[^a-z0-9\s-]/g, '')
+          .replace(/\s+/g, '-')
+          .replace(/-+/g, '-')
+          .replace(/^-|-$/g, '') || 'product'}`;
+
+        const legacySlug = `${(product.itemName || '')
+          .toLowerCase()
+          .replace(/[^a-z0-9\s-]/g, '')
+          .replace(/\s+/g, '-') || 'product'}`;
         
-        return optionSlugs.includes(category) && productSlug === slug;
+        return optionSlugs.includes(category) && (productSlug === slug || legacySlug === slug);
       });
       
       if (!matchedProduct) {
@@ -53,7 +75,7 @@ const ProductDetail = () => {
     } else {
       // Original behavior: fetch by ID
       const response = await publicApi.get(`/medicines/${id}`);
-      return response.data;
+      return response;
     }
   };
 
@@ -622,7 +644,7 @@ const ProductDetail = () => {
                           <div
                             className="swipe-hint-animation w-full border border-gray-200 overflow-hidden bg-white text-center pb-4 flex flex-col cursor-pointer hover:shadow-lg transition-shadow h-full"
                             onClick={() => {
-                              window.scrollTo({ top: 0, behavior: 'instant' });
+                              window.scrollTo({ top: 0, behavior: 'auto' });
                               // If product has variants, navigate to first variant, otherwise use product ID
                               const productId = (relatedProduct.variants && relatedProduct.variants.length > 0) 
                                 ? relatedProduct.variants[0]._id 
@@ -641,12 +663,12 @@ const ProductDetail = () => {
                               />
                               <div className="absolute top-2.5 right-2.5 flex flex-col gap-1 items-end z-10">
                                 {displayDiscount > 0 && (relatedProduct.totalStock > 0 && (relatedProduct.variants?.some(v => v.stock > 0) || relatedProduct.stock > 0)) && (
-                                  <div className="bg-red-500 text-white px-2.5 py-1.5 text-sm font-bold">
+                                  <div className="bg-red-500 text-white pill-badge px-3 py-1 text-xs font-bold shadow-sm">
                                     Save {Math.round(displayDiscount)}%
                                   </div>
                                 )}
                                 {relatedProduct.stock === 0 && (
-                                  <div className="bg-red-500 text-white px-2.5 py-1.5 text-sm font-bold">
+                                  <div className="bg-red-500 text-white pill-badge px-3 py-1 text-xs font-bold shadow-sm">
                                     Sold Out
                                   </div>
                                 )}

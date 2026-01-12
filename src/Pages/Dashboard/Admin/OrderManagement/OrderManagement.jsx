@@ -46,6 +46,15 @@ const OrderManagement = () => {
                 } else {
                     notificationManager.showNotification(`${newOrdersCount} New Orders`, `${newOrdersCount} customers have placed new orders`);
                 }
+
+                // Also trigger service worker notification for background support
+                if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+                    navigator.serviceWorker.controller.postMessage({
+                        type: 'NEW_ORDER',
+                        count: newOrdersCount,
+                        message: newOrdersCount === 1 ? 'A customer has placed a new order' : `${newOrdersCount} customers have placed new orders`
+                    });
+                }
             }
         }
         previousOrdersCount.current = orders.length;

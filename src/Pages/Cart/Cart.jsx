@@ -250,11 +250,17 @@ const Cart = () => {
                     </span>
                   </p>
                   <p className="text-xl font-extrabold text-gray-900 mt-1">
-                    Subtotal :{' '}
-                    <del className="text-red-300 text-base lux-price-number">
-                      {Number(totalPrice).toLocaleString()} ALL
-                    </del>{' '}
-                    <span className="lux-price-number">{Number(discountedTotal).toLocaleString()} ALL</span>
+                    Totali :{' '}
+                    {Number(discountedTotal) < Number(totalPrice) ? (
+                      <>
+                        <del className="text-red-300 text-base lux-price-number">
+                          {Number(totalPrice).toLocaleString()} ALL
+                        </del>{' '}
+                        <span className="lux-price-number">{Number(discountedTotal).toLocaleString()} ALL</span>
+                      </>
+                    ) : (
+                      <span className="lux-price-number">{Number(totalPrice).toLocaleString()} ALL</span>
+                    )}
                   </p>
                 </div>
                 <button

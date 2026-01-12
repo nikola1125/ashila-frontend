@@ -87,7 +87,7 @@ const DetailsModal = ({ isOpen, close, medicine }) => {
                       {discountedPrice.toLocaleString()} ALL
                     </span>
                     {medicine?.discount > 0 && (
-                      <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full font-semibold">
+                      <span className="bg-red-500 text-white text-xs px-2 py-1 pill-badge font-semibold">
                         -<span className="lux-price-number">{Math.round(medicine.discount)}%</span>
                       </span>
                     )}

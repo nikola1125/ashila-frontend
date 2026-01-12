@@ -62,16 +62,21 @@ const CreateProductModal = ({ isOpen, onClose, productToEdit, refetch, isBestsel
     const [imagePreview, setImagePreview] = useState(productToEdit?.image || null);
     const [imageFile, setImageFile] = useState(null);
 
+    const normalizeCategoryName = (value) => {
+        if (!value) return '';
+        return String(value).split('>')[0].trim();
+    };
+
     // Form State
     const [formData, setFormData] = useState({
         itemName: productToEdit?.itemName || '',
         company: productToEdit?.company || '',
         price: productToEdit?.price || '',
         stock: productToEdit?.stock || 0,
-        categoryName: productToEdit?.categoryName || Object.keys(CATEGORY_HIERARCHY)[0],
+        categoryName: normalizeCategoryName(productToEdit?.categoryName) || Object.keys(CATEGORY_HIERARCHY)[0],
         subcategory: productToEdit?.subcategory || '',
         option: productToEdit?.option || '',
-        options: productToEdit?.options || [], // New: Multiple options support
+        options: productToEdit?.options || (productToEdit?.option ? [productToEdit.option] : []), // Include single option if present
         productType: productToEdit?.productType || '',
         skinProblem: productToEdit?.skinProblem || '',
         description: productToEdit?.description || '',
@@ -82,7 +87,7 @@ const CreateProductModal = ({ isOpen, onClose, productToEdit, refetch, isBestsel
             : '',
         isBestseller: productToEdit?.isBestseller || false,
         variants: productToEdit?.variants?.length > 0
-            ? productToEdit.variants.map(v =>({
+            ? productToEdit.variants.map(v => ({
                 ...v,
                 discountPrice: v.price && v.discount ? (v.price - (v.price * v.discount / 100)).toFixed(2) : ''
             }))
@@ -112,7 +117,7 @@ const CreateProductModal = ({ isOpen, onClose, productToEdit, refetch, isBestsel
     // Dynamic product type options based on selected subcategory
     const getDynamicProductTypes = () => {
         if (!formData.subcategory) return PRODUCT_TYPE_OPTIONS;
-        
+
         // Return relevant product types based on subcategory
         const subcategoryTypes = {
             "Problematikat e fytyres": ["Serume", "Krem per syte", "Retinol", "Spot treatment", "Eye patches", "Acne patches"],
@@ -125,7 +130,7 @@ const CreateProductModal = ({ isOpen, onClose, productToEdit, refetch, isBestsel
             "Kujdesi per femije": ["Ushqim per femije", "Pelena", "Aksesore"],
             "Kategorite": ["Vitamina", "Suplemente per shendetin", "Minerale", "Suplemente bimore", "Peshore", "Aparat tensioni", "Termometer"]
         };
-        
+
         return subcategoryTypes[formData.subcategory] || PRODUCT_TYPE_OPTIONS;
     };
 
@@ -182,10 +187,11 @@ const CreateProductModal = ({ isOpen, onClose, productToEdit, refetch, isBestsel
         setLoading(true);
 
         // Find database ID for selected category name
-        const selectedDbCategory = categories.find(c => c.categoryName === formData.categoryName);
+        const baseCategoryName = normalizeCategoryName(formData.categoryName);
+        const selectedDbCategory = categories.find(c => c.categoryName === baseCategoryName);
 
         if (!selectedDbCategory) {
-            toast.error(`Error: Category "${formData.categoryName}" does not exist in database!`);
+            toast.error(`Error: Category "${baseCategoryName || formData.categoryName}" does not exist in database!`);
             setLoading(false);
             return; // Stop submission
         }
@@ -193,7 +199,7 @@ const CreateProductModal = ({ isOpen, onClose, productToEdit, refetch, isBestsel
         // Construct category path for searching/filtering
         // Path format: "Category > Subcategory > Option1, Option2"
         const optionsString = formData.options.length > 0 ? ` > ${formData.options.join(', ')}` : '';
-        const categoryPath = `${formData.categoryName} > ${formData.subcategory}${optionsString}`;
+        const categoryPath = `${baseCategoryName} > ${formData.subcategory}${optionsString}`;
 
         try {
             // Validate only required fields
@@ -249,7 +255,7 @@ const CreateProductModal = ({ isOpen, onClose, productToEdit, refetch, isBestsel
 
             // Append correct MongoDB _id for category
             data.append('category', selectedDbCategory._id);
-            
+
             // Save the full path string in categoryName for easier retrieval/filtering as requested
             // We ensure it is a string to avoid cast errors
             data.append('categoryName', String(categoryPath));
@@ -266,17 +272,23 @@ const CreateProductModal = ({ isOpen, onClose, productToEdit, refetch, isBestsel
                 data.append('bestsellerCategory', 'skincare'); // Default category
             }
 
+            // Only append image if a new file was selected
             if (imageFile) {
                 data.append('image', imageFile);
-            } else if (productToEdit?.image) {
-                data.append('image', productToEdit.image);
+            } else if (productToEdit && productToEdit.image) {
+                // If editing and no new image, keep the old one
+                data.append('imageUrl', productToEdit.image);
             }
 
             if (productToEdit) {
-                await privateApi.patch(`/medicines/${productToEdit._id}`, data);
+                await privateApi.patch(`/medicines/${productToEdit._id}`, data, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                });
                 toast.success('Product updated successfully');
             } else {
-                await privateApi.post('/medicines', data);
+                await privateApi.post('/medicines', data, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                });
                 toast.success('Product created successfully');
             }
 

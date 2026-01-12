@@ -1,6 +1,5 @@
 import React, { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { generateDirectProductUrl } from '../../utils/productUrls';
 import { CartContext } from '../../Context/Cart/CartContext';
 import { getProductImage } from '../../utils/productImages';
 
@@ -16,11 +15,21 @@ const ShopGrid = ({
   const { addItem } = useContext(CartContext);
   const navigate = useNavigate();
 
+  const getProductIdForDetails = (product) => {
+    if (!product) return null;
+    if (product.variants && product.variants.length > 0) {
+      return product.variants[0]._id || product.variants[0].id;
+    }
+    return product._id || product.id;
+  };
+
   return (
     <div>
       {/* Grid Layout - Using auto-fill with minmax */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5 justify-items-center">
         {paginatedMedicines?.map((medicine, index) => {
+          const detailsId = getProductIdForDetails(medicine);
+
           return (
             <div
               key={medicine._id || medicine.id || index}
@@ -31,8 +40,8 @@ const ShopGrid = ({
                 className="relative w-full overflow-hidden bg-white cursor-pointer h-[160px] md:h-[200px] flex items-center justify-center"
                 onClick={(e) => {
                   e.stopPropagation(); // Prevent any parent click handlers
-                  window.scrollTo({ top: 0, behavior: 'instant' });
-                  navigate(generateDirectProductUrl(medicine));
+                  window.scrollTo({ top: 0, behavior: 'auto' });
+                  if (detailsId) navigate(`/product/${detailsId}`);
                 }}
               >
                 <img
@@ -44,6 +53,12 @@ const ShopGrid = ({
                     transform: 'scale(1.05)'
                   }}
                   onError={(e) => {
+                    console.warn('Image failed to load for product:', medicine.itemName, 'Error:', e);
+                    console.warn('Image data:', {
+                      image: medicine.image,
+                      productId: medicine._id || index,
+                      fallbackImage: getProductImage(null, medicine._id || index)
+                    });
                     e.target.src = getProductImage(null, medicine._id || index);
                   }}
                 />
@@ -67,14 +82,14 @@ const ShopGrid = ({
                     }
 
                     return displayDiscount > 0 && (medicine.totalStock > 0 && (medicine.variants?.some(v => v.stock > 0) || medicine.stock > 0)) && (
-                      <div className="bg-red-500 text-white px-2.5 py-1.5 text-sm font-bold shadow-sm">
+                      <div className="bg-red-500 text-white pill-badge px-3 py-1 text-xs font-bold shadow-sm">
                         Save {Math.round(displayDiscount)}%
                       </div>
                     );
                   })()}
                   {/* Sold Out Badge */}
                   {(medicine.totalStock === 0 || medicine.stock === 0) && (
-                    <div className="bg-red-500 text-white px-2.5 py-1.5 text-sm font-bold shadow-sm">
+                    <div className="bg-red-500 text-white pill-badge px-3 py-1 text-xs font-bold shadow-sm">
                       Sold Out
                     </div>
                   )}
@@ -93,8 +108,8 @@ const ShopGrid = ({
                   className="lux-serif-text !text-[11px] md:!text-[13px] mb-1 text-gray-800 leading-tight whitespace-normal break-words min-h-[24px] md:min-h-[32px] cursor-pointer hover:text-gray-600 transition-colors"
                   onClick={(e) => {
                     e.stopPropagation(); // Prevent any parent click handlers
-                    window.scrollTo({ top: 0, behavior: 'instant' });
-                    navigate(generateDirectProductUrl(medicine));
+                    window.scrollTo({ top: 0, behavior: 'auto' });
+                    if (detailsId) navigate(`/product/${detailsId}`);
                   }}
                 >
                   {medicine.itemName}

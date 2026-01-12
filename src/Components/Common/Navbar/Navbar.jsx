@@ -3,8 +3,9 @@ import { AuthContext } from '../../../Context/Auth/AuthContext';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import Cart from './Cart';
 import CartSidebar from './CartSidebar';
-import userLogo from '../../../assets/userLogo.png';
-import Logo from '../Logo/Logo';
+import userLogo from "../../../assets/userLogo.png";
+const logo = "/images/logo.png";
+import Logo from "../Logo/Logo";
 import { Search, ChevronDown, Menu, X, ChevronRight } from 'lucide-react';
 import useAxiosSecure from '../../../hooks/useAxiosSecure';
 import { useThrottle } from '../../../hooks/useThrottle';
@@ -86,7 +87,7 @@ const NAV_CATEGORIES = [
         label: 'Higjena intime',
         subitems: [
           { id: 'intimate-wash', label: 'Lares intim', path: '/shop?subcategory=lares-intim' },
-          { id: 'intimate-wipes', label: 'Peceta', path: '/shop?subcategory=peceta' },
+          { id: 'intimate-wipes', label: 'Peceta', path: '/shop?subcategory=peceta-intime' },
         ],
       },
       {
@@ -293,9 +294,23 @@ const Navbar = () => {
     };
     window.addEventListener("scroll", throttledHandleMobileMenuScroll, { passive: true });
     document.addEventListener("click", handleClickOutside);
+    
+    // Don't lock body scroll - this might be causing scroll issues
+    // document.body.style.overflow = 'hidden';
+    // document.body.style.position = 'fixed';
+    // document.body.style.top = `-${window.scrollY}px`;
+    // document.body.style.width = '100%';
+    
     return () => {
       window.removeEventListener("scroll", throttledHandleMobileMenuScroll);
       document.removeEventListener("click", handleClickOutside);
+      
+      // Don't restore body scroll when mobile menu is closed
+      // document.body.style.overflow = '';
+      // document.body.style.position = '';
+      // document.body.style.top = '';
+      // document.body.style.width = '';
+      // Don't scroll anywhere when closing mobile menu
     };
   }, [mobileMenuOpen, throttledHandleMobileMenuScroll]);
 
@@ -323,15 +338,18 @@ const Navbar = () => {
           <div className="w-full mx-auto px-2 sm:px-4 lg:px-4 xl:px-6">
             <div className="h-[64px] lg:h-[70px] flex items-center gap-1 lg:gap-2 lg:justify-start">
               <button
-                onClick={(e) => { e.stopPropagation(); setMobileMenuOpen(!mobileMenuOpen); }}
-                className={`lg:hidden transition-colors z-50 min-h-[44px] min-w-[44px] flex items-center justify-center ${isScrolled || isAuthPage ? 'text-black' : 'text-white'}`}
+                onClick={(e) => { 
+                  e.stopPropagation(); 
+                  setMobileMenuOpen(!mobileMenuOpen);
+                }}
+                className={`lg:hidden transition-colors z-50 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg p-2 ${isScrolled || isAuthPage ? 'text-black bg-white' : 'text-white'}`}
                 aria-label="Toggle menu"
               >
                 {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
               </button>
 
               <div className="flex-1 flex justify-end lg:flex-none lg:justify-start items-center">
-                <div className="scale-75 lg:scale-75"><Logo /></div>
+                <div className="scale-75 lg:scale-80"><Logo /></div>
               </div>
 
               <div className="flex items-center gap-0.5 lg:hidden relative z-20">
@@ -407,73 +425,95 @@ const Navbar = () => {
         </div>
 
         <div className={`lg:hidden fixed top-full left-0 right-0 bg-white overflow-hidden z-40 transition-all duration-500 ${mobileMenuOpen ? 'max-h-screen' : 'max-h-0'}`}>
-          <div className="py-4 flex flex-col max-h-[80vh] overflow-y-auto">
-            <NavLink to="/" onClick={() => setMobileMenuOpen(false)} className="text-[#5A3F2A] font-medium text-sm uppercase px-4 py-3">Kreu</NavLink>
+          <div className="py-1 flex flex-col max-h-[95vh] overflow-y-auto bg-white">
+            <NavLink 
+              to="/" 
+              onClick={() => {
+                setMobileMenuOpen(false);
+              }} 
+              className="text-[#5A3F2A] font-medium text-sm uppercase px-4 py-1 hover:bg-gray-50"
+            >
+              Kreu
+            </NavLink>
+            
             {NAV_CATEGORIES.map((category) => {
               const isCategoryOpen = mobileOpenCategoryId === category.id;
+              
               return (
-                <div key={category.id}>
+                <div key={category.id} className="border-b border-gray-100">
                   <button
                     onClick={() => {
                       setMobileOpenCategoryId(isCategoryOpen ? null : category.id);
                       setMobileOpenGroupId(null);
                     }}
-                    className="w-full text-left font-medium text-sm uppercase px-4 py-3 flex items-center justify-between"
+                    className="w-full text-left font-medium text-sm uppercase px-4 py-1 flex items-center justify-between hover:bg-gray-50"
                   >
                     <span>{category.label}</span>
-                    <ChevronRight className={`w-4 h-4 transition-transform duration-200 ${isCategoryOpen ? 'rotate-90' : ''}`} />
+                    <ChevronRight 
+                      className={`w-4 h-4 transition-transform duration-200 ${isCategoryOpen ? 'rotate-90' : ''}`} 
+                    />
                   </button>
 
+                  {/* Category submenu */}
                   <div
-                    className={`bg-gray-50 overflow-hidden transition-[max-height,opacity,transform] duration-300 ease-out ${
-                      isCategoryOpen ? 'max-h-[1000px] opacity-100 translate-y-0' : 'max-h-0 opacity-0 -translate-y-1'
+                    className={`overflow-hidden transition-all duration-300 ${
+                      isCategoryOpen ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'
                     }`}
                   >
                     {category.groups.map((group) => {
                       const isGroupOpen = mobileOpenGroupId === group.id;
+                      
                       return (
-                        <div key={group.id}>
-                          <button
-                            onClick={() => {
-                              if (group.subitems) {
-                                setMobileOpenGroupId(isGroupOpen ? null : group.id);
-                              } else if (group.path) {
+                        <div key={group.id} className="border-t border-gray-50">
+                          {group.subitems ? (
+                            <>
+                              <button
+                                onClick={() => {
+                                  setMobileOpenGroupId(isGroupOpen ? null : group.id);
+                                }}
+                                className="w-full text-left text-gray-700 px-8 py-1 flex items-center justify-between hover:bg-gray-50"
+                              >
+                                <span className="text-[13px]">{group.label}</span>
+                                <ChevronRight 
+                                  className={`w-4 h-4 transition-transform duration-200 ${isGroupOpen ? 'rotate-90' : ''}`} 
+                                />
+                              </button>
+                              
+                              {/* Group submenu */}
+                              <div
+                                className={`overflow-hidden transition-all duration-300 ${
+                                  isGroupOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+                                }`}
+                              >
+                                <ul>
+                                  {group.subitems.map((sub) => (
+                                    <li key={sub.id}>
+                                      <button
+                                        onClick={() => {
+                                          navigate(sub.path);
+                                          setMobileMenuOpen(false);
+                                        }}
+                                        className="w-full text-left text-gray-700 px-12 py-1 hover:bg-gray-50 text-sm"
+                                      >
+                                        {sub.label}
+                                      </button>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            </>
+                          ) : group.path ? (
+                            <button
+                              onClick={() => {
                                 navigate(group.path);
                                 setMobileMenuOpen(false);
-                              }
-                            }}
-                            className="w-full text-left text-gray-700 px-4 py-3 flex items-center justify-between"
-                          >
-                            <span className="text-[13px]">{group.label}</span>
-                            {group.subitems && (
-                              <ChevronRight className={`w-4 h-4 transition-transform duration-200 ${isGroupOpen ? 'rotate-90' : ''}`} />
-                            )}
-                          </button>
-
-                          {group.subitems && (
-                            <div
-                              className={`bg-white overflow-hidden transition-[max-height,opacity,transform] duration-300 ease-out ${
-                                isCategoryOpen && isGroupOpen
-                                  ? 'max-h-[800px] opacity-100 translate-y-0'
-                                  : 'max-h-0 opacity-0 -translate-y-1'
-                              }`}
+                              }}
+                              className="w-full text-left text-gray-700 px-8 py-1 hover:bg-gray-50 text-sm"
                             >
-                              <ul>
-                                {group.subitems.map((sub) => (
-                                  <li key={sub.id}>
-                                    <button
-                                      onClick={() => {
-                                        navigate(sub.path);
-                                        setMobileMenuOpen(false);
-                                      }}
-                                      className="w-full text-left text-[13px] px-6 py-2"
-                                    >
-                                      {sub.label}
-                                    </button>
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
+                              {group.label}
+                            </button>
+                          ) : (
+                            <div className="px-8 py-1 text-sm text-gray-500">{group.label}</div>
                           )}
                         </div>
                       );
@@ -482,40 +522,42 @@ const Navbar = () => {
                 </div>
               );
             })}
-            <div className="mt-2">
-              {user ? (
-                <>
-                  <NavLink
-                    to="/dashboard"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-2 font-medium text-sm uppercase px-4 py-3"
-                  >
-                    <img src={user.photoURL || userLogo} alt="Account" className="w-6 h-6 rounded-full" />
-                    Account
-                  </NavLink>
-                  <button
-                    onClick={async () => {
-                      await signOutUser();
-                      setMobileMenuOpen(false);
-                      navigate('/');
-                    }}
-                    className="w-full text-left font-medium text-sm uppercase px-4 py-3"
-                  >
-                    Log out
-                  </button>
-                </>
-              ) : (
-                <NavLink
-                  to="/login"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="block font-medium text-sm uppercase px-4 py-3"
-                >
-                  Log in
-                </NavLink>
-              )}
-            </div>
-          </div>
-        </div>
+    
+    {/* User section */}
+    <div className="border-t border-gray-200 mt-2 pt-2">
+      {user ? (
+        <>
+          <NavLink
+            to="/dashboard"
+            onClick={() => setMobileMenuOpen(false)}
+            className="flex items-center gap-2 font-medium text-sm uppercase px-4 py-1 hover:bg-gray-50"
+          >
+            <img src={user.photoURL || userLogo} alt="Account" className="w-6 h-6 rounded-full" />
+            Account
+          </NavLink>
+          <button
+            onClick={async () => {
+              await signOutUser();
+              setMobileMenuOpen(false);
+              navigate('/');
+            }}
+            className="w-full text-left font-medium text-sm uppercase px-4 py-1 hover:bg-gray-50"
+          >
+            Log out
+          </button>
+        </>
+      ) : (
+        <NavLink
+          to="/login"
+          onClick={() => setMobileMenuOpen(false)}
+          className="block font-medium text-sm uppercase px-4 py-1 hover:bg-gray-50"
+        >
+          Log in
+        </NavLink>
+      )}
+    </div>
+  </div>
+</div>
       </header>
       <CartSidebar isOpen={cartOpen} onClose={() => setCartOpen(false)} />
       <SearchModal isOpen={searchOpen} onClose={() => setSearchOpen(false)} />

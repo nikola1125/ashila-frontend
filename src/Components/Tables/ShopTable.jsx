@@ -41,12 +41,12 @@ const ShopTable = ({
                     <div className="flex items-center gap-3">
                       <div className="avatar">
                         <div className="h-12 w-12 cursor-pointer flex-shrink-0 bg-gray-100 overflow-hidden relative" style={{ borderRadius: '999px' }} onClick={() => {
-                          window.scrollTo({ top: 0, behavior: 'instant' });
+                          window.scrollTo({ top: 0, behavior: 'auto' });
                           navigate(generateDirectProductUrl(medicine));
                         }}>
                           {/* Discount Badge */}
                           {medicine.discount && Number(medicine.discount) > 0 && (
-                            <div className="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold px-1.5 py-0.5" style={{ borderRadius: '999px' }}>
+                            <div className="absolute top-0 right-0 bg-red-500 text-white pill-badge px-2 py-0.5 text-[11px] font-bold shadow-sm">
                               -{Math.round(medicine.discount)}%
                             </div>
                           )}
@@ -69,7 +69,7 @@ const ShopTable = ({
                         <div
                           className="font-bold cursor-pointer hover:text-gray-600 transition-colors"
                           onClick={() => {
-                            window.scrollTo({ top: 0, behavior: 'instant' });
+                            window.scrollTo({ top: 0, behavior: 'auto' });
                             navigate(generateDirectProductUrl(medicine));
                           }}
                         >

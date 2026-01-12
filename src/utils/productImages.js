@@ -1,20 +1,9 @@
 // Available product images from public/images folder
-// Excluding: produkt.png, background.png, backg.mp4
+// Using existing images and fallbacks
 const PRODUCT_IMAGES = [
-  '/images/25-12-248-5_f6d1d39c-0dbb-41df-b09b-606b8643c4d4.webp',
-  '/images/2d6c295f-0d8b-4ed7-9048-15c38970f06c.webp',
-  '/images/4_191a7880-0b71-4057-9ab7-35e79aafa669.webp',
-  '/images/5_0bf7b0e1-73b6-44dd-94f4-dc404b267c7a.webp',
-  '/images/baume.webp',
-  '/images/BeautyofJoseon-ReliefSuntexture.webp',
-  '/images/centella.webp',
-  '/images/ceravefoaming2.webp',
-  '/images/hairtowel.webp',
-  '/images/IMG_2112_301a03db-e67d-4e84-9cd9-9c97c40824d2.webp',
-  '/images/MisshaALLAROUNDSUNSPF50.webp',
-  '/images/puff_254f1eef-7b9c-446a-be78-d82c14da0c4b.webp',
-  '/images/skin55ml_c9356fb5-f92f-4b33-b31b-0c44cf88c58e.webp',
-  '/images/TheOrdinaryGlycolicAcid7_ToningSolutiontexture.webp'
+  '/images/placeholder-product.svg', // Use product placeholder instead of logo
+  '/images/logo.png', // Fallback to logo if needed
+  // Add more images as they become available
 ];
 
 /**
@@ -45,9 +34,42 @@ export const getFallbackProductImage = () => {
  * @returns {string} Image path
  */
 export const getProductImage = (image, indexOrId = 0) => {
-  if (image && typeof image === 'string' && image.trim()) {
-    return image;
+  // Handle null, undefined, or empty values
+  if (image === null || image === undefined) {
+    return getImageByIndex(indexOrId);
   }
+  
+  // If image is an object, try to extract URL from common properties
+  if (typeof image === 'object') {
+    // Try common image URL properties
+    const possibleUrl = image.url || image.src || image.imageUrl || image.image || Object.values(image)[0];
+    
+    if (possibleUrl && typeof possibleUrl === 'string') {
+      return possibleUrl;
+    }
+    
+    return getImageByIndex(indexOrId);
+  }
+  
+  // Convert to string and trim whitespace
+  const imageStr = String(image).trim();
+  
+  // If empty after trimming, use fallback
+  if (imageStr === '' || imageStr === 'undefined') {
+    return getImageByIndex(indexOrId);
+  }
+  
+  // If it's an external URL (R2, http, https), return as-is
+  if (imageStr.startsWith('http') || imageStr.startsWith('https://pub-')) {
+    return imageStr;
+  }
+  
+  // If it's a local path that exists, return as-is
+  if (imageStr.startsWith('/images/')) {
+    return imageStr;
+  }
+  
+  // Otherwise, use fallback
   return getImageByIndex(indexOrId);
 };
 

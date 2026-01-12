@@ -58,7 +58,7 @@ const SalesPromotion = () => {
                 className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent flex flex-col justify-end p-6">
-                <div className="absolute top-4 right-4 bg-red-500 text-white px-4 py-2 rounded-full font-bold text-lg">
+                <div className="absolute top-4 right-4 bg-red-500 text-white px-4 py-2 pill-badge font-bold text-lg">
                   {promo.discount} OFF
                 </div>
                 <h3 className="text-2xl font-bold text-white mb-2">

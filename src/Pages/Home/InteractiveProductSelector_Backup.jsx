@@ -57,7 +57,7 @@ const InteractiveProductSelector = () => {
 
     const handleViewProduct = useCallback(() => {
         if (productsData[activeProductIndex]?._id) {
-            window.scrollTo({ top: 0, behavior: 'instant' });
+            window.scrollTo({ top: 0, behavior: 'auto' });
             navigate(`/product/${productsData[activeProductIndex]._id}`);
         } else {
             navigate('/shop');
@@ -203,12 +203,12 @@ const InteractiveProductSelector = () => {
                                     }}
                                 />
                                 {activeProduct.discount > 0 && (
-                                    <div className="absolute top-2.5 right-2.5 bg-red-500 text-white px-2.5 py-1.5 text-sm font-bold product-badge">
+                                    <div className="absolute top-2.5 right-2.5 bg-red-500 text-white pill-badge px-3 py-1 text-xs font-bold shadow-sm product-badge">
                                         Save {Math.round(activeProduct.discount)}%
                                     </div>
                                 )}
                                 {activeProduct.stock === 0 && (
-                                    <div className="absolute top-2.5 left-2.5 bg-red-500 text-white px-2.5 py-1.5 text-sm font-bold product-badge">
+                                    <div className="absolute top-2.5 left-2.5 bg-red-500 text-white pill-badge px-3 py-1 text-xs font-bold shadow-sm product-badge">
                                         Sold Out
                                     </div>
                                 )}

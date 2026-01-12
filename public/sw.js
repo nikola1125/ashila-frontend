@@ -1,5 +1,36 @@
 // Background service worker for keeping the app responsive
-const CACHE_NAME = 'ashila-pharmacy-v1';
+const CACHE_NAME = 'ashila-pharmacy-v3'; // Updated version to force cache refresh
+
+// Clear old caches on install
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cacheName) => {
+          if (cacheName !== CACHE_NAME) {
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    })
+  );
+});
+
+// Install event - cache essential resources
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.keys().then((requests) => {
+        requests.forEach((request) => {
+          if (request.url.includes('localhost:5001')) {
+            cache.delete(request);
+          }
+        });
+      });
+    })
+  );
+});
+
 const API_BASE_URL = 'https://your-backend.onrender.com';
 
 // Install event - cache essential resources
@@ -64,6 +95,102 @@ self.addEventListener('sync', (event) => {
       // Perform background sync tasks
       caches.open(CACHE_NAME).then((cache) => {
         return cache.add('/api/health');
+      })
+    );
+  }
+});
+
+// Handle messages from main thread
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'NEW_ORDER') {
+    const options = {
+      body: event.data.message,
+      icon: '/favicon.ico',
+      badge: '/favicon.ico',
+      vibrate: [200, 100, 200],
+      tag: 'medi-mart-order',
+      requireInteraction: false,
+      silent: false,
+      data: {
+        dateOfArrival: Date.now(),
+        primaryKey: 1,
+        count: event.data.count
+      },
+      actions: [
+        {
+          action: 'view-orders',
+          title: 'View Orders',
+          icon: '/favicon.ico'
+        },
+        {
+          action: 'dismiss',
+          title: 'Dismiss',
+          icon: '/favicon.ico'
+        }
+      ]
+    };
+
+    self.registration.showNotification('New Order - Farmaci Ashila', options);
+  }
+});
+
+// Handle push notifications for new orders
+self.addEventListener('push', (event) => {
+  const options = {
+    body: event.data ? event.data.text() : 'A customer has placed a new order',
+    icon: '/favicon.ico',
+    badge: '/favicon.ico',
+    vibrate: [200, 100, 200],
+    tag: 'medi-mart-order',
+    requireInteraction: false,
+    silent: false,
+    data: {
+      dateOfArrival: Date.now(),
+      primaryKey: 1
+    },
+    actions: [
+      {
+        action: 'view-orders',
+        title: 'View Orders',
+        icon: '/favicon.ico'
+      },
+      {
+        action: 'dismiss',
+        title: 'Dismiss',
+        icon: '/favicon.ico'
+      }
+    ]
+  };
+
+  event.waitUntil(
+    self.registration.showNotification('New Order - Farmaci Ashila', options)
+  );
+});
+
+// Handle notification click
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+
+  if (event.action === 'view-orders') {
+    // Open the admin orders page
+    event.waitUntil(
+      clients.openWindow('/admin/orders')
+    );
+  } else if (event.action === 'dismiss') {
+    // Just close the notification
+    event.notification.close();
+  } else {
+    // Default action - focus the existing window or open new one
+    event.waitUntil(
+      clients.matchAll().then((clientList) => {
+        for (const client of clientList) {
+          if (client.url && client.url.includes('/admin') && 'focus' in client) {
+            return client.focus();
+          }
+        }
+        if (clients.openWindow) {
+          return clients.openWindow('/admin/orders');
+        }
       })
     );
   }

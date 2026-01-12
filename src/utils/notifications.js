@@ -5,8 +5,29 @@ class NotificationManager {
     this.isEnabled = true;
     this.selectedSound = 'chime'; // Default sound
     this.audioInitialized = false;
+    this.lastPlayTime = 0;
+    this.minPlayInterval = 100; // Minimum 100ms between sounds
     // Don't initialize audio immediately - wait for user interaction
     this.requestPermission();
+    
+    // Handle page visibility changes
+    this.setupVisibilityHandler();
+  }
+
+  setupVisibilityHandler() {
+    // Re-initialize audio when page becomes visible again
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden && this.isEnabled) {
+        this.initAudio();
+      }
+    });
+
+    // Handle window focus
+    window.addEventListener('focus', () => {
+      if (this.isEnabled) {
+        this.initAudio();
+      }
+    });
   }
 
   async initAudio() {
@@ -42,12 +63,23 @@ class NotificationManager {
   async playNotificationSound(type = 'order') {
     if (!this.isEnabled) return;
     
+    // Rate limiting to prevent audio spam
+    const now = Date.now();
+    if (now - this.lastPlayTime < this.minPlayInterval) {
+      return;
+    }
+    this.lastPlayTime = now;
+    
     // Initialize audio context if not already done (lazy initialization)
     if (!this.audioInitialized) {
       await this.initAudio();
     }
     
-    if (!this.audioContext) return;
+    if (!this.audioContext) {
+      // Fallback to HTML5 Audio if Web Audio API fails
+      this.playFallbackSound(type);
+      return;
+    }
 
     try {
       // Ensure audio context is running
@@ -55,94 +87,233 @@ class NotificationManager {
         await this.audioContext.resume();
       }
       
-      const oscillator = this.audioContext.createOscillator();
-      const gainNode = this.audioContext.createGain();
+      // Create a more robust sound with multiple oscillators
+      await this.playEnhancedSound(type);
+    } catch (error) {
+      // Fallback to HTML5 Audio if Web Audio API fails
+      this.playFallbackSound(type);
+    }
+  }
 
-      oscillator.connect(gainNode);
-      gainNode.connect(this.audioContext.destination);
+  async playEnhancedSound(type) {
+    const currentTime = this.audioContext.currentTime;
+    
+    // Create multiple oscillators for richer sound
+    const primaryOsc = this.audioContext.createOscillator();
+    const secondaryOsc = this.audioContext.createOscillator();
+    const gainNode = this.audioContext.createGain();
+    const filterNode = this.audioContext.createBiquadFilter();
 
-      // Play the selected sound type
-      this.playSoundPattern(oscillator, gainNode, this.selectedSound);
+    // Connect nodes
+    primaryOsc.connect(filterNode);
+    secondaryOsc.connect(filterNode);
+    filterNode.connect(gainNode);
+    gainNode.connect(this.audioContext.destination);
 
-      gainNode.gain.setValueAtTime(0.3, this.audioContext.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.5);
+    // Configure filter for better sound quality
+    filterNode.type = 'lowpass';
+    filterNode.frequency.setValueAtTime(2000, currentTime);
+    filterNode.Q.setValueAtTime(1, currentTime);
 
-      oscillator.start(this.audioContext.currentTime);
-      oscillator.stop(this.audioContext.currentTime + 0.5);
+    // Set oscillator types
+    primaryOsc.type = 'sine';
+    secondaryOsc.type = 'triangle';
+
+    // Configure gain envelope
+    gainNode.gain.setValueAtTime(0, currentTime);
+    gainNode.gain.linearRampToValueAtTime(0.3, currentTime + 0.01);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, currentTime + 0.8);
+
+    // Play the selected sound pattern
+    this.playSoundPattern(primaryOsc, secondaryOsc, currentTime, this.selectedSound);
+
+    // Start and stop oscillators
+    primaryOsc.start(currentTime);
+    secondaryOsc.start(currentTime);
+    primaryOsc.stop(currentTime + 0.8);
+    secondaryOsc.stop(currentTime + 0.8);
+  }
+
+  playFallbackSound(type) {
+    try {
+      // Create a simple HTML5 Audio element as fallback
+      const audio = new Audio();
+      
+      // Generate a data URI for a simple beep sound
+      const beepData = this.generateBeepData(type);
+      audio.src = beepData;
+      audio.volume = 0.3;
+      
+      // Play the sound
+      const playPromise = audio.play();
+      
+      // Handle autoplay restrictions
+      if (playPromise !== undefined) {
+        playPromise.catch(() => {
+          // Silently fail if autoplay is blocked
+        });
+      }
     } catch (error) {
       // Silently fail - audio is optional
     }
   }
 
-  playSoundPattern(oscillator, gainNode, soundType) {
-    const currentTime = this.audioContext.currentTime;
+  generateBeepData(type) {
+    // Generate a simple beep sound as data URI
+    const frequency = this.getFrequencyForType(type);
+    const duration = 0.3;
+    const sampleRate = 44100;
+    const numSamples = Math.floor(sampleRate * duration);
+    
+    // Generate PCM data
+    const buffer = new ArrayBuffer(44 + numSamples * 2);
+    const view = new DataView(buffer);
+    
+    // WAV header
+    const writeString = (offset, string) => {
+      for (let i = 0; i < string.length; i++) {
+        view.setUint8(offset + i, string.charCodeAt(i));
+      }
+    };
+    
+    writeString(0, 'RIFF');
+    view.setUint32(4, 36 + numSamples * 2, true);
+    writeString(8, 'WAVE');
+    writeString(12, 'fmt ');
+    view.setUint32(16, 16, true);
+    view.setUint16(20, 1, true);
+    view.setUint16(22, 1, true);
+    view.setUint32(24, sampleRate, true);
+    view.setUint32(28, sampleRate * 2, true);
+    view.setUint16(32, 2, true);
+    view.setUint16(34, 16, true);
+    writeString(36, 'data');
+    view.setUint32(40, numSamples * 2, true);
+    
+    // Generate sine wave data
+    let offset = 44;
+    for (let i = 0; i < numSamples; i++) {
+      const sample = Math.sin(2 * Math.PI * frequency * i / sampleRate) * 0.3;
+      const envelope = Math.exp(-i / (sampleRate * 0.1)); // Exponential decay
+      view.setInt16(offset, sample * envelope * 32767, true);
+      offset += 2;
+    }
+    
+    return 'data:audio/wav;base64,' + btoa(String.fromCharCode(...new Uint8Array(buffer)));
+  }
 
+  getFrequencyForType(type) {
+    const frequencies = {
+      'order': 800,
+      'chime': 1000,
+      'bell': 1200,
+      'ding': 900,
+      'notification': 600,
+      'alert': 400,
+      'subtle': 500,
+      'digital': 1000,
+      'soft': 400
+    };
+    return frequencies[type] || 800;
+  }
+
+  playSoundPattern(primaryOsc, secondaryOsc, currentTime, soundType) {
     switch (soundType) {
       case 'chime':
         // Pleasant chime sound
-        oscillator.frequency.setValueAtTime(800, currentTime);
-        oscillator.frequency.exponentialRampToValueAtTime(1200, currentTime + 0.1);
-        oscillator.frequency.exponentialRampToValueAtTime(600, currentTime + 0.2);
+        primaryOsc.frequency.setValueAtTime(800, currentTime);
+        primaryOsc.frequency.exponentialRampToValueAtTime(1200, currentTime + 0.1);
+        primaryOsc.frequency.exponentialRampToValueAtTime(600, currentTime + 0.2);
+        secondaryOsc.frequency.setValueAtTime(1600, currentTime);
+        secondaryOsc.frequency.exponentialRampToValueAtTime(2400, currentTime + 0.1);
+        secondaryOsc.frequency.exponentialRampToValueAtTime(1200, currentTime + 0.2);
         break;
         
       case 'bell':
         // Bell-like sound
-        oscillator.frequency.setValueAtTime(1000, currentTime);
-        oscillator.frequency.exponentialRampToValueAtTime(1500, currentTime + 0.05);
-        oscillator.frequency.exponentialRampToValueAtTime(1000, currentTime + 0.1);
-        oscillator.frequency.exponentialRampToValueAtTime(800, currentTime + 0.2);
+        primaryOsc.frequency.setValueAtTime(1000, currentTime);
+        primaryOsc.frequency.exponentialRampToValueAtTime(1500, currentTime + 0.05);
+        primaryOsc.frequency.exponentialRampToValueAtTime(1000, currentTime + 0.1);
+        primaryOsc.frequency.exponentialRampToValueAtTime(800, currentTime + 0.2);
+        secondaryOsc.frequency.setValueAtTime(2000, currentTime);
+        secondaryOsc.frequency.exponentialRampToValueAtTime(3000, currentTime + 0.05);
+        secondaryOsc.frequency.exponentialRampToValueAtTime(2000, currentTime + 0.1);
         break;
         
       case 'ding':
         // Simple ding sound
-        oscillator.frequency.setValueAtTime(1200, currentTime);
-        oscillator.frequency.setValueAtTime(1200, currentTime + 0.15);
+        primaryOsc.frequency.setValueAtTime(1200, currentTime);
+        primaryOsc.frequency.setValueAtTime(1200, currentTime + 0.15);
+        secondaryOsc.frequency.setValueAtTime(2400, currentTime);
+        secondaryOsc.frequency.setValueAtTime(2400, currentTime + 0.15);
         break;
         
       case 'notification':
         // Classic notification sound
-        oscillator.frequency.setValueAtTime(600, currentTime);
-        oscillator.frequency.exponentialRampToValueAtTime(800, currentTime + 0.05);
-        oscillator.frequency.exponentialRampToValueAtTime(1000, currentTime + 0.1);
-        oscillator.frequency.exponentialRampToValueAtTime(800, currentTime + 0.15);
-        oscillator.frequency.exponentialRampToValueAtTime(600, currentTime + 0.2);
+        primaryOsc.frequency.setValueAtTime(600, currentTime);
+        primaryOsc.frequency.exponentialRampToValueAtTime(800, currentTime + 0.05);
+        primaryOsc.frequency.exponentialRampToValueAtTime(1000, currentTime + 0.1);
+        primaryOsc.frequency.exponentialRampToValueAtTime(800, currentTime + 0.15);
+        primaryOsc.frequency.exponentialRampToValueAtTime(600, currentTime + 0.2);
+        secondaryOsc.frequency.setValueAtTime(1200, currentTime);
+        secondaryOsc.frequency.exponentialRampToValueAtTime(1600, currentTime + 0.05);
+        secondaryOsc.frequency.exponentialRampToValueAtTime(2000, currentTime + 0.1);
+        secondaryOsc.frequency.exponentialRampToValueAtTime(1600, currentTime + 0.15);
+        secondaryOsc.frequency.exponentialRampToValueAtTime(1200, currentTime + 0.2);
         break;
         
       case 'alert':
         // Alert sound - more urgent
-        oscillator.frequency.setValueAtTime(400, currentTime);
-        oscillator.frequency.exponentialRampToValueAtTime(600, currentTime + 0.05);
-        oscillator.frequency.setValueAtTime(600, currentTime + 0.1);
-        oscillator.frequency.exponentialRampToValueAtTime(400, currentTime + 0.15);
+        primaryOsc.frequency.setValueAtTime(400, currentTime);
+        primaryOsc.frequency.exponentialRampToValueAtTime(600, currentTime + 0.05);
+        primaryOsc.frequency.setValueAtTime(600, currentTime + 0.1);
+        primaryOsc.frequency.exponentialRampToValueAtTime(400, currentTime + 0.15);
+        secondaryOsc.frequency.setValueAtTime(800, currentTime);
+        secondaryOsc.frequency.exponentialRampToValueAtTime(1200, currentTime + 0.05);
+        secondaryOsc.frequency.setValueAtTime(1200, currentTime + 0.1);
+        secondaryOsc.frequency.exponentialRampToValueAtTime(800, currentTime + 0.15);
         break;
         
       case 'subtle':
         // Subtle notification
-        oscillator.frequency.setValueAtTime(500, currentTime);
-        oscillator.frequency.exponentialRampToValueAtTime(700, currentTime + 0.1);
-        oscillator.frequency.exponentialRampToValueAtTime(500, currentTime + 0.2);
+        primaryOsc.frequency.setValueAtTime(500, currentTime);
+        primaryOsc.frequency.exponentialRampToValueAtTime(700, currentTime + 0.1);
+        primaryOsc.frequency.exponentialRampToValueAtTime(500, currentTime + 0.2);
+        secondaryOsc.frequency.setValueAtTime(1000, currentTime);
+        secondaryOsc.frequency.exponentialRampToValueAtTime(1400, currentTime + 0.1);
+        secondaryOsc.frequency.exponentialRampToValueAtTime(1000, currentTime + 0.2);
         break;
         
       case 'digital':
         // Digital beep
-        oscillator.type = 'square';
-        oscillator.frequency.setValueAtTime(1000, currentTime);
-        oscillator.frequency.setValueAtTime(1000, currentTime + 0.1);
+        primaryOsc.type = 'square';
+        secondaryOsc.type = 'square';
+        primaryOsc.frequency.setValueAtTime(1000, currentTime);
+        primaryOsc.frequency.setValueAtTime(1000, currentTime + 0.1);
+        secondaryOsc.frequency.setValueAtTime(2000, currentTime);
+        secondaryOsc.frequency.setValueAtTime(2000, currentTime + 0.1);
         break;
         
       case 'soft':
         // Soft gentle sound
-        oscillator.type = 'sine';
-        oscillator.frequency.setValueAtTime(400, currentTime);
-        oscillator.frequency.exponentialRampToValueAtTime(600, currentTime + 0.15);
-        oscillator.frequency.exponentialRampToValueAtTime(400, currentTime + 0.3);
+        primaryOsc.type = 'sine';
+        secondaryOsc.type = 'sine';
+        primaryOsc.frequency.setValueAtTime(400, currentTime);
+        primaryOsc.frequency.exponentialRampToValueAtTime(600, currentTime + 0.15);
+        primaryOsc.frequency.exponentialRampToValueAtTime(400, currentTime + 0.3);
+        secondaryOsc.frequency.setValueAtTime(800, currentTime);
+        secondaryOsc.frequency.exponentialRampToValueAtTime(1200, currentTime + 0.15);
+        secondaryOsc.frequency.exponentialRampToValueAtTime(800, currentTime + 0.3);
         break;
         
       default:
         // Default to chime
-        oscillator.frequency.setValueAtTime(800, currentTime);
-        oscillator.frequency.exponentialRampToValueAtTime(1200, currentTime + 0.1);
-        oscillator.frequency.exponentialRampToValueAtTime(600, currentTime + 0.2);
+        primaryOsc.frequency.setValueAtTime(800, currentTime);
+        primaryOsc.frequency.exponentialRampToValueAtTime(1200, currentTime + 0.1);
+        primaryOsc.frequency.exponentialRampToValueAtTime(600, currentTime + 0.2);
+        secondaryOsc.frequency.setValueAtTime(1600, currentTime);
+        secondaryOsc.frequency.exponentialRampToValueAtTime(2400, currentTime + 0.1);
+        secondaryOsc.frequency.exponentialRampToValueAtTime(1200, currentTime + 0.2);
     }
   }
 

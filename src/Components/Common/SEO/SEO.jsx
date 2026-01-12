@@ -37,6 +37,44 @@ const SEO = ({
       <meta name="language" content="sq" />
       <meta name="geo.region" content="AL" />
       <meta name="geo.placename" content="Shqipëri" />
+      
+      {/* Organization Schema for Google Search Logo */}
+      <script type="application/ld+json">
+        {JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "Ashila Pharmacy",
+          "url": "https://www.farmaciashila.com",
+          "logo": "https://www.farmaciashila.com/logo.png",
+          "image": "https://www.farmaciashila.com/logo.png",
+          "description": "Farmaci Ashila - Kujdesi shëndetësor dhe produkte farmaceutike në Shqipëri",
+          "address": {
+            "@type": "PostalAddress",
+            "addressCountry": "AL"
+          },
+          "contactPoint": {
+            "@type": "ContactPoint",
+            "telephone": "+355 68 687 9292",
+            "contactType": "customer service"
+          }
+        })}
+      </script>
+      
+      {/* Website Schema */}
+      <script type="application/ld+json">
+        {JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "Ashila Pharmacy",
+          "url": "https://www.farmaciashila.com",
+          "logo": "https://www.farmaciashila.com/logo.png",
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://www.farmaciashila.com/shop?q={search_term_string}",
+            "query-input": "required name=search_term_string"
+          }
+        })}
+      </script>
     </Helmet>
   );
 };

@@ -1,6 +1,6 @@
 import React from 'react';
 import { getProductImage } from '../../utils/productImages';
-import logo from '../../assets/logo.png';
+import logo from '/images/logo.png';
 
 const DiscountCard = ({ medicine }) => {
   const discountedPrice = Number(medicine.price * (1 - medicine.discount / 100));
@@ -19,7 +19,7 @@ const DiscountCard = ({ medicine }) => {
       
       {/* Discount Badge - Bottom Left */}
       {medicine.discount > 0 && (
-        <span className="elegant-badge bg-[#F4A640] text-white px-2.5 py-1 text-xs font-semibold">
+        <span className="elegant-badge pill-badge bg-red-500 text-white px-3 py-1 text-xs font-semibold shadow-sm">
           Save <span className="lux-price-number">{Math.round(medicine.discount)}%</span>
         </span>
       )}

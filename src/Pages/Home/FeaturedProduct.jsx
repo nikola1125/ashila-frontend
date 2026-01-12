@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { getProductImage } from '../../utils/productImages';
 
 const FeaturedProduct = ({ title = 'Featured Product', description, image }) => {
@@ -13,7 +14,7 @@ const FeaturedProduct = ({ title = 'Featured Product', description, image }) => 
             <li>• Clinically tested</li>
             <li>• Fast-acting and safe</li>
           </ul>
-          <a href="/shop" className="inline-block bg-[#946259] text-white py-3 px-6 font-bold hover:bg-[#7a4f47] transition-all duration-200 border-2 border-[#946259] uppercase tracking-wide">Shop Now</a>
+          <Link to="/shop" className="inline-block bg-[#946259] text-white py-3 px-6 font-bold hover:bg-[#7a4f47] transition-all duration-200 border-2 border-[#946259] uppercase tracking-wide">Shop Now</Link>
         </div>
 
         <div className="flex items-center justify-center">

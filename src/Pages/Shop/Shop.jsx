@@ -27,10 +27,36 @@ const Shop = () => {
 
   // Get all medicines - Moved to top to be available for filterOptions
   // Use group=true to group variants together
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['medicines'],
-    queryFn: () => publicApi.get('/medicines?group=true'),
+    queryFn: () => {
+      // Add mobile debugging
+      if (typeof window !== 'undefined') {
+        console.log('Mobile Debug:', {
+          userAgent: navigator.userAgent,
+          isMobile: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent),
+          isIOS: /iPad|iPhone|iPod/.test(navigator.userAgent),
+          isAndroid: /Android/.test(navigator.userAgent),
+          connection: navigator.connection?.effectiveType,
+          timestamp: new Date().toISOString()
+        });
+      }
+      return publicApi.get('/medicines?group=true');
+    },
     staleTime: 2 * 60 * 1000, // 2 minutes - will use default refetchOnMount
+    retry: (failureCount, error) => {
+      // Add retry debugging
+      if (typeof window !== 'undefined') {
+        console.log('Retry attempt:', {
+          attempt: failureCount + 1,
+          error: error?.message,
+          status: error?.response?.status,
+          isMobile: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+        });
+      }
+      return failureCount < 3; // Retry up to 3 times
+    },
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
   });
 
   const allMedicines = data?.result || [];
@@ -98,6 +124,7 @@ const Shop = () => {
     "Lekure e yndyrshme": "lekure-e-yndyrshme",
     "Lekure e thate": "lekure-e-thate",
     "Lekure mikes": "lekure-mikes",
+    "Lekure mikse": "lekure-mikes",
     "Lekure sensitive": "lekure-sensitive",
 
     // Synonyms for slug matching
@@ -125,7 +152,9 @@ const Shop = () => {
     "Kujdesi ndaj diellit": "kujdesi-ndaj-diellit",
     "Deodorant": "deodorant",
     "Vaj per trupin": "vaj-per-trupin",
-    "Krem per duart & këmbet": "krem-per-duart-kembet",
+    "Krem per duart & këmbet": "krem-per-duart-dhe-kembet",
+    "Krem per duart & kembet": "krem-per-duart-dhe-kembet",
+    "Krem per duart & këmbet (dhe)": "krem-per-duart-dhe-kembet",
     
     // Per flokë
     "Skalp i thate": "skalp-i-thate",
@@ -366,23 +395,20 @@ const Shop = () => {
     setCurrentPage(1);
   }, []);
 
-  // Handle page change
-  const goToPage = useCallback((page) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-    }
-  }, []);
-
   // Handle items per page change
   const handleItemsPerPageChange = useCallback((e) => {
     setItemsPerPage(Number(e.target.value));
     setCurrentPage(1);
+    // Scroll to top when items per page changes
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
   // Handle sort change
   const handleSortChange = useCallback((e) => {
     setSortBy(e.target.value);
     setCurrentPage(1);
+    // Scroll to top when sort changes
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
 
@@ -399,6 +425,28 @@ const Shop = () => {
   React.useEffect(() => {
     setSearchTerm(searchParam || '');
   }, [searchParam]);
+
+  // Prevent body scroll when mobile filters are open
+  React.useEffect(() => {
+    if (showFilters) {
+      document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+      document.body.style.top = '0';
+    } else {
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+      document.body.style.top = '';
+    }
+
+    return () => {
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+      document.body.style.top = '';
+    };
+  }, [showFilters]);
 
     // Filter and sort medicines
     const filteredAndSortedMedicines = useMemo(() => {
@@ -526,7 +574,6 @@ const Shop = () => {
       filtered.sort((a, b) => a.itemName?.localeCompare(b.itemName) || 0);
     } else if (sortBy === 'price-low') {
       filtered.sort((a, b) => {
-        const priceA = Number(a.price) * (1 - Number(a.discount) / 0); // Fix potential division by zero if discount logic changes, but standard is (1 - discount/100)
         return (Number(a.price) * (1 - (Number(a.discount) || 0) / 100)) - (Number(b.price) * (1 - (Number(b.discount) || 0) / 100));
       });
     } else if (sortBy === 'price-high') {
@@ -538,7 +585,7 @@ const Shop = () => {
     return filtered;
   }, [allMedicines, searchTerm, sortBy, categoryParam, subcategoryParam, selectedProblems, selectedSkinTypes, selectedProductTypes, selectedBodyHair, selectedHygiene, selectedMotherChild, selectedSupplements, selectedHealthMonitors, normalizeText, optionToSlugMap]);
 
-  // Pagination
+  // Update pagination values with filtered data
   const totalFilteredItems = filteredAndSortedMedicines.length;
   const totalPages = Math.ceil(totalFilteredItems / itemsPerPage);
   const paginatedMedicines = useMemo(() => {
@@ -547,12 +594,18 @@ const Shop = () => {
     return filteredAndSortedMedicines.slice(startIndex, endIndex);
   }, [filteredAndSortedMedicines, currentPage, itemsPerPage]);
 
+  // Handle page change
+  const goToPage = useCallback((page) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+      // Scroll to top when page changes
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [totalPages]);
 
-  if (isLoading) return <DataLoading label="Medicines" />;
-  if (error) return <LoadingError label="Medicines" />;
 
   // Determine SEO title/description based on active filters
-  const seoDetails = useMemo(() => {
+  const seoDetails = (() => {
     let title = "Produktet | Farmacia Shila";
     let description = "Eksploroni gamën tonë të gjerë të produkteve farmaceutike dhe kozmetike.";
     
@@ -562,7 +615,34 @@ const Shop = () => {
     }
     
     return { title, description };
-  }, [subcategoryParam]);
+  })();
+
+  if (isLoading) return <DataLoading label="Medicines" />;
+  if (error) {
+    return (
+      <div className="min-h-[80vh] pt-20 lg:pt-[84px] pb-4 sm:pt-24 sm:pb-8 bg-white relative overflow-x-hidden">
+        <div className="max-w-full mx-auto px-4 md:px-4 lg:px-6 relative">
+          <div className="text-center py-12">
+            <LoadingError label="Medicines" />
+            <div className="mt-6 space-y-4">
+              <p className="text-gray-600 text-sm">
+                Having trouble loading products? This might be a device-specific issue.
+              </p>
+              <button
+                onClick={() => refetch()}
+                className="px-6 py-3 bg-[#A67856] text-white rounded-lg hover:bg-[#8B6345] transition-colors"
+              >
+                Try Again
+              </button>
+              <div className="text-xs text-gray-500 mt-4">
+                Debug info: Check browser console for details
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -582,20 +662,23 @@ const Shop = () => {
             {/* Left Sidebar - Filters */}
             {/* Mobile Filter Overlay */}
             {showFilters && (
-              <div
-                className="fixed inset-0 bg-black/50 z-[10001] lg:hidden transition-opacity duration-300 ease-in-out opacity-100"
-                onClick={() => setShowFilters(false)}
-              />
+              <>
+                <div
+                  className="fixed inset-0 bg-black/50 z-[10001] lg:hidden transition-opacity duration-300 ease-in-out opacity-100"
+                  onClick={() => setShowFilters(false)}
+                />
+                <div className="fixed inset-0 z-[10000] lg:hidden" style={{ overflow: 'hidden' }} />
+              </>
             )}
 
             <aside
               className={`${showFilters
                 ? 'fixed inset-y-0 left-0 w-80 translate-x-0 z-[10002]'
                 : 'fixed inset-y-0 left-0 w-80 -translate-x-full z-[10002] pointer-events-none'
-                } lg:static lg:w-72 lg:translate-x-0 lg:z-auto lg:pointer-events-auto transition-transform duration-300 ease-in-out lg:transition-none overflow-hidden flex-shrink-0`}
+                } lg:static lg:w-72 lg:translate-x-0 lg:z-auto lg:pointer-events-auto transition-transform duration-300 ease-in-out lg:transition-none overflow-hidden lg:overflow-visible flex-shrink-0`}
             >
-              <div className="bg-white h-full flex flex-col lg:sticky lg:top-20 pointer-events-auto" style={{ maxHeight: '100vh', overflow: 'hidden' }}>
-                <div className="p-6 overflow-y-auto flex-1" data-lenis-prevent>
+              <div className="bg-white h-full flex flex-col lg:sticky lg:top-20 pointer-events-auto h-[100vh] lg:h-auto max-h-[100vh] lg:max-h-[calc(100vh-5rem)] overflow-y-auto lg:overflow-y-auto">
+                <div className="p-6 flex-1" data-lenis-prevent>
                   {/* Desktop Title */}
                   <div className="hidden lg:block mb-4">
                     <h2 className="text-lg font-semibold text-[#A67856] uppercase tracking-wide">Filters</h2>

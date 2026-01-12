@@ -104,7 +104,28 @@ const OrderDetailsModal = ({ isOpen, onClose, order }) => {
                                         <p className="text-xs text-gray-500 mt-1">{item.company}</p>
                                         <div className="flex justify-between items-center mt-2">
                                             <span className="text-xs bg-gray-100 px-2 py-1 rounded text-gray-600">Qty: {item.quantity}</span>
-                                            <span className="text-sm font-bold text-amber-700">{(item.price * item.quantity).toFixed(2)} ALL</span>
+                                            <div className="text-right">
+                                                {item.discount && item.discount > 0 ? (
+                                                    <>
+                                                        <span className="text-xs text-gray-400 line-through block">
+                                                            {item.price.toFixed(2)} ALL
+                                                        </span>
+                                                        <span className="text-sm font-bold text-amber-700">
+                                                            {(item.price * (1 - item.discount / 100)).toFixed(2)} ALL
+                                                        </span>
+                                                        <span className="text-xs text-green-600 font-semibold ml-1">
+                                                            -{Math.round(item.discount)}%
+                                                        </span>
+                                                    </>
+                                                ) : (
+                                                    <span className="text-sm font-bold text-amber-700">
+                                                        {item.price.toFixed(2)} ALL
+                                                    </span>
+                                                )}
+                                                <div className="text-xs text-gray-600 mt-1">
+                                                    Total: {(item.price * (1 - (item.discount || 0) / 100) * item.quantity).toFixed(2)} ALL
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
