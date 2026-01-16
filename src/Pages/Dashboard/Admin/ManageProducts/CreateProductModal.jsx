@@ -77,7 +77,11 @@ const CreateProductModal = ({ isOpen, onClose, productToEdit, refetch, isBestsel
         subcategory: productToEdit?.subcategory || '',
         option: productToEdit?.option || '',
         options: productToEdit?.options || (productToEdit?.option ? [productToEdit.option] : []), // Include single option if present
-        productType: productToEdit?.productType || '',
+        productTypes: productToEdit?.productType
+            ? (String(productToEdit.productType).includes(',')
+                ? String(productToEdit.productType).split(', ')
+                : [productToEdit.productType])
+            : [],
         skinProblem: productToEdit?.skinProblem || '',
         description: productToEdit?.description || '',
         isFreeDelivery: productToEdit?.isFreeDelivery || false,
@@ -114,27 +118,7 @@ const CreateProductModal = ({ isOpen, onClose, productToEdit, refetch, isBestsel
         ? currentCategoryData.subcategories[formData.subcategory]
         : [];
 
-    // Dynamic product type options based on selected subcategory
-    const getDynamicProductTypes = () => {
-        if (!formData.subcategory) return PRODUCT_TYPE_OPTIONS;
 
-        // Return relevant product types based on subcategory
-        const subcategoryTypes = {
-            "Problematikat e fytyres": ["Serume", "Krem per syte", "Retinol", "Spot treatment", "Eye patches", "Acne patches"],
-            "Tipi i lekures": ["Lares vajor", "Lares ujor", "Toner", "Exfoliant", "Hidratues", "SPF"],
-            "Per trupin": ["Hidratues trupi", "Scrub trupi", "Vaj per trupin", "Krem per duart & kembet", "Deodorant"],
-            "Per floke": ["Skalp i thate", "Skalp i yndyrshem", "Skalp sensitive", "Renia e flokut", "Aksesore"],
-            "Higjena intime": ["Lares intim", "Peceta"],
-            "Higjena orale": ["Furce dhembesh", "Paste dhembesh", "Fill dentar/furca interdentare"],
-            "Kujdesi per nenen": ["Shtatezania", "Pas lindjes", "Ushqyerja me gji"],
-            "Kujdesi per femije": ["Ushqim per femije", "Pelena", "Aksesore"],
-            "Kategorite": ["Vitamina", "Suplemente per shendetin", "Minerale", "Suplemente bimore", "Peshore", "Aparat tensioni", "Termometer"]
-        };
-
-        return subcategoryTypes[formData.subcategory] || PRODUCT_TYPE_OPTIONS;
-    };
-
-    const dynamicProductTypes = getDynamicProductTypes();
 
     useEffect(() => {
         // Reset sub-selections when category changes if they aren't valid anymore
@@ -199,7 +183,22 @@ const CreateProductModal = ({ isOpen, onClose, productToEdit, refetch, isBestsel
         // Construct category path for searching/filtering
         // Path format: "Category > Subcategory > Option1, Option2"
         const optionsString = formData.options.length > 0 ? ` > ${formData.options.join(', ')}` : '';
-        const categoryPath = `${baseCategoryName} > ${formData.subcategory}${optionsString}`;
+
+        let subcategoryToSave = formData.subcategory;
+        if (formData.categoryName === 'Kujdesi per fytyren') {
+            // Find which subcategories have at least one selected option
+            const activeSubs = [];
+            const faceCategoryData = CATEGORY_HIERARCHY['Kujdesi per fytyren'];
+            Object.keys(faceCategoryData.subcategories).forEach(sub => {
+                const hasOption = faceCategoryData.subcategories[sub].some(opt => formData.options.includes(opt));
+                if (hasOption) activeSubs.push(sub);
+            });
+            if (activeSubs.length > 0) {
+                subcategoryToSave = activeSubs.join(', ');
+            }
+        }
+
+        const categoryPath = `${baseCategoryName} > ${subcategoryToSave}${optionsString}`;
 
         try {
             // Validate only required fields
@@ -238,8 +237,8 @@ const CreateProductModal = ({ isOpen, onClose, productToEdit, refetch, isBestsel
             Object.keys(formData).forEach(key => {
                 // Skip price/stock/discount keys from main formData as we manually append derived ones
                 // Also skip single option as we now use multiple options
-                // IMPORTANT: skip 'categoryName' here because we append it manually as a string later
-                if (key !== 'price' && key !== 'stock' && key !== 'discount' && key !== 'discountPrice' && key !== 'variants' && key !== 'option' && key !== 'categoryName') {
+                // IMPORTANT: skip 'categoryName' and 'subcategory' here because we append them manually as strings later
+                if (key !== 'price' && key !== 'stock' && key !== 'discount' && key !== 'discountPrice' && key !== 'variants' && key !== 'option' && key !== 'categoryName' && key !== 'subcategory') {
                     if (key === 'options') {
                         data.append(key, JSON.stringify(formData[key]));
                     } else {
@@ -247,6 +246,10 @@ const CreateProductModal = ({ isOpen, onClose, productToEdit, refetch, isBestsel
                     }
                 }
             });
+
+            // Append calculated subcategory and product type strings
+            data.append('subcategory', subcategoryToSave);
+            data.append('productType', formData.productTypes.join(', '));
 
             // Append derived/calculated fields
             data.append('price', mainPrice);
@@ -390,67 +393,117 @@ const CreateProductModal = ({ isOpen, onClose, productToEdit, refetch, isBestsel
                                     </select>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Subcategory</label>
-                                        <select
-                                            name="subcategory"
-                                            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none"
-                                            value={formData.subcategory}
-                                            onChange={handleChange}
-                                            disabled={availableSubcategories.length === 0}
-                                        >
-                                            <option value="">Select...</option>
+                                <div className={`${formData.categoryName === 'Kujdesi per fytyren' ? 'col-span-2' : 'contents'}`}>
+                                    {formData.categoryName === 'Kujdesi per fytyren' ? (
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             {availableSubcategories.map(sub => (
-                                                <option key={sub} value={sub}>{sub}</option>
-                                            ))}
-                                        </select>
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Product Options</label>
-                                        <div className="space-y-2 max-h-32 overflow-y-auto border border-gray-200 rounded-lg p-3 bg-white">
-                                            {availableOptions.map(opt => (
-                                                <label key={opt} className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
-                                                    <input
-                                                        type="checkbox"
-                                                        name="options"
-                                                        value={opt}
-                                                        checked={formData.options.includes(opt)}
-                                                        onChange={(e) => {
-                                                            const { value, checked } = e.target;
-                                                            setFormData(prev => ({
-                                                                ...prev,
-                                                                options: checked
-                                                                    ? [...prev.options, value]
-                                                                    : prev.options.filter(o => o !== value)
-                                                            }));
-                                                        }}
-                                                        className="w-4 h-4 text-amber-600 border-gray-300 rounded focus:ring-2 focus:ring-amber-500"
-                                                    />
-                                                    <span className="text-sm text-gray-700">{opt}</span>
-                                                </label>
+                                                <div key={sub}>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1">{sub}</label>
+                                                    <div className="space-y-2 max-h-40 overflow-y-auto border border-gray-200 rounded-lg p-3 bg-white">
+                                                        {currentCategoryData.subcategories[sub].map(opt => (
+                                                            <label key={opt} className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    name="options"
+                                                                    value={opt}
+                                                                    checked={formData.options.includes(opt)}
+                                                                    onChange={(e) => {
+                                                                        const { value, checked } = e.target;
+                                                                        setFormData(prev => ({
+                                                                            ...prev,
+                                                                            options: checked
+                                                                                ? [...prev.options, value]
+                                                                                : prev.options.filter(o => o !== value)
+                                                                        }));
+                                                                    }}
+                                                                    className="w-4 h-4 text-amber-600 border-gray-300 rounded focus:ring-2 focus:ring-amber-500"
+                                                                />
+                                                                <span className="text-sm text-gray-700">{opt}</span>
+                                                            </label>
+                                                        ))}
+                                                    </div>
+                                                </div>
                                             ))}
                                         </div>
-                                        <p className="text-xs text-gray-500 mt-1">
-                                            {formData.options.length} option{formData.options.length !== 1 ? 's' : ''} selected
-                                        </p>
-                                    </div>
+                                    ) : (
+                                        <div className="grid grid-cols-2 gap-4 w-full">
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">Subcategory</label>
+                                                <select
+                                                    name="subcategory"
+                                                    className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                                                    value={formData.subcategory}
+                                                    onChange={handleChange}
+                                                    disabled={availableSubcategories.length === 0}
+                                                >
+                                                    <option value="">Select...</option>
+                                                    {availableSubcategories.map(sub => (
+                                                        <option key={sub} value={sub}>{sub}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">Product Options</label>
+                                                <div className="space-y-2 max-h-32 overflow-y-auto border border-gray-200 rounded-lg p-3 bg-white">
+                                                    {availableOptions.map(opt => (
+                                                        <label key={opt} className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                                                            <input
+                                                                type="checkbox"
+                                                                name="options"
+                                                                value={opt}
+                                                                checked={formData.options.includes(opt)}
+                                                                onChange={(e) => {
+                                                                    const { value, checked } = e.target;
+                                                                    setFormData(prev => ({
+                                                                        ...prev,
+                                                                        options: checked
+                                                                            ? [...prev.options, value]
+                                                                            : prev.options.filter(o => o !== value)
+                                                                    }));
+                                                                }}
+                                                                className="w-4 h-4 text-amber-600 border-gray-300 rounded focus:ring-2 focus:ring-amber-500"
+                                                            />
+                                                            <span className="text-sm text-gray-700">{opt}</span>
+                                                        </label>
+                                                    ))}
+                                                </div>
+                                                <p className="text-xs text-gray-500 mt-1">
+                                                    {formData.options.length} option{formData.options.length !== 1 ? 's' : ''} selected
+                                                </p>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Lloji Produktit</label>
-                                    <select
-                                        name="productType"
-                                        className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none"
-                                        value={formData.productType}
-                                        onChange={handleChange}
-                                    >
-                                        <option value="">Select Type...</option>
-                                        {dynamicProductTypes.map(opt => (
-                                            <option key={opt} value={opt}>{opt}</option>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Lloji i Produktit</label>
+                                    <div className="space-y-2 max-h-40 overflow-y-auto border border-gray-200 rounded-lg p-3 bg-white">
+                                        {PRODUCT_TYPE_OPTIONS.map(opt => (
+                                            <label key={opt} className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                                                <input
+                                                    type="checkbox"
+                                                    name="productTypes"
+                                                    value={opt}
+                                                    checked={formData.productTypes.includes(opt)}
+                                                    onChange={(e) => {
+                                                        const { value, checked } = e.target;
+                                                        setFormData(prev => ({
+                                                            ...prev,
+                                                            productTypes: checked
+                                                                ? [...prev.productTypes, value]
+                                                                : prev.productTypes.filter(t => t !== value)
+                                                        }));
+                                                    }}
+                                                    className="w-4 h-4 text-amber-600 border-gray-300 rounded focus:ring-2 focus:ring-amber-500"
+                                                />
+                                                <span className="text-sm text-gray-700">{opt}</span>
+                                            </label>
                                         ))}
-                                    </select>
+                                    </div>
+                                    <p className="text-xs text-gray-500 mt-1">
+                                        {formData.productTypes.length} type{formData.productTypes.length !== 1 ? 's' : ''} selected
+                                    </p>
                                 </div>
 
                                 {(formData.subcategory === 'Problematikat e fytyres' && formData.options.includes('Akne')) && (

@@ -2,6 +2,7 @@ import React, { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CartContext } from '../../Context/Cart/CartContext';
 import { getProductImage } from '../../utils/productImages';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 const ShopGrid = ({
   paginatedMedicines,
@@ -138,7 +139,7 @@ const ShopGrid = ({
                       displayPrice = Number(smallestVariant.price);
                       displayDiscount = Number(smallestVariant.discount) || 0;
                     }
-                    
+
                     return displayDiscount > 0 ? (
                       <>
                         <span className="lux-price-number text-sm md:text-lg font-medium text-black">
@@ -227,98 +228,39 @@ const ShopGrid = ({
         })}
       </div>
 
-      {/* Pagination Controls */}
-      <div className="flex flex-wrap justify-center items-center my-4 gap-2 rounded-lg shadow-sm p-3">
-        {/* Prev Button */}
-        <button
-          className="btn btn-sm text-xs sm:text-sm px-2 sm:px-3 py-2"
-          onClick={() => goToPage(currentPage - 1)}
-          disabled={currentPage === 1}
-        >
-          Prev
-        </button>
-
-        {/* Page Numbers */}
-        <div className="flex items-center gap-1 sm:gap-2">
-          {totalPages <= 5 ? (
-            // If total pages is 5 or less, show all page numbers
-            [...Array(totalPages)].map((_, idx) => (
-              <button
-                key={idx + 1}
-                className={`btn btn-sm text-xs sm:text-sm px-2 sm:px-3 py-2 ${currentPage === idx + 1 ? 'btn-active' : ''
-                  }`}
-                onClick={() => goToPage(idx + 1)}
-              >
-                <span className="lux-price-number">{idx + 1}</span>
-              </button>
-            ))
-          ) : (
-            // If more than 5 pages, show smart pagination with max 5 page numbers
-            <>
-              {/* Always show first page */}
-              <button
-                className={`btn btn-sm text-xs sm:text-sm px-2 sm:px-3 py-2 ${currentPage === 1 ? 'btn-active' : ''
-                  }`}
-                onClick={() => goToPage(1)}
-              >
-                <span className="lux-price-number">1</span>
-              </button>
-
-              {/* Show ellipsis if there's a gap */}
-              {currentPage > 3 && (
-                <span className="px-1 sm:px-2 text-xs sm:text-sm">...</span>
-              )}
-
-              {/* Show current page and 2 pages around it (max 3 pages) */}
-              {Array.from({ length: 3 }, (_, i) => currentPage - 1 + i)
-                .filter((pageNum) => pageNum > 1 && pageNum < totalPages)
-                .map((pageNum) => (
-                  <button
-                    key={pageNum}
-                    className={`btn btn-sm text-xs sm:text-sm px-2 sm:px-3 py-2 ${currentPage === pageNum ? 'btn-active' : ''
-                      }`}
-                    onClick={() => goToPage(pageNum)}
-                  >
-                    <span className="lux-price-number">{pageNum}</span>
-                  </button>
-                ))}
-
-              {/* Show ellipsis if there's a gap */}
-              {currentPage < totalPages - 2 && (
-                <span className="px-1 sm:px-2 text-xs sm:text-sm">...</span>
-              )}
-
-              {/* Always show last page if it's different from first */}
-              {totalPages > 1 && (
-                <button
-                  className={`btn btn-sm text-xs sm:text-sm px-2 sm:px-3 py-2 ${currentPage === totalPages ? 'btn-active' : ''
-                    }`}
-                  onClick={() => goToPage(totalPages)}
-                >
-                  <span className="lux-price-number">{totalPages}</span>
-                </button>
-              )}
-            </>
-          )}
-        </div>
-
-
-        {/* Items Per Page Selector */}
-        <div className="flex items-center gap-2">
-          <span className="text-xs sm:text-sm text-gray-600 hidden sm:inline">
-            Show:
-          </span>
-          <select
-            value={itemsPerPage}
-            onChange={handleItemsPerPageChange}
-            className="select select-sm select-bordered text-xs sm:text-sm min-w-[60px] sm:min-w-[80px]"
+      {/* Luxurious Pagination Controls */}
+      <div className="flex justify-center items-center py-12 mt-8 border-t border-gray-100">
+        <div className="flex items-center gap-8 sm:gap-16">
+          {/* Prev Button */}
+          <button
+            onClick={() => goToPage(currentPage - 1)}
+            disabled={currentPage === 1}
+            className={`flex items-center gap-2 group transition-all duration-300 ${currentPage === 1 ? 'opacity-20 cursor-not-allowed' : 'opacity-100 hover:text-[#8B6F47]'
+              }`}
           >
-            {[5, 10, 20, 50].map((num) => (
-              <option key={num} value={num}>
-                {num}
-              </option>
-            ))}
-          </select>
+            <ChevronLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
+            <span className="text-[10px] sm:text-xs font-light tracking-[0.2em] uppercase hidden sm:block">Mëparshme</span>
+          </button>
+
+          {/* Progress Indicator */}
+          <div className="flex items-center">
+            <span className="text-[11px] sm:text-[13px] font-light tracking-[0.3em] uppercase text-gray-400">
+              <span className="text-[#8B6F47] font-medium">{currentPage}</span>
+              <span className="mx-3 sm:mx-4">/</span>
+              <span className="text-gray-900">{totalPages}</span>
+            </span>
+          </div>
+
+          {/* Next Button */}
+          <button
+            onClick={() => goToPage(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className={`flex items-center gap-2 group transition-all duration-300 ${currentPage === totalPages ? 'opacity-20 cursor-not-allowed' : 'opacity-100 hover:text-[#8B6F47]'
+              }`}
+          >
+            <span className="text-[10px] sm:text-xs font-light tracking-[0.2em] uppercase hidden sm:block">Tjetra</span>
+            <ChevronRight size={20} className="group-hover:translate-x-1 transition-transform" />
+          </button>
         </div>
       </div>
     </div>

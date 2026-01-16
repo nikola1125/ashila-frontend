@@ -11,6 +11,7 @@ import DataLoading from '../../Components/Common/Loaders/DataLoading';
 import ShopTable from '../../Components/Tables/ShopTable';
 import { Helmet } from 'react-helmet-async';
 import { Search, X } from 'lucide-react';
+import CategorySEO from '../../Components/Common/SEO/CategorySEO';
 
 const CategoryDetails = () => {
   const { publicApi } = useAxiosSecure();
@@ -98,9 +99,11 @@ const CategoryDetails = () => {
   return (
     <>
       <section className="min-h-[80vh] py-12 bg-gradient-to-br from-blue-50 via-white to-emerald-50 rounded-xl my-10">
-        <Helmet key={location.pathname}>
-          <title>Category Details - {category}</title>
-        </Helmet>
+        <CategorySEO
+          categoryName={category}
+          products={allCategoryMedicines}
+          canonicalUrl={`https://www.farmaciashila.com/category-details?category=${category}`}
+        />
         <div className="container mx-auto px-4 max-w-6xl">
           {/* Header */}
           <div className="flex flex-col items-center mb-10">

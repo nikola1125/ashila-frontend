@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useContext } from 'react';
+import React, { useState, useMemo, useCallback, useContext, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import useAxiosSecure from '../../hooks/useAxiosSecure';
 import LoadingError from '../../Components/Common/States/LoadingError';
@@ -9,21 +9,49 @@ import VariantSelectionSidebar from '../../Components/Common/Products/VariantSel
 import { Helmet } from 'react-helmet-async';
 import { useLocation } from 'react-router-dom';
 import { CartContext } from '../../Context/Cart/CartContext';
+import Breadcrumbs from '../../Components/Common/Navigation/Breadcrumbs';
+import CategorySEO from '../../Components/Common/SEO/CategorySEO';
+import { useSmoothScroll } from '../../Context/SmoothScroll/SmoothScrollProvider';
 
 const Shop = () => {
   const location = useLocation();
   const { addItem } = useContext(CartContext);
   const { publicApi } = useAxiosSecure();
+  const { scrollToTop } = useSmoothScroll();
+
+
 
   const onAddToCart = useCallback((product, quantity = 1, selectedVariant = null) => {
     addItem(product, quantity, selectedVariant);
   }, [addItem]);
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(20);
+  const [itemsPerPage, setItemsPerPage] = useState(30);
   const [sortBy, setSortBy] = useState('alphabetical');
   const [searchTerm, setSearchTerm] = useState('');
   const [showFilters, setShowFilters] = useState(false); // Hidden on mobile by default, visible on desktop
+
+  // Ultimate "Fail-Safe" scroll to top on page change
+  useEffect(() => {
+    // 1. Try Lenis provider (primary)
+    if (scrollToTop) {
+      scrollToTop({ immediate: true });
+    }
+
+    // 2. Hard native fallback (real device browser level)
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+
+    // 3. Forced DOM manipulation (last resort for Safari/Android)
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+
+    // 4. Delayed backup to catch any layout shifts
+    const timer = setTimeout(() => {
+      window.scrollTo(0, 0);
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [currentPage, scrollToTop]);
 
   // Get all medicines - Moved to top to be available for filterOptions
   // Use group=true to group variants together
@@ -107,12 +135,12 @@ const Shop = () => {
     // 2. Remove all non-alphanumeric chars
     // 3. Handle specific group synonyms systematically
     let normalized = text.toLowerCase()
-        .replace(/[ëèé]/g, 'e')
-        .replace(/[ç]/g, 'c')
-        .replace(/fytyre/g, 'lekure')
-        .replace(/trupin/g, 'trupi')
-        .replace(/floke/g, 'flokë') // align potential mismatches
-        .replace(/[^a-z0-9]/g, '');
+      .replace(/[ëèé]/g, 'e')
+      .replace(/[ç]/g, 'c')
+      .replace(/fytyre/g, 'lekure')
+      .replace(/trupin/g, 'trupi')
+      .replace(/floke/g, 'flokë') // align potential mismatches
+      .replace(/[^a-z0-9]/g, '');
     return normalized;
   }, []);
 
@@ -120,7 +148,7 @@ const Shop = () => {
   const optionToSlugMap = {
     // Tipi i lekures
     "Te gjitha": "te-gjitha",
-    "Lekure normale": "lekure-normale", 
+    "Lekure normale": "lekure-normale",
     "Lekure e yndyrshme": "lekure-e-yndyrshme",
     "Lekure e thate": "lekure-e-thate",
     "Lekure mikes": "lekure-mikes",
@@ -133,17 +161,17 @@ const Shop = () => {
     "fytyre-e-thate": "lekure-e-thate",
     "fytyre-mikes": "lekure-mikes",
     "fytyre-sensitive": "lekure-sensitive",
-    
+
     // Problematikat e fytyres
     "Akne": "akne",
-    "Rrudha": "rrudha", 
+    "Rrudha": "rrudha",
     "Hiperpigmentim": "hiperpigmentim",
     "Balancim yndyre/pore evidente": "balancim-yndyre-pore-evidente",
     "Pikat e zeza": "pika-te-zeza",
     "Dehidratim": "dehidratim",
     "Skuqje": "skuqje",
     "Rozacea": "rozacea",
-    
+
     // Per trupin
     "Lares trupi": "lares-trupi",
     "Hidratues trupi": "hidratues-trupi",
@@ -155,21 +183,21 @@ const Shop = () => {
     "Krem per duart & këmbet": "krem-per-duart-dhe-kembet",
     "Krem per duart & kembet": "krem-per-duart-dhe-kembet",
     "Krem per duart & këmbet (dhe)": "krem-per-duart-dhe-kembet",
-    
+
     // Per flokë
     "Skalp i thate": "skalp-i-thate",
-    "Skalp i yndyrshem": "skalp-i-yndyrshem", 
+    "Skalp i yndyrshem": "skalp-i-yndyrshem",
     "Skalp sensitive": "skalp-sensitive",
     "Renia e flokut": "renia-e-flokut",
     "Aksesore": "aksesore-floke",
-    
+
     // Higjene
     "Lares intim": "lares-intim",
     "Peceta intime": "peceta-intime",
     "Furce dhembesh": "furce-dhembesh",
     "Paste dhembesh": "paste-dhembesh",
     "Fill dentar/furca interdentare": "fill-dentar-furca-interdentare",
-    
+
     // Nena dhe femije
     "Shtatezania": "shtatezania",
     "Pas lindjes": "pas-lindjes",
@@ -177,13 +205,13 @@ const Shop = () => {
     "Ushqim per femije": "ushqim-per-femije",
     "Pelena": "pelena",
     "Aksesore femije": "aksesore-femije",
-    
+
     // Suplemente
     "Vitamina": "vitamina",
     "Suplemente per shendetin": "suplemente-per-shendetin",
-    "Minerale": "minerale", 
+    "Minerale": "minerale",
     "Suplemente bimore": "suplemente-bimore",
-    
+
     // Monitoruesit e shendetit
     "Peshore": "peshore",
     "Aparat tensioni": "aparat-tensioni",
@@ -191,7 +219,7 @@ const Shop = () => {
     "Monitorues te diabetit": "monitorues-te-diabetit",
     "Oksimeter": "oksimeter",
     "Paisje ortopedike": "paisje-ortopedike",
-    
+
     // Product types
     "Lares vajor": "lares-vajor",
     "Lares ujor": "lares-ujor",
@@ -330,7 +358,7 @@ const Shop = () => {
         { id: 'exfoliant', label: 'Exfoliant' },
         { id: 'serume', label: 'Serume' },
         { id: 'krem-per-syte', label: 'Krem per syte' },
-        { id: 'vitamin-cantioxidant', label: 'Vitamin C/antioxidant' },
+        { id: 'vitamin-c-antioxidant', label: 'Vitamin C/antioxidant' },
         { id: 'hidratues', label: 'Hidratues' },
         { id: 'retinol', label: 'Retinol' },
         { id: 'spf', label: 'SPF' },
@@ -448,20 +476,20 @@ const Shop = () => {
     };
   }, [showFilters]);
 
-    // Filter and sort medicines
-    const filteredAndSortedMedicines = useMemo(() => {
-        let filtered = [...allMedicines];
+  // Filter and sort medicines
+  const filteredAndSortedMedicines = useMemo(() => {
+    let filtered = [...allMedicines];
 
-        // 0. Skin Problem Filter (Strict but with fallback for hyphenated URLs)
-        if (skinProblemParam) {
-            const normalizedParam = skinProblemParam.toLowerCase().replace(/-/g, '');
-            filtered = filtered.filter(item => {
-                const prob = item.skinProblem?.toLowerCase().replace(/-/g, '') || '';
-                return prob === normalizedParam;
-            });
-        }
+    // 0. Skin Problem Filter (Strict but with fallback for hyphenated URLs)
+    if (skinProblemParam) {
+      const normalizedParam = skinProblemParam.toLowerCase().replace(/-/g, '');
+      filtered = filtered.filter(item => {
+        const prob = item.skinProblem?.toLowerCase().replace(/-/g, '') || '';
+        return prob === normalizedParam;
+      });
+    }
 
-        // 1. URL Category Filter
+    // 1. URL Category Filter
     if (categoryParam) {
       // Handle slug-to-name matching safely
       const normalizedCatParam = categoryParam.toLowerCase().replace(/-/g, ' ');
@@ -488,7 +516,7 @@ const Shop = () => {
 
         // SYSTEMIC MATCHING:
         // We look for the parameter anywhere in the product's classification tree
-        const matchesAnywhere = 
+        const matchesAnywhere =
           sub.includes(normalizedSubParam) ||
           opt.includes(normalizedSubParam) ||
           opts.some(o => o.includes(normalizedSubParam)) ||
@@ -517,7 +545,7 @@ const Shop = () => {
     // Helper to check if item matches any selected filter in a group
     const matchesFilter = (selectedFilters, item) => {
       if (selectedFilters.length === 0) return true;
-      
+
       const itemSub = normalizeText(item.subcategory);
       const itemOpt = normalizeText(item.option);
       const itemOpts = item.options ? item.options.map(opt => normalizeText(opt)) : [];
@@ -598,8 +626,6 @@ const Shop = () => {
   const goToPage = useCallback((page) => {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
-      // Scroll to top when page changes
-      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }, [totalPages]);
 
@@ -608,14 +634,16 @@ const Shop = () => {
   const seoDetails = (() => {
     let title = "Produktet | Farmacia Shila";
     let description = "Eksploroni gamën tonë të gjerë të produkteve farmaceutike dhe kozmetike.";
-    
+
     if (subcategoryParam) {
       const displaySub = subcategoryParam.replace(/-/g, ' ');
       title = `${displaySub.charAt(0).toUpperCase() + displaySub.slice(1)} | Farmacia Shila`;
     }
-    
+
     return { title, description };
   })();
+
+  const subcategoryName = subcategoryParam ? subcategoryParam.replace(/-/g, ' ').charAt(0).toUpperCase() + subcategoryParam.replace(/-/g, ' ').slice(1) : null;
 
   if (isLoading) return <DataLoading label="Medicines" />;
   if (error) {
@@ -646,12 +674,28 @@ const Shop = () => {
 
   return (
     <>
-      <Helmet key={location.pathname}>
-        <title>{seoDetails.title}</title>
-        <meta name="description" content={seoDetails.description} />
-      </Helmet>
+      {subcategoryParam ? (
+        <CategorySEO
+          categoryName={subcategoryName}
+          description={seoDetails.description}
+          products={filteredAndSortedMedicines}
+          canonicalUrl={`https://www.farmaciashila.com/shop?subcategory=${subcategoryParam}`}
+        />
+      ) : (
+        <Helmet key={location.pathname}>
+          <title>{seoDetails.title}</title>
+          <meta name="description" content={seoDetails.description} />
+        </Helmet>
+      )}
       <section className="min-h-[80vh] pt-20 lg:pt-[84px] pb-4 sm:pt-24 sm:pb-8 bg-white relative overflow-x-hidden">
         <div className="max-w-full mx-auto px-4 md:px-4 lg:px-6 relative">
+          <Breadcrumbs
+            paths={[
+              { name: 'Shop', url: '/shop' },
+              ...(subcategoryParam ? [{ name: subcategoryParam.replace(/-/g, ' ').charAt(0).toUpperCase() + subcategoryParam.replace(/-/g, ' ').slice(1), url: `/shop?subcategory=${subcategoryParam}` }] : []),
+              ...(searchTerm ? [{ name: `Kërkimi: ${searchTerm}`, url: `/shop?search=${searchTerm}` }] : [])
+            ]}
+          />
           {/* Header */}
           <div className="mb-4 sm:mb-6 text-center space-y-3">
             <p className="lux-heading">Koleksioni</p>
@@ -724,7 +768,7 @@ const Shop = () => {
                           }`}
                       />
                     </button>
-                    <div className={`overflow-hidden transition-all duration-300 ease-in-out ${expandedCategories.problematica ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+                    <div className={`overflow-hidden transition-all duration-300 ease-in-out ${expandedCategories.problematica ? 'max-h-[800px] opacity-100' : 'max-h-0 opacity-0'
                       }`}>
                       <div className="space-y-2 pt-1">
                         {filterOptions.problematica.map((option) => (
@@ -761,7 +805,7 @@ const Shop = () => {
                           }`}
                       />
                     </button>
-                    <div className={`overflow-hidden transition-all duration-300 ease-in-out ${expandedCategories.skinTypes ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+                    <div className={`overflow-hidden transition-all duration-300 ease-in-out ${expandedCategories.skinTypes ? 'max-h-[800px] opacity-100' : 'max-h-0 opacity-0'
                       }`}>
                       <div className="space-y-2 pt-1">
                         {filterOptions.skinTypes.map((option) => (
@@ -798,7 +842,7 @@ const Shop = () => {
                           }`}
                       />
                     </button>
-                    <div className={`overflow-hidden transition-all duration-300 ease-in-out ${expandedCategories.productTypes ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+                    <div className={`overflow-hidden transition-all duration-300 ease-in-out ${expandedCategories.productTypes ? 'max-h-[800px] opacity-100' : 'max-h-0 opacity-0'
                       }`}>
                       <div className="space-y-2 pt-1">
                         {filterOptions.productTypes.map((option) => (
@@ -835,7 +879,7 @@ const Shop = () => {
                           }`}
                       />
                     </button>
-                    <div className={`overflow-hidden transition-all duration-300 ease-in-out ${expandedCategories.bodyHair ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+                    <div className={`overflow-hidden transition-all duration-300 ease-in-out ${expandedCategories.bodyHair ? 'max-h-[800px] opacity-100' : 'max-h-0 opacity-0'
                       }`}>
                       <div className="space-y-2 pt-1">
                         {filterOptions.bodyHair.map((option) => (
@@ -872,7 +916,7 @@ const Shop = () => {
                           }`}
                       />
                     </button>
-                    <div className={`overflow-hidden transition-all duration-300 ease-in-out ${expandedCategories.hygiene ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+                    <div className={`overflow-hidden transition-all duration-300 ease-in-out ${expandedCategories.hygiene ? 'max-h-[800px] opacity-100' : 'max-h-0 opacity-0'
                       }`}>
                       <div className="space-y-2 pt-1">
                         {filterOptions.hygiene.map((option) => (
@@ -909,7 +953,7 @@ const Shop = () => {
                           }`}
                       />
                     </button>
-                    <div className={`overflow-hidden transition-all duration-300 ease-in-out ${expandedCategories.motherChild ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+                    <div className={`overflow-hidden transition-all duration-300 ease-in-out ${expandedCategories.motherChild ? 'max-h-[800px] opacity-100' : 'max-h-0 opacity-0'
                       }`}>
                       <div className="space-y-2 pt-1">
                         {filterOptions.motherChild.map((option) => (
@@ -948,7 +992,7 @@ const Shop = () => {
                           }`}
                       />
                     </button>
-                    <div className={`overflow-hidden transition-all duration-300 ease-in-out ${expandedCategories.supplements ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+                    <div className={`overflow-hidden transition-all duration-300 ease-in-out ${expandedCategories.supplements ? 'max-h-[800px] opacity-100' : 'max-h-0 opacity-0'
                       }`}>
                       <div className="space-y-2 pt-1">
                         {filterOptions.supplements.map((option) => (
@@ -1066,8 +1110,8 @@ const Shop = () => {
               </div>
             </div>
           </div>
-        </div>
-      </section>
+        </div >
+      </section >
 
       <VariantSelectionSidebar
         isOpen={isVariantSidebarOpen}

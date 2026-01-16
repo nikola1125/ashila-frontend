@@ -59,11 +59,11 @@ async function fetchProducts() {
     if (!response.ok) return [];
     const data = await response.json();
     const products = data.result || data;
-    
+
     return (Array.isArray(products) ? products : []).map(product => {
       const productName = product.itemName || product.genericName || 'product';
       const companyName = product.company || '';
-      
+
       // Determine primary category slug for path /product/:category/:slug
       let primaryOption = '';
       if (product.options && product.options.length > 0) {
@@ -73,21 +73,38 @@ async function fetchProducts() {
       }
       const categorySlug = optionToSlugMap[primaryOption] || createSlug(primaryOption) || 'general';
 
-      let descriptiveName = productName.toLowerCase();
+      let descriptiveName = productName.toLowerCase().trim();
+
+      // Filter out obviously fake/test products (gibberish or test keywords)
+      const isGibberish = (str) => {
+        const simplified = str.replace(/[^a-z]/g, '');
+        if (simplified.length > 15 && !/[aeiouy]/.test(simplified)) return true;
+        if (simplified.length > 20 && simplified.split(/[aeiouy]/).some(part => part.length > 10)) return true;
+        return false;
+      };
+
+      if (descriptiveName.length < 3 ||
+        descriptiveName.includes('test') ||
+        descriptiveName.includes('ynthbgrvfedcsxaz') ||
+        descriptiveName.includes('warthfdgjj') ||
+        isGibberish(descriptiveName)) {
+        return null;
+      }
+
       if (companyName && companyName !== productName) {
         descriptiveName += `-${companyName.toLowerCase()}`;
       }
       if (product.size) {
-        descriptiveName += `-${product.size.toLowerCase().replace(/\s+/g, '-')}`;
+        descriptiveName += `-${String(product.size).toLowerCase().replace(/\s+/g, '-')}`;
       }
       const productSlug = createSlug(descriptiveName);
-      
+
       return {
         url: `/product/${categorySlug}/${productSlug}`,
         priority: '0.7',
         changefreq: 'weekly',
-        lastmod: product.updatedAt ? 
-          new Date(product.updatedAt).toISOString().split('T')[0] : 
+        lastmod: product.updatedAt ?
+          new Date(product.updatedAt).toISOString().split('T')[0] :
           new Date().toISOString().split('T')[0]
       };
     });
@@ -104,18 +121,18 @@ async function fetchCategories() {
     if (!response.ok) return [];
     const data = await response.json();
     const categories = data.result || data;
-    
+
     return (Array.isArray(categories) ? categories : []).map(category => {
       // Use actual category name for SEO-friendly URL
       const categoryName = category.categoryName || 'category';
       const categorySlug = createSlug(categoryName);
-      
+
       return {
         url: `/category/${categorySlug}`,
         priority: '0.8',
         changefreq: 'weekly',
-        lastmod: category.updatedAt ? 
-          new Date(category.updatedAt).toISOString().split('T')[0] : 
+        lastmod: category.updatedAt ?
+          new Date(category.updatedAt).toISOString().split('T')[0] :
           new Date().toISOString().split('T')[0]
       };
     });
@@ -129,19 +146,19 @@ async function fetchCategories() {
 async function generateSitemapIndex(totalUrls) {
   const maxUrlsPerSitemap = 50000; // Google's limit
   const sitemapCount = Math.ceil(totalUrls / maxUrlsPerSitemap);
-  
+
   if (sitemapCount <= 1) return null;
-  
+
   let sitemapIndex = '<?xml version="1.0" encoding="UTF-8"?>\n';
   sitemapIndex += '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
-  
+
   for (let i = 0; i < sitemapCount; i++) {
     sitemapIndex += '  <sitemap>\n';
     sitemapIndex += `    <loc>${baseUrl}/sitemap-${i + 1}.xml</loc>\n`;
     sitemapIndex += `    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>\n`;
     sitemapIndex += '  </sitemap>\n';
   }
-  
+
   sitemapIndex += '</sitemapindex>';
   return sitemapIndex;
 }
@@ -149,9 +166,9 @@ async function generateSitemapIndex(totalUrls) {
 async function generateDynamicSitemap() {
   let sitemap = '<?xml version="1.0" encoding="UTF-8"?>\n';
   sitemap += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
-  
+
   const today = new Date().toISOString().split('T')[0];
-  
+
   // Add static pages
   staticPages.forEach(page => {
     sitemap += '  <url>\n';
@@ -161,16 +178,16 @@ async function generateDynamicSitemap() {
     sitemap += `    <priority>${page.priority}</priority>\n`;
     sitemap += '  </url>\n';
   });
-  
+
   try {
     // Fetch dynamic content
     const [products, categories] = await Promise.all([
       fetchProducts(),
       fetchCategories()
     ]);
-    
+
     // Add products with SEO-friendly URLs
-    products.forEach(product => {
+    products.filter(p => p !== null).forEach(product => {
       sitemap += '  <url>\n';
       sitemap += `    <loc>${baseUrl}${product.url}</loc>\n`;
       sitemap += `    <lastmod>${product.lastmod}</lastmod>\n`;
@@ -178,7 +195,7 @@ async function generateDynamicSitemap() {
       sitemap += `    <priority>${product.priority}</priority>\n`;
       sitemap += '  </url>\n';
     });
-    
+
     // Add categories with SEO-friendly URLs
     categories.forEach(category => {
       sitemap += '  <url>\n';
@@ -188,20 +205,20 @@ async function generateDynamicSitemap() {
       sitemap += `    <priority>${category.priority}</priority>\n`;
       sitemap += '  </url>\n';
     });
-    
+
     const totalUrls = staticPages.length + products.length + categories.length;
     console.log(`✅ Generated sitemap with ${totalUrls} URLs`);
     console.log(`📊 Breakdown: ${staticPages.length} static, ${products.length} products, ${categories.length} categories`);
-    
+
     sitemap += '</urlset>';
-    
+
     return {
       content: sitemap,
       totalUrls,
       productsCount: products.length,
       categoriesCount: categories.length
     };
-    
+
   } catch (error) {
     console.error('Error generating dynamic content:', error);
     sitemap += '</urlset>';
@@ -223,11 +240,11 @@ Disallow: /api/
 
 Sitemap: ${baseUrl}/sitemap.xml
 `;
-  
+
   // Write robots.txt to public and dist folders
   const robotsPathPublic = path.join(__dirname, 'public', 'robots.txt');
   const robotsPathDist = path.join(__dirname, 'dist', 'robots.txt');
-  
+
   fs.writeFileSync(robotsPathPublic, robots);
   fs.writeFileSync(robotsPathDist, robots);
   console.log('✅ Generated robots.txt');
@@ -237,43 +254,43 @@ Sitemap: ${baseUrl}/sitemap.xml
 async function main() {
   try {
     console.log('🚀 Starting sitemap generation...');
-    
+
     // Generate sitemap
     const sitemapData = await generateDynamicSitemap();
-    
+
     // Write main sitemap
     const sitemapPathPublic = path.join(__dirname, 'public', 'sitemap.xml');
     const sitemapPathDist = path.join(__dirname, 'dist', 'sitemap.xml');
-    
+
     fs.writeFileSync(sitemapPathPublic, sitemapData.content);
     fs.writeFileSync(sitemapPathDist, sitemapData.content);
-    
+
     // Generate sitemap index if needed
     if (sitemapData.totalUrls > 50000) {
       const sitemapIndex = await generateSitemapIndex(sitemapData.totalUrls);
       if (sitemapIndex) {
         const indexPathPublic = path.join(__dirname, 'public', 'sitemap_index.xml');
         const indexPathDist = path.join(__dirname, 'dist', 'sitemap_index.xml');
-        
+
         fs.writeFileSync(indexPathPublic, sitemapIndex);
         fs.writeFileSync(indexPathDist, sitemapIndex);
         console.log('✅ Generated sitemap_index.xml for large site');
       }
     }
-    
+
     // Generate robots.txt
     generateRobotsTxt();
-    
+
     console.log('🎉 Sitemap generation completed!');
     console.log(`📍 Main sitemap: ${baseUrl}/sitemap.xml`);
     console.log(`📍 Robots.txt: ${baseUrl}/robots.txt`);
-    
+
     // Summary
     console.log('\n📈 SUMMARY:');
     console.log(`Total URLs: ${sitemapData.totalUrls}`);
     console.log(`Products: ${sitemapData.productsCount}`);
     console.log(`Categories: ${sitemapData.categoriesCount}`);
-    
+
   } catch (error) {
     console.error('❌ Error in sitemap generation:', error);
     process.exit(1);

@@ -12,7 +12,7 @@ import { SmoothScrollProvider } from './Context/SmoothScroll/SmoothScrollProvide
 
 // Define default meta tags for mobile responsiveness
 const defaultMeta = {
-  viewport: 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no',
+  viewport: 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover',
   'theme-color': '#A67856',
   'apple-mobile-web-app-capable': 'yes',
   'apple-mobile-web-app-status-bar-style': 'default'
@@ -24,7 +24,7 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js')
       .then((registration) => {
         console.log('Service Worker registered with scope:', registration.scope);
-        
+
         // Request notification permission
         if ('Notification' in window && Notification.permission === 'default') {
           Notification.requestPermission().then((permission) => {

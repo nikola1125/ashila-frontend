@@ -2,37 +2,37 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://www.farmaciashila.com/</loc>
-    <lastmod>2026-01-07</lastmod>
+    <lastmod>2026-01-13</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://www.farmaciashila.com/shop</loc>
-    <lastmod>2026-01-07</lastmod>
+    <lastmod>2026-01-13</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://www.farmaciashila.com/contact-us</loc>
-    <lastmod>2026-01-07</lastmod>
+    <lastmod>2026-01-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.farmaciashila.com/about-us</loc>
-    <lastmod>2026-01-07</lastmod>
+    <lastmod>2026-01-13</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://www.farmaciashila.com/privacy-policy</loc>
-    <lastmod>2026-01-07</lastmod>
+    <lastmod>2026-01-13</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://www.farmaciashila.com/terms-conditions</loc>
-    <lastmod>2026-01-07</lastmod>
+    <lastmod>2026-01-13</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
@@ -182,7 +182,7 @@
   </url>
   <url>
     <loc>https://www.farmaciashila.com/product/general/bright-c-cleanser-youth-lab-300-ml</loc>
-    <lastmod>2026-01-05</lastmod>
+    <lastmod>2026-01-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -211,10 +211,52 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://www.farmaciashila.com/category/kujdesi-ndaj-fytyres</loc>
-    <lastmod>2025-12-06</lastmod>
+    <loc>https://www.farmaciashila.com/product/te-gjitha/cicaplast-b5-la-roche-posay-40ml</loc>
+    <lastmod>2026-01-12</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.farmaciashila.com/product/te-gjitha/cicaplast-b5-la-roche-posay-100-ml</loc>
+    <lastmod>2026-01-12</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.farmaciashila.com/product/dehidratim/lipikar-gel-la-roche-posay-400-ml</loc>
+    <lastmod>2026-01-12</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.farmaciashila.com/product/lekure-e-yndyrshme/effaclar-gel-la-roche-posay-400-ml</loc>
+    <lastmod>2026-01-12</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.farmaciashila.com/product/lekure-e-yndyrshme/effaclar-micro-peeling-purifying-gel-la-roche-posay-400-ml</loc>
+    <lastmod>2026-01-12</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.farmaciashila.com/product/lekure-e-yndyrshme/effaclar-duo-m-la-roche-posay-40-ml</loc>
+    <lastmod>2026-01-12</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.farmaciashila.com/product/lekure-normale/moisturizing-cream-cerave-177-ml</loc>
+    <lastmod>2026-01-12</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.farmaciashila.com/product/lekure-normale/moisturizing-cream-cerave-340-ml</loc>
+    <lastmod>2026-01-12</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://www.farmaciashila.com/category/trupi-dhe-floke</loc>
@@ -224,6 +266,12 @@
   </url>
   <url>
     <loc>https://www.farmaciashila.com/category/nena-dhe-femija</loc>
+    <lastmod>2025-12-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.farmaciashila.com/category/kujdesi-ndaj-fytyres</loc>
     <lastmod>2025-12-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>

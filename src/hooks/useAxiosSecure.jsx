@@ -42,6 +42,9 @@ const useAxiosSecure = () => {
   const baseURL = normalizeBaseUrl(import.meta.env.VITE_BASE_API) || 'http://localhost:5001';
   const timeoutMs = 30000; // Increased from 15s to 30s for Render cold starts
 
+  console.log('--- API CONFIG ---');
+  console.log('Base URL:', baseURL);
+
   const publicApi = useMemo(() => createClient({ baseURL, timeoutMs }), [baseURL]);
 
   const privateApi = useMemo(() => {

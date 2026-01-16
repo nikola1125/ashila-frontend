@@ -81,7 +81,6 @@ const Cart = () => {
         }
 
         if (item.quantity >= latestStock) {
-          toast.error(`Only ${latestStock} left in stock`);
           updateQuantity(cartKey, latestStock, latestStock);
           return;
         }
@@ -180,15 +179,6 @@ const Cart = () => {
                             Discounted price: {Number(item.discountedPrice).toLocaleString()} ALL
                           </p>
                         )}
-                      {(() => {
-                        const stock = parseStockValue(item.stock);
-                        if (stock === null) return null;
-                        return (
-                          <p className={`text-xs font-medium ${stock <= 5 ? 'text-orange-600' : 'text-green-600'}`}>
-                            {stock <= 5 ? `Only ${stock} left!` : `${stock} available`}
-                          </p>
-                        );
-                      })()}
                     </div>
                   </div>
                   <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-start">

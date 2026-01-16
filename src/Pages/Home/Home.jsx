@@ -14,23 +14,18 @@ const Home = memo(() => {
   const location = useLocation();
   return (
     <>
-      <SEO 
-        title="Farmaci Ashila | Mjekësi & Kujdes Shëndetësor"
-        description="Farmaci Ashila - Produkte mjekësore të kuruara, këshillim profesional dhe kujdes shëndetësor në Shqipëri"
-        keywords="farmaci ashila, farmaci, mjekësi, shëndet, produkte farmaceutike, kujdes shëndetësor, Shqipëri, barna, medicamente"
+      <SEO
+        title="Farmaci Ashila | Mjekësi & Kujdes Shëndetësor në Shqipëri | Farmaci Online"
+        description="Farmaci Ashila - Partneri juaj i besueshëm për produkte mjekësore të kuruara, këshillim profesional dhe kujdes shëndetësor cilësor në Shqipëri. Porositni online barna dhe kozmetikë."
+        keywords="farmaci ashila, farmaci online shqiperi, farmaci ne tirane, mjekësi, shëndet, produkte farmaceutike, kujdes shëndetësor, e-pharma albania, barna online, kozmetike"
         canonicalUrl="https://www.farmaciashila.com/"
       />
       <StructuredData type="LocalBusiness" />
-      <Helmet key={location.pathname}>
-        <title>Farmaci Ashila | Mjekësi & Kujdes Shëndetësor</title>
-        <meta name="description" content="Farmaci Ashila - Produkte mjekësore të kuruara, këshillim profesional dhe kujdes shëndetësor në Shqipëri" />
-        <link rel="canonical" href="https://www.farmaciashila.com/" />
-      </Helmet>
       <div className="relative" style={{ marginTop: 0, paddingTop: 0 }}>
         <h1 className="sr-only">Farmaci Ashila - Produkte Mjekësore të Kuruara dhe Kujdes Shëndetësor</h1>
         <Hero />
       </div>
-      
+
       <div className="relative z-10 bg-white">
         <div className="mb-12 md:mb-0">
           <BestSeller />
@@ -42,7 +37,7 @@ const Home = memo(() => {
         <FluSection />
         <InteractiveProductSelector />
       </div>
-    </>  
+    </>
   );
 });
 

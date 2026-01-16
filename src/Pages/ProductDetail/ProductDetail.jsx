@@ -11,6 +11,7 @@ import { getProductImage } from '../../utils/productImages';
 import { useThrottle } from '../../hooks/useThrottle';
 import VariantSelectionSidebar from '../../Components/Common/Products/VariantSelectionSidebar';
 import { generateDirectProductUrl, getProductOptionSlugs } from '../../utils/productUrls';
+import Breadcrumbs from '../../Components/Common/Navigation/Breadcrumbs';
 
 const ProductDetail = () => {
   const { id, category, slug } = useParams();
@@ -29,7 +30,7 @@ const ProductDetail = () => {
 
   // Determine if we're using the new SEO URL structure
   const isSeoUrl = !!category && !!slug;
-  
+
   // Query function to find product by ID or by category+slug
   const fetchProduct = async () => {
     if (isSeoUrl) {
@@ -38,7 +39,7 @@ const ProductDetail = () => {
       const allProducts = Array.isArray(response)
         ? response
         : (response?.result || response?.medicines || response || []);
-      
+
       // Find product matching the category and slug
       const matchedProduct = allProducts.find(product => {
         const optionSlugs = getProductOptionSlugs(product);
@@ -63,14 +64,14 @@ const ProductDetail = () => {
           .toLowerCase()
           .replace(/[^a-z0-9\s-]/g, '')
           .replace(/\s+/g, '-') || 'product'}`;
-        
+
         return optionSlugs.includes(category) && (productSlug === slug || legacySlug === slug);
       });
-      
+
       if (!matchedProduct) {
         throw new Error('Product not found');
       }
-      
+
       return matchedProduct;
     } else {
       // Original behavior: fetch by ID
@@ -90,23 +91,23 @@ const ProductDetail = () => {
     queryKey: ['product-variants', product?.variantGroupId, product?._id],
     queryFn: async () => {
       if (!product) return [];
-      
+
       // If product has variantGroupId, fetch all products with same variantGroupId
       if (product.variantGroupId) {
         const response = await publicApi.get(`/products?group=false`);
         const allProducts = response?.result || response || [];
-        const variants = allProducts.filter(p => 
+        const variants = allProducts.filter(p =>
           p.variantGroupId === product.variantGroupId
         );
         return variants.length > 0 ? variants : [product];
       }
-      
+
       // Fallback: if no variantGroupId, try to find by name/company/category
       const response = await publicApi.get(`/products?group=false`);
       const allProducts = response?.result || response || [];
-      const variants = allProducts.filter(p => 
-        p.itemName === product.itemName && 
-        p.company === product.company && 
+      const variants = allProducts.filter(p =>
+        p.itemName === product.itemName &&
+        p.company === product.company &&
         p.categoryName === product.categoryName
       );
       return variants.length > 0 ? variants : [product];
@@ -349,13 +350,44 @@ const ProductDetail = () => {
       <Helmet>
         <title>{product.itemName} {product.company ? `nga ${product.company}` : ''} | Farmacia Shila</title>
         <meta name="description" content={`Bli ${product.itemName} ${product.company ? `nga ${product.company}` : ''} në Farmacia Shila. ${product.description?.substring(0, 150) || 'Produkt cilësor për përkujdesjen tuaj shëndetësore.'}`} />
+        <link rel="canonical" href={`https://www.farmaciashila.com${category && slug ? `/product/${category}/${slug}` : `/product/${id}`}`} />
+        <meta name="robots" content="index, follow" />
         <meta property="og:title" content={`${product.itemName} | Farmacia Shila`} />
         <meta property="og:description" content={product.description?.substring(0, 160)} />
         {product.image && <meta property="og:image" content={product.image} />}
         <meta name="twitter:card" content="summary_large_image" />
+
+        {/* Structured Data (JSON-LD) for Product */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org/",
+            "@type": "Product",
+            "name": product.itemName,
+            "image": product.image,
+            "description": product.description?.substring(0, 300),
+            "brand": {
+              "@type": "Brand",
+              "name": product.company || "Farmaci Ashila"
+            },
+            "offers": {
+              "@type": "Offer",
+              "url": `https://www.farmaciashila.com${category && slug ? `/product/${category}/${slug}` : `/product/${id}`}`,
+              "priceCurrency": "ALL",
+              "price": discountedPrice,
+              "availability": isInStock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+              "itemCondition": "https://schema.org/NewCondition"
+            }
+          })}
+        </script>
       </Helmet>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 sm:pt-32 md:pt-40 pb-10">
+        <Breadcrumbs
+          paths={[
+            { name: 'Shop', url: '/shop' },
+            { name: product.itemName, url: `/product/${category}/${slug}` }
+          ]}
+        />
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-10 mb-10 sm:mb-12">
           {/* Left Column - Product Image */}
@@ -427,11 +459,6 @@ const ProductDetail = () => {
               <label className="block text-xs font-semibold text-[#4A3628] uppercase tracking-wide mb-2">
                 QUANTITY
               </label>
-              {currentStock <= 10 && currentStock > 0 && (
-                <div className="mb-2 text-sm text-orange-600 font-medium">
-                  Only {currentStock} left in stock!
-                </div>
-              )}
               <div className="flex items-center gap-2 sm:gap-3">
                 <button
                   onClick={() => handleQuantityChange(-1)}
@@ -506,13 +533,12 @@ const ProductDetail = () => {
                 <div className="hidden md:block whitespace-pre-wrap">
                   {product.description}
                 </div>
-                
+
                 {/* Mobile: Show truncated description with See More */}
                 <div className="md:hidden">
-                  <div 
-                    className={`whitespace-pre-wrap transition-all duration-300 ease-in-out ${
-                      showFullDescription ? 'max-h-none' : 'max-h-24 overflow-hidden'
-                    }`}
+                  <div
+                    className={`whitespace-pre-wrap transition-all duration-300 ease-in-out ${showFullDescription ? 'max-h-none' : 'max-h-24 overflow-hidden'
+                      }`}
                   >
                     {product.description}
                   </div>
@@ -646,8 +672,8 @@ const ProductDetail = () => {
                             onClick={() => {
                               window.scrollTo({ top: 0, behavior: 'auto' });
                               // If product has variants, navigate to first variant, otherwise use product ID
-                              const productId = (relatedProduct.variants && relatedProduct.variants.length > 0) 
-                                ? relatedProduct.variants[0]._id 
+                              const productId = (relatedProduct.variants && relatedProduct.variants.length > 0)
+                                ? relatedProduct.variants[0]._id
                                 : relatedProduct._id;
                               navigate(`/product/${productId}`);
                             }}
