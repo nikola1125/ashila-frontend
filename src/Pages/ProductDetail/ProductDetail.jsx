@@ -1,6 +1,6 @@
 import React, { useState, useContext, useCallback, useEffect, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import useAxiosSecure from '../../hooks/useAxiosSecure';
 import { CartContext } from '../../Context/Cart/CartContext';
 import { Helmet } from 'react-helmet-async';
@@ -10,8 +10,9 @@ import LoadingError from '../../Components/Common/States/LoadingError';
 import { getProductImage } from '../../utils/productImages';
 import { useThrottle } from '../../hooks/useThrottle';
 import VariantSelectionSidebar from '../../Components/Common/Products/VariantSelectionSidebar';
-import { generateDirectProductUrl, getProductOptionSlugs } from '../../utils/productUrls';
+import { generateDirectProductUrl, getProductOptionSlugs, createSlug } from '../../utils/productUrls';
 import Breadcrumbs from '../../Components/Common/Navigation/Breadcrumbs';
+import ProductDetailSkeleton from './ProductDetailSkeleton';
 
 const ProductDetail = () => {
   const { id, category, slug } = useParams();
@@ -34,7 +35,6 @@ const ProductDetail = () => {
   // Query function to find product by ID or by category+slug
   const fetchProduct = async () => {
     if (isSeoUrl) {
-      // Find product by category and slug
       const response = await publicApi.get('/medicines');
       const allProducts = Array.isArray(response)
         ? response
@@ -53,30 +53,41 @@ const ProductDetail = () => {
           descriptiveName += `-${String(product.size).toLowerCase().replace(/\s+/g, '-')}`;
         }
 
-        const productSlug = `${descriptiveName
-          .toLowerCase()
-          .replace(/[^a-z0-9\s-]/g, '')
-          .replace(/\s+/g, '-')
-          .replace(/-+/g, '-')
-          .replace(/^-|-$/g, '') || 'product'}`;
+        const productSlug = createSlug(descriptiveName) || 'product';
+        const legacySlug = createSlug(product.itemName) || 'product';
+        const categorySlug = createSlug(product.categoryName);
 
-        const legacySlug = `${(product.itemName || '')
-          .toLowerCase()
-          .replace(/[^a-z0-9\s-]/g, '')
-          .replace(/\s+/g, '-') || 'product'}`;
+        const urlCategoryMatches = optionSlugs.includes(category) || categorySlug === category || createSlug(product.subcategory) === category;
 
-        return optionSlugs.includes(category) && (productSlug === slug || legacySlug === slug);
+        // Strict match: Category/Option matches AND Slug matches
+        if (urlCategoryMatches && (productSlug === slug || legacySlug === slug)) {
+          return true;
+        }
+
+        // Fallback: If strict match fails, check if Slug matches exactly (ignoring category context to prevent 404s)
+        // This handles cases where the category/option mapping might arguably be ambiguous
+        if (productSlug === slug || legacySlug === slug) {
+          return true;
+        }
+
+        return false;
       });
 
       if (!matchedProduct) {
         throw new Error('Product not found');
       }
 
-      return matchedProduct;
+      // Fetch full product details (including description) by ID
+      const fullProduct = await publicApi.get(`/medicines/${matchedProduct._id}`);
+      return fullProduct;
     } else {
       // Original behavior: fetch by ID
-      const response = await publicApi.get(`/medicines/${id}`);
-      return response;
+      try {
+        const response = await publicApi.get(`/medicines/${id}`);
+        return response;
+      } catch (err) {
+        throw err;
+      }
     }
   };
 
@@ -84,6 +95,7 @@ const ProductDetail = () => {
     queryKey: ['product', id, category, slug],
     queryFn: fetchProduct,
     enabled: !!(id || (category && slug)),
+    staleTime: 5 * 60 * 1000, // 5 minutes cache
   });
 
   // Fetch all variants of the same product using variantGroupId
@@ -239,6 +251,31 @@ const ProductDetail = () => {
     });
   }, []);
 
+  const queryClient = useQueryClient();
+
+  // Auto-redirect to SEO-friendly URL if accessed by ID
+  useEffect(() => {
+    if (product && !isSeoUrl) {
+      const seoUrl = generateDirectProductUrl(product);
+      // Validate the URL: must exist, not include the ID (to avoid loop), and NOT contain double slashes (malformed)
+      if (seoUrl && !seoUrl.includes(id) && !seoUrl.includes('//')) {
+        // Pre-fill the cache for the target query key to avoid loading state/glitch
+        const parts = seoUrl.split('/product/');
+        if (parts.length > 1) {
+          const params = parts[1].split('/');
+          if (params.length === 2) {
+            const [newCategory, newSlug] = params;
+            // Key must match exactly what useQuery uses: ['product', undefined, category, slug]
+            // When navigating to SEO URL, id param is undefined
+            queryClient.setQueryData(['product', undefined, newCategory, newSlug], product);
+          }
+        }
+
+        navigate(seoUrl, { replace: true });
+      }
+    }
+  }, [product, isSeoUrl, navigate, id, queryClient]);
+
   // Initialize selected variant logic
   useEffect(() => {
     if (product && allVariants.length > 0) {
@@ -338,7 +375,7 @@ const ProductDetail = () => {
   }, [currentStock]);
 
   if (isLoading) {
-    return <DataLoading label="Product Details" />;
+    return <ProductDetailSkeleton />;
   }
 
   if (error || !product) {
@@ -385,7 +422,7 @@ const ProductDetail = () => {
         <Breadcrumbs
           paths={[
             { name: 'Shop', url: '/shop' },
-            { name: product.itemName, url: `/product/${category}/${slug}` }
+            { name: product.itemName, url: generateDirectProductUrl(product) }
           ]}
         />
         {/* Main Content */}

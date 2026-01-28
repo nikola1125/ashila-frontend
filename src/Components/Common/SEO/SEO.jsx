@@ -5,7 +5,7 @@ const SEO = ({
   title,
   description,
   keywords,
-  ogImage = 'https://www.farmaciashila.com/logo.png',
+  ogImage = 'https://www.farmaciashila.com/images/logo.png',
   canonicalUrl = 'https://www.farmaciashila.com/'
 }) => {
   const siteName = 'Farmaci Ashila';
@@ -54,7 +54,7 @@ const SEO = ({
             "url": "https://www.farmaciashila.com",
             "logo": {
               "@type": "ImageObject",
-              "url": "https://www.farmaciashila.com/logo.png",
+              "url": "https://www.farmaciashila.com/images/logo.png",
               "width": 512,
               "height": 512
             },

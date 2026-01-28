@@ -103,6 +103,10 @@ export const router = createBrowserRouter([
         path: 'category-details',
         element: <CategoryDetails />,
       },
+      {
+        path: 'category/:categoryName',
+        element: <CategoryDetails />,
+      },
     ],
   },
   {

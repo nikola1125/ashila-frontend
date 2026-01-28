@@ -8,7 +8,7 @@ export const ADMIN_CATEGORY_TREE = [
     children: [
       {
         label: 'Per trupin',
-        children: ['Scrub trupi'],
+        children: ['Scrub trupi', 'Aksesore trupi'],
       },
       {
         label: 'Per floke',
@@ -25,7 +25,7 @@ export const ADMIN_CATEGORY_TREE = [
     children: [
       {
         label: 'Kujdesi per nenen',
-        children: ['Shtatezania', 'Pas lindjes', 'Ushqyerja me gji'],
+        children: ['Shtatezania', 'Pas lindjes', 'Ushqyerja me gji', 'Aksesore'],
       },
       {
         label: 'Kujdesi per femije',

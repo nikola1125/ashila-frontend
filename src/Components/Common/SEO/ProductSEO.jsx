@@ -6,9 +6,9 @@ const ProductSEO = ({ product }) => {
 
   const siteTitle = 'Ashila Pharmacy';
   const fullTitle = `${product.itemName} | ${siteTitle}`;
-  
+
   // Generate product description
-  const description = product.description 
+  const description = product.description
     ? `${product.itemName} - ${product.description.substring(0, 150)}... | Blerje online në Shqipëri | Farmaci Ashila`
     : `${product.itemName} | Blerje online barna dhe mjekësore | Farmaci Ashila`;
 
@@ -27,17 +27,17 @@ const ProductSEO = ({ product }) => {
   ].filter(Boolean).join(', ');
 
   // Product image for Open Graph
-  const productImage = product.image || product.imageUrl || '/logo.png';
+  const productImage = product.image || product.imageUrl || '/images/logo.png';
 
   return (
     <Helmet>
       <title>{fullTitle}</title>
       <meta name="description" content={description} />
       <meta name="keywords" content={keywords} />
-      
+
       {/* Canonical URL */}
       <link rel="canonical" href={`https://www.farmaciashila.com/product/${product._id}`} />
-      
+
       {/* Open Graph */}
       <meta property="og:title" content={fullTitle} />
       <meta property="og:description" content={description} />
@@ -47,19 +47,19 @@ const ProductSEO = ({ product }) => {
       <meta property="product:price:amount" content={product.price} />
       <meta property="product:price:currency" content="ALL" />
       <meta property="product:availability" content={product.stock > 0 ? 'in stock' : 'out of stock'} />
-      
+
       {/* Twitter */}
       <meta name="twitter:card" content="product" />
       <meta name="twitter:title" content={fullTitle} />
       <meta name="twitter:description" content={description} />
       <meta name="twitter:image" content={productImage} />
-      
+
       {/* Additional SEO */}
       <meta name="robots" content="index, follow" />
       <meta name="language" content="sq" />
       <meta name="geo.region" content="AL" />
       <meta name="geo.placename" content="Shqipëri" />
-      
+
       {/* Structured Data - Product Schema */}
       <script type="application/ld+json">
         {JSON.stringify({

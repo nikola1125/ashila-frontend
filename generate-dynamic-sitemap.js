@@ -246,7 +246,9 @@ Sitemap: ${baseUrl}/sitemap.xml
   const robotsPathDist = path.join(__dirname, 'dist', 'robots.txt');
 
   fs.writeFileSync(robotsPathPublic, robots);
-  fs.writeFileSync(robotsPathDist, robots);
+  if (fs.existsSync(path.join(__dirname, 'dist'))) {
+    fs.writeFileSync(robotsPathDist, robots);
+  }
   console.log('✅ Generated robots.txt');
 }
 
@@ -263,7 +265,9 @@ async function main() {
     const sitemapPathDist = path.join(__dirname, 'dist', 'sitemap.xml');
 
     fs.writeFileSync(sitemapPathPublic, sitemapData.content);
-    fs.writeFileSync(sitemapPathDist, sitemapData.content);
+    if (fs.existsSync(path.join(__dirname, 'dist'))) {
+      fs.writeFileSync(sitemapPathDist, sitemapData.content);
+    }
 
     // Generate sitemap index if needed
     if (sitemapData.totalUrls > 50000) {
@@ -273,7 +277,9 @@ async function main() {
         const indexPathDist = path.join(__dirname, 'dist', 'sitemap_index.xml');
 
         fs.writeFileSync(indexPathPublic, sitemapIndex);
-        fs.writeFileSync(indexPathDist, sitemapIndex);
+        if (fs.existsSync(path.join(__dirname, 'dist'))) {
+          fs.writeFileSync(indexPathDist, sitemapIndex);
+        }
         console.log('✅ Generated sitemap_index.xml for large site');
       }
     }

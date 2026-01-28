@@ -243,7 +243,6 @@ const Products = () => {
         // Create new variant(s) from existing product
         // Map all variants to the format expected by the backend
         const variantsData = form.variants
-          .filter(v => v.size && v.size.trim()) // Only include variants with a size
           .map(variant => ({
             size: String(variant.size || '').trim(),
             price: Number(variant.price || form.price || 0),
@@ -252,7 +251,7 @@ const Products = () => {
           }));
 
         if (variantsData.length === 0) {
-          toast.error('At least one variant with size is required');
+          toast.error('At least one variant is required');
           setSaving(false);
           return;
         }
@@ -286,7 +285,6 @@ const Products = () => {
         // Create new product with same data as original but new variant(s)
         // Map all variants to the format expected by the backend
         const variantsData = form.variants
-          .filter(v => v.size && v.size.trim()) // Only include variants with a size
           .map(variant => ({
             size: String(variant.size || '').trim(),
             price: Number(variant.price || form.price || 0),
@@ -295,7 +293,7 @@ const Products = () => {
           }));
 
         if (variantsData.length === 0) {
-          toast.error('At least one variant with size is required');
+          toast.error('At least one variant is required');
           setSaving(false);
           return;
         }
@@ -857,13 +855,12 @@ const Products = () => {
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <div className="text-xs font-semibold text-gray-500 mb-1">Size / Volume *</div>
+                        <div className="text-xs font-semibold text-gray-500 mb-1">Size / Volume</div>
                         <input
                           className="input input-bordered w-full"
                           placeholder="e.g. 50ml, 100ml"
                           value={variant.size}
                           onChange={(e) => updateVariant(index, 'size', e.target.value)}
-                          required
                         />
                       </div>
                       <div>

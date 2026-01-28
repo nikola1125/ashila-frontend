@@ -4,6 +4,8 @@ import { CartContext } from '../../Context/Cart/CartContext';
 import { getProductImage } from '../../utils/productImages';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
+import ShopGridSkeleton from './ShopGridSkeleton';
+
 const ShopGrid = ({
   paginatedMedicines,
   handleItemsPerPageChange,
@@ -12,9 +14,14 @@ const ShopGrid = ({
   goToPage,
   totalPages,
   onOpenVariantSidebar,
+  isLoading,
 }) => {
   const { addItem } = useContext(CartContext);
   const navigate = useNavigate();
+
+  if (isLoading) {
+    return <ShopGridSkeleton itemsPerPage={itemsPerPage} />;
+  }
 
   const getProductIdForDetails = (product) => {
     if (!product) return null;
@@ -48,10 +55,9 @@ const ShopGrid = ({
                 <img
                   src={getProductImage(medicine.image, medicine._id || index)}
                   alt={medicine.itemName}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-contain p-6"
                   style={{
-                    objectPosition: 'center',
-                    transform: 'scale(1.05)'
+                    objectPosition: 'center'
                   }}
                   onError={(e) => {
                     console.warn('Image failed to load for product:', medicine.itemName, 'Error:', e);

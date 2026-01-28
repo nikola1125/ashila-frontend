@@ -13,7 +13,7 @@ const CATEGORY_HIERARCHY = {
     },
     "Kujdesi per trupin dhe floke": {
         subcategories: {
-            "Per trupin": ["Lares trupi", "Hidratues trupi", "Scrub trupi", "Akne ne trup", "Kujdesi ndaj diellit", "Deodorant", "Vaj per trupin", "Krem per duart & kembet"],
+            "Per trupin": ["Lares trupi", "Hidratues trupi", "Scrub trupi", "Akne ne trup", "Kujdesi ndaj diellit", "Deodorant", "Vaj per trupin", "Krem per duart & kembet", "Aksesore trupi"],
             "Per floke": ["Skalp i thate", "Skalp i yndyrshem", "Skalp sensitive", "Renia e flokut", "Aksesore"]
         }
     },
@@ -25,7 +25,7 @@ const CATEGORY_HIERARCHY = {
     },
     "Nena dhe femije": {
         subcategories: {
-            "Kujdesi per nenen": ["Shtatezania", "Pas lindjes", "Ushqyerja me gji"],
+            "Kujdesi per nenen": ["Shtatezania", "Pas lindjes", "Ushqyerja me gji", "Aksesore"],
             "Kujdesi per femije": ["Ushqim per femije", "Pelena", "Aksesore"]
         }
     },
@@ -37,6 +37,11 @@ const CATEGORY_HIERARCHY = {
     "Monitoruesit e shendetit": {
         subcategories: {
             "Kategorite": ["Peshore", "Aparat tensioni", "Termometer", "Monitorues te diabetit", "Oksimeter", "Paisje ortopedike"]
+        }
+    },
+    "Set": {
+        subcategories: {
+            "Kategorite": ["Set per fytyren", "Set per trupin", "Set per floket", "Set per nena", "Set per femije"]
         }
     }
 };
@@ -166,6 +171,27 @@ const CreateProductModal = ({ isOpen, onClose, productToEdit, refetch, isBestsel
         }
     });
 
+    // Fetch full product details if editing (to get description which might be excluded in list)
+    const { data: fullProductDetails } = useQuery({
+        queryKey: ['product-details', productToEdit?._id],
+        queryFn: async () => {
+            if (!productToEdit?._id) return null;
+            const res = await publicApi.get(`/medicines/${productToEdit._id}`);
+            return res;
+        },
+        enabled: !!productToEdit?._id
+    });
+
+    // Update description in form data when full product details are loaded
+    useEffect(() => {
+        if (fullProductDetails && fullProductDetails.description) {
+            setFormData(prev => ({
+                ...prev,
+                description: fullProductDetails.description
+            }));
+        }
+    }, [fullProductDetails]);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -179,6 +205,7 @@ const CreateProductModal = ({ isOpen, onClose, productToEdit, refetch, isBestsel
             setLoading(false);
             return; // Stop submission
         }
+
 
         // Construct category path for searching/filtering
         // Path format: "Category > Subcategory > Option1, Option2"
@@ -209,7 +236,7 @@ const CreateProductModal = ({ isOpen, onClose, productToEdit, refetch, isBestsel
             }
 
             if (!formData.variants || formData.variants.length === 0) {
-                toast.error('Please add at least one product variant (size, price, stock).');
+                toast.error('Please add at least one product variant (price, stock).');
                 setLoading(false);
                 return;
             }
@@ -232,6 +259,7 @@ const CreateProductModal = ({ isOpen, onClose, productToEdit, refetch, isBestsel
             const totalStock = formData.variants.reduce((acc, v) => acc + parseInt(v.stock || 0), 0);
             const mainPrice = formData.variants[0].price || 0;
             const mainDiscount = formData.variants[0].discount || 0;
+            const mainSize = formData.variants[0].size || '';
 
             const data = new FormData();
             Object.keys(formData).forEach(key => {
@@ -255,6 +283,7 @@ const CreateProductModal = ({ isOpen, onClose, productToEdit, refetch, isBestsel
             data.append('price', mainPrice);
             data.append('stock', totalStock);
             data.append('discount', mainDiscount);
+            data.append('size', mainSize);
 
             // Append correct MongoDB _id for category
             data.append('category', selectedDbCategory._id);
@@ -329,11 +358,11 @@ const CreateProductModal = ({ isOpen, onClose, productToEdit, refetch, isBestsel
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">Product Image</label>
                                     <div
-                                        className="relative border-2 border-dashed border-gray-300 rounded-xl p-8 flex flex-col items-center justify-center cursor-pointer hover:border-amber-500 hover:bg-amber-50 transition h-64"
+                                        className="relative border-2 border-dashed border-gray-300 rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer hover:border-amber-500 hover:bg-amber-50 transition h-52 overflow-hidden bg-gray-50"
                                         onClick={() => document.getElementById('product-image').click()}
                                     >
                                         {imagePreview ? (
-                                            <img src={imagePreview} alt="Preview" className="h-full object-contain" />
+                                            <img src={imagePreview} alt="Preview" className="w-full h-full object-contain" />
                                         ) : (
                                             <>
                                                 <Upload className="w-12 h-12 text-gray-400 mb-2" />
@@ -377,7 +406,8 @@ const CreateProductModal = ({ isOpen, onClose, productToEdit, refetch, isBestsel
 
                             {/* Right Column - Details & Pricing */}
                             <div className="space-y-6">
-                                {/* Price & Stock inputs filtered out as per request - Derived from variants now */}
+                                {/* Main Price/Stock inputs - Visible if no variants */}
+
 
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
@@ -506,16 +536,16 @@ const CreateProductModal = ({ isOpen, onClose, productToEdit, refetch, isBestsel
                                     </p>
                                 </div>
 
-                                {(formData.subcategory === 'Problematikat e fytyres' && formData.options.includes('Akne')) && (
+                                {(formData.categoryName === 'Kujdesi per fytyren' && (formData.options.includes('Akne') || formData.options.includes('Pika te zeza'))) && (
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Lloji i problematikës (Acne Type)</label>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Lloji i problematikës (Problem Type)</label>
                                         <select
                                             name="skinProblem"
                                             className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none"
                                             value={formData.skinProblem}
                                             onChange={handleChange}
                                         >
-                                            <option value="">Select Acne Type...</option>
+                                            <option value="">Select Type...</option>
                                             <option value="papules">Papules</option>
                                             <option value="cyst">Cyst</option>
                                             <option value="pustules">Pustules</option>
@@ -545,7 +575,10 @@ const CreateProductModal = ({ isOpen, onClose, productToEdit, refetch, isBestsel
 
                         {/* Variants Section - In Flow but Separated */}
                         <div className="border-t pt-6 mt-6">
-                            <h3 className="text-lg font-semibold text-gray-800 mb-4">Product Variants (Sizes)</h3>
+                            <h3 className="text-lg font-semibold text-gray-800 mb-4 flex justify-between items-center">
+                                <span>Product Variants (Sizes/Types)</span>
+                                <span className="text-xs font-normal text-gray-500 bg-gray-100 px-2 py-1 rounded">Optional</span>
+                            </h3>
 
                             {formData.variants && formData.variants.map((variant, index) => (
                                 <div key={index} className="bg-gray-50 p-4 rounded-xl mb-4 relative border border-gray-200">
@@ -562,7 +595,7 @@ const CreateProductModal = ({ isOpen, onClose, productToEdit, refetch, isBestsel
 
                                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                         <div>
-                                            <label className="block text-xs font-medium text-gray-700 mb-1">Size (e.g. 50ml)</label>
+                                            <label className="block text-xs font-medium text-gray-700 mb-1">Size (e.g. 50ml) - Optional</label>
                                             <input
                                                 type="text"
                                                 value={variant.size}

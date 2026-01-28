@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import React, { useState, useMemo } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useParams, useNavigate } from 'react-router-dom';
 import useAxiosSecure from '../../hooks/useAxiosSecure';
 import DetailsModal from '../../Components/Common/Medicines/DetailsModal';
 
@@ -17,8 +17,19 @@ const CategoryDetails = () => {
   const { publicApi } = useAxiosSecure();
   const location = useLocation();
 
+  const navigate = useNavigate();
+  const { categoryName } = useParams();
   const searchParams = new URLSearchParams(location.search);
-  const category = searchParams.get('category');
+  const categoryParam = searchParams.get('category');
+  const category = categoryName ? categoryName.replace(/-/g, ' ') : categoryParam;
+
+  // Auto-redirect to SEO-friendly category URL if accessed via query param
+  React.useEffect(() => {
+    if (categoryParam && !categoryName) {
+      const slug = categoryParam.toLowerCase().replace(/\s+/g, '-');
+      navigate(`/category/${slug}`, { replace: true });
+    }
+  }, [categoryParam, categoryName, navigate]);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(5);
@@ -102,7 +113,7 @@ const CategoryDetails = () => {
         <CategorySEO
           categoryName={category}
           products={allCategoryMedicines}
-          canonicalUrl={`https://www.farmaciashila.com/category-details?category=${category}`}
+          canonicalUrl={`https://www.farmaciashila.com/category/${categoryName || (category ? category.toLowerCase().replace(/\s+/g, '-') : '')}`}
         />
         <div className="container mx-auto px-4 max-w-6xl">
           {/* Header */}

@@ -75,7 +75,7 @@ const ProductCard = React.memo(({ product, pricing, index, onProductClick, onAdd
           }}
         />
         <div className="absolute top-1.5 md:top-2.5 right-1.5 md:right-2.5 flex flex-col gap-1 items-end z-10">
-          {pricing.discountPercent > 0 && (product.totalStock > 0 &&(product.variants?.some(v => v.stock > 0) || product.stock > 0)) && (
+          {pricing.discountPercent > 0 && (product.totalStock > 0 && (product.variants?.some(v => v.stock > 0) || product.stock > 0)) && (
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -179,11 +179,6 @@ const BestSeller = () => {
         const res = await publicApi.get(`/products/bestsellers?group=true`);
         const list = Array.isArray(res) ? res : (res?.result || res || []);
         const finalList = Array.isArray(list) ? list : [];
-        console.log('BestSeller API response:', res);
-        console.log('Final products list:', finalList);
-        finalList.forEach(p => {
-          console.log(`- ${p.itemName}: variants=${p.variants?.length || 0}`);
-        });
         return finalList;
       } catch (err) {
         console.warn('BestSeller fetch failed:', err);
@@ -304,7 +299,7 @@ const BestSeller = () => {
         discountPercent: 0
       };
     }
-    
+
     // Handle grouped products with min/max prices (fallback)
     if (product.minPrice !== undefined && product.maxPrice !== undefined) {
       return {
@@ -313,7 +308,7 @@ const BestSeller = () => {
         discountPercent: 0
       };
     }
-    
+
     // Handle single products
     if (product.discount && product.discount > 0) {
       const discountedPrice = product.price * (1 - product.discount / 100);
@@ -370,8 +365,8 @@ const BestSeller = () => {
   const handleProductClick = useCallback((product) => {
     window.scrollTo({ top: 0, behavior: 'auto' });
     // If product has variants, navigate to first variant, otherwise use product ID
-    const productId = (product.variants && product.variants.length > 0) 
-      ? product.variants[0]._id 
+    const productId = (product.variants && product.variants.length > 0)
+      ? product.variants[0]._id
       : product._id;
     navigate(`/product/${productId}`);
   }, [navigate]);

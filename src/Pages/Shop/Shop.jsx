@@ -25,7 +25,11 @@ const Shop = () => {
     addItem(product, quantity, selectedVariant);
   }, [addItem]);
 
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const pageParam = searchParams.get('page');
+    return pageParam ? parseInt(pageParam) : 1;
+  });
   const [itemsPerPage, setItemsPerPage] = useState(30);
   const [sortBy, setSortBy] = useState('alphabetical');
   const [searchTerm, setSearchTerm] = useState('');
@@ -100,6 +104,7 @@ const Shop = () => {
 
     supplements: false,
     healthMonitors: false,
+    sets: false,
   });
 
   // Toggle category expansion
@@ -120,6 +125,7 @@ const Shop = () => {
 
   const [selectedSupplements, setSelectedSupplements] = useState([]);
   const [selectedHealthMonitors, setSelectedHealthMonitors] = useState([]);
+  const [selectedSets, setSelectedSets] = useState([]);
 
   // Variant Selection State
   const [isVariantSidebarOpen, setIsVariantSidebarOpen] = useState(false);
@@ -184,6 +190,9 @@ const Shop = () => {
     "Krem per duart & kembet": "krem-per-duart-dhe-kembet",
     "Krem per duart & këmbet (dhe)": "krem-per-duart-dhe-kembet",
 
+    // Aksesore trupi
+    "Aksesore trupi": "aksesore-trupi",
+
     // Per flokë
     "Skalp i thate": "skalp-i-thate",
     "Skalp i yndyrshem": "skalp-i-yndyrshem",
@@ -238,7 +247,14 @@ const Shop = () => {
     "Uje termal": "uje-termal",
     "Peeling Pads": "peeling-pads",
     "Lipbalm": "lipbalm",
-    "Set me produkte": "set-me-produkte"
+    "Set me produkte": "set-me-produkte",
+
+    // Set
+    "Set per fytyren": "set-per-fytyren",
+    "Set per trupin": "set-per-trupin",
+    "Set per floket": "set-per-floket",
+    "Set per nena": "set-per-nena",
+    "Set per femije": "set-per-femije"
   };
 
   // Calculate dynamic filter counts based on allMedicines
@@ -250,12 +266,13 @@ const Shop = () => {
     const filterGroups = {
       problematica: ['akne', 'rrudha', 'hiperpigmentim', 'balancim-yndyre-pore-evidente', 'pika-te-zeza', 'dehidratim', 'skuqje', 'rozacea'],
       skinTypes: ['lekure-normale', 'lekure-e-yndyrshme', 'lekure-e-thate', 'lekure-mikes', 'lekure-sensitive'],
-      bodyHair: ['lares-trupi', 'hidratues-trupi', 'scrub-trupi', 'akne-ne-trup', 'kujdesi-ndaj-diellit', 'deodorant', 'vaj-per-trupin', 'krem-per-duart-dhe-kembet', 'skalp-i-thate', 'skalp-i-yndyrshem', 'skalp-sensitive', 'renia-e-flokut', 'aksesore-floke'],
+      bodyHair: ['lares-trupi', 'hidratues-trupi', 'scrub-trupi', 'akne-ne-trup', 'kujdesi-ndaj-diellit', 'deodorant', 'vaj-per-trupin', 'krem-per-duart-dhe-kembet', 'aksesore-trupi', 'skalp-i-thate', 'skalp-i-yndyrshem', 'skalp-sensitive', 'renia-e-flokut', 'aksesore-floke'],
       hygiene: ['lares-intim', 'peceta-intime', 'furce-dhembesh', 'paste-dhembesh', 'fill-dentar-furca-interdentare'],
-      motherChild: ['shtatezania', 'pas-lindjes', 'ushqyerja-me-gji', 'ushqim-per-femije', 'pelena', 'aksesore'],
+      motherChild: ['shtatezania', 'pas-lindjes', 'ushqyerja-me-gji', 'aksesore-nene', 'ushqim-per-femije', 'pelena', 'aksesore-femije'],
       supplements: ['vitamina', 'suplemente-per-shendetin', 'minerale', 'suplemente-bimore'],
       healthMonitors: ['peshore', 'aparat-tensioni', 'termometer', 'monitorues-te-diabetit', 'oksimeter', 'paisje-ortopedike'],
-      productTypes: ['lares-vajor', 'lares-ujor', 'toner', 'exfoliant', 'serume', 'krem-per-syte', 'vitamin-c-antioxidant', 'hidratues', 'retinol', 'spf', 'eye-patches', 'acne-patches', 'maske-fytyre', 'spot-treatment', 'uje-termal', 'peeling-pads', 'lipbalm', 'set-me-produkte']
+      productTypes: ['lares-vajor', 'lares-ujor', 'toner', 'exfoliant', 'serume', 'krem-per-syte', 'vitamin-c-antioxidant', 'hidratues', 'retinol', 'spf', 'eye-patches', 'acne-patches', 'maske-fytyre', 'spot-treatment', 'uje-termal', 'peeling-pads', 'lipbalm', 'set-me-produkte'],
+      sets: ['set-per-fytyren', 'set-per-trupin', 'set-per-floket', 'set-per-nena', 'set-per-femije']
     };
 
     // Helper to check match (Synchronized with matchesFilter for 100% accuracy)
@@ -269,6 +286,19 @@ const Shop = () => {
       const itemType = normalizeText(item.bestsellerCategory);
       const itemPath = normalizeText(item.categoryName);
       const itemProblem = normalizeText(item.skinProblem);
+
+      // Special handling for aksesore filters to handle context
+      if (normalizedFilter === 'aksesorenene') {
+        return (itemPath.includes('aksesore') && itemPath.includes('kujdesipernenena')) ||
+               itemOpts.some(opt => opt === 'aksesore' && itemPath.includes('kujdesipernenena')) ||
+               itemOptSlugs.some(slug => slug === 'aksesorenene');
+      }
+      
+      if (normalizedFilter === 'aksesorefemije') {
+        return (itemPath.includes('aksesore') && itemPath.includes('kujdesiperfemije')) ||
+               itemOpts.some(opt => opt === 'aksesore' && itemPath.includes('kujdesiperfemije')) ||
+               itemOptSlugs.some(slug => slug === 'aksesorefemije');
+      }
 
       return itemSub.includes(normalizedFilter) ||
         itemOpt.includes(normalizedFilter) ||
@@ -316,6 +346,7 @@ const Shop = () => {
         { id: 'deodorant', label: 'Deodorant' },
         { id: 'vaj-per-trupin', label: 'Vaj per trupin' },
         { id: 'krem-per-duart-dhe-kembet', label: 'Krem per duart & kembet' },
+        { id: 'aksesore-trupi', label: 'Aksesore trupi' },
         { id: 'skalp-i-thate', label: 'Skalp i thate' },
         { id: 'skalp-i-yndyrshem', label: 'Skalp i yndyrshem' },
         { id: 'skalp-sensitive', label: 'Skalp sensitive' },
@@ -333,9 +364,10 @@ const Shop = () => {
         { id: 'shtatezania', label: 'Shtatezania' },
         { id: 'pas-lindjes', label: 'Pas lindjes' },
         { id: 'ushqyerja-me-gji', label: 'Ushqyerja me gji' },
+        { id: 'aksesore-nene', label: 'Aksesore (nënë)' },
         { id: 'ushqim-per-femije', label: 'Ushqim per femije' },
         { id: 'pelena', label: 'Pelena' },
-        { id: 'aksesore', label: 'Aksesore' },
+        { id: 'aksesore-femije', label: 'Aksesore (fëmijë)' },
       ].map(opt => ({ ...opt, count: counts[opt.id] || 0 })),
       supplements: [
         { id: 'vitamina', label: 'Vitamina' },
@@ -371,6 +403,13 @@ const Shop = () => {
         { id: 'lipbalm', label: 'Lipbalm' },
         { id: 'set-me-produkte', label: 'Set me produkte' },
       ].map(opt => ({ ...opt, count: counts[opt.id] || 0 })),
+      sets: [
+        { id: 'set-per-fytyren', label: 'Set per fytyren' },
+        { id: 'set-per-trupin', label: 'Set per trupin' },
+        { id: 'set-per-floket', label: 'set per floket' },
+        { id: 'set-per-nena', label: 'Set per nena' },
+        { id: 'set-per-femije', label: 'Set per femije' },
+      ].map(opt => ({ ...opt, count: counts[opt.id] || 0 })),
     };
   }, [allMedicines, normalizeText, optionToSlugMap]);
 
@@ -397,15 +436,29 @@ const Shop = () => {
         prev.includes(id) ? prev.filter(f => f !== id) : [...prev, id]
       );
     } else if (filterType === 'motherChild') {
-      setSelectedMotherChild(prev =>
-        prev.includes(id) ? prev.filter(f => f !== id) : [...prev, id]
-      );
+      setSelectedMotherChild(prev => {
+        // Handle mutual exclusivity for aksesore options
+        if (id === 'aksesore-nene' && !prev.includes(id)) {
+          // Selecting aksesore-nene, deselect aksesorefemije if it's selected
+          return [...prev.filter(f => f !== 'aksesorefemije'), id];
+        } else if (id === 'aksesorefemije' && !prev.includes(id)) {
+          // Selecting aksesorefemije, deselect aksesorenene if it's selected
+          return [...prev.filter(f => f !== 'aksesore-nene'), id];
+        } else {
+          // Normal toggle behavior
+          return prev.includes(id) ? prev.filter(f => f !== id) : [...prev, id];
+        }
+      });
     } else if (filterType === 'supplements') {
       setSelectedSupplements(prev =>
         prev.includes(id) ? prev.filter(f => f !== id) : [...prev, id]
       );
     } else if (filterType === 'healthMonitors') {
       setSelectedHealthMonitors(prev =>
+        prev.includes(id) ? prev.filter(f => f !== id) : [...prev, id]
+      );
+    } else if (filterType === 'sets') {
+      setSelectedSets(prev =>
         prev.includes(id) ? prev.filter(f => f !== id) : [...prev, id]
       );
     }
@@ -448,11 +501,25 @@ const Shop = () => {
   const subcategoryParam = searchParams.get('subcategory');
   const searchParam = searchParams.get('search');
   const skinProblemParam = searchParams.get('skinProblem');
+  const pageParam = searchParams.get('page'); // Add this
 
   // Sync state with URL search
   React.useEffect(() => {
     setSearchTerm(searchParam || '');
-  }, [searchParam]);
+
+    // Sync page from URL
+    if (pageParam) {
+      const page = parseInt(pageParam);
+      if (!isNaN(page) && page > 0 && page !== currentPage) {
+        setCurrentPage(page);
+      }
+    } else if (currentPage !== 1 && !pageParam) {
+      // If URL has no page param but state is not 1, reset to 1 (e.g. cleared filters)
+      // BUT: be careful not to reset if we just navigated to the page. 
+      // This logic is tricky. Simplest is: if URL has no page, page is 1.
+      setCurrentPage(1);
+    }
+  }, [searchParam, pageParam]); // Listen to pageParam
 
   // Prevent body scroll when mobile filters are open
   React.useEffect(() => {
@@ -514,6 +581,19 @@ const Shop = () => {
         const path = normalizeText(item.categoryName);
         const name = normalizeText(item.itemName);
 
+        // Special handling for aksesore URL parameters to handle context
+        if (normalizedSubParam === 'aksesorenene') {
+          return (path.includes('aksesore') && path.includes('kujdesipernenena')) ||
+                 opts.some(o => o === 'aksesore' && path.includes('kujdesipernenena')) ||
+                 optSlugs.some(slug => slug === 'aksesorenene');
+        }
+        
+        if (normalizedSubParam === 'aksesorefemije') {
+          return (path.includes('aksesore') && path.includes('kujdesiperfemije')) ||
+                 opts.some(o => o === 'aksesore' && path.includes('kujdesiperfemije')) ||
+                 optSlugs.some(slug => slug === 'aksesorefemije');
+        }
+
         // SYSTEMIC MATCHING:
         // We look for the parameter anywhere in the product's classification tree
         const matchesAnywhere =
@@ -557,6 +637,19 @@ const Shop = () => {
       return selectedFilters.some(filterId => {
         const normalizedFilter = normalizeText(filterId);
 
+        // Special handling for aksesore filters to handle context
+        if (normalizedFilter === 'aksesorenene') {
+          return (itemPath.includes('aksesore') && itemPath.includes('kujdesipernenena')) ||
+                 itemOpts.some(opt => opt === 'aksesore' && itemPath.includes('kujdesipernenena')) ||
+                 itemOptSlugs.some(slug => slug === 'aksesorenene');
+        }
+        
+        if (normalizedFilter === 'aksesorefemije') {
+          return (itemPath.includes('aksesore') && itemPath.includes('kujdesiperfemije')) ||
+                 itemOpts.some(opt => opt === 'aksesore' && itemPath.includes('kujdesiperfemije')) ||
+                 itemOptSlugs.some(slug => slug === 'aksesorefemije');
+        }
+
         // We use .includes for maximum discovery cross-compatibility
         // but normalize both sides to ensure slugs like 'lekure-normale' match 'Lekure normale'
         return itemSub.includes(normalizedFilter) ||
@@ -594,6 +687,9 @@ const Shop = () => {
     if (selectedHealthMonitors.length > 0) {
       filtered = filtered.filter(item => matchesFilter(selectedHealthMonitors, item));
     }
+    if (selectedSets.length > 0) {
+      filtered = filtered.filter(item => matchesFilter(selectedSets, item));
+    }
 
 
 
@@ -611,7 +707,7 @@ const Shop = () => {
     }
 
     return filtered;
-  }, [allMedicines, searchTerm, sortBy, categoryParam, subcategoryParam, selectedProblems, selectedSkinTypes, selectedProductTypes, selectedBodyHair, selectedHygiene, selectedMotherChild, selectedSupplements, selectedHealthMonitors, normalizeText, optionToSlugMap]);
+  }, [allMedicines, searchTerm, sortBy, categoryParam, subcategoryParam, selectedProblems, selectedSkinTypes, selectedProductTypes, selectedBodyHair, selectedHygiene, selectedMotherChild, selectedSupplements, selectedHealthMonitors, selectedSets, normalizeText, optionToSlugMap]);
 
   // Update pagination values with filtered data
   const totalFilteredItems = filteredAndSortedMedicines.length;
@@ -645,7 +741,71 @@ const Shop = () => {
 
   const subcategoryName = subcategoryParam ? subcategoryParam.replace(/-/g, ' ').charAt(0).toUpperCase() + subcategoryParam.replace(/-/g, ' ').slice(1) : null;
 
-  if (isLoading) return <DataLoading label="Medicines" />;
+  // Generate pagination URL helper
+  const generatePaginationUrl = (page) => {
+    const baseUrl = 'https://www.farmaciashila.com';
+    
+    if (subcategoryParam) {
+      const canonicalUrl = `${baseUrl}/category/${subcategoryParam}`;
+      return page > 1 ? `${canonicalUrl}?page=${page}` : canonicalUrl;
+    } else if (searchTerm) {
+      const searchUrl = `${baseUrl}/shop?search=${encodeURIComponent(searchTerm)}`;
+      return page > 1 ? `${searchUrl}&page=${page}` : searchUrl;
+    } else if (categoryParam) {
+      const categoryUrl = `${baseUrl}/shop?category=${encodeURIComponent(categoryParam)}`;
+      return page > 1 ? `${categoryUrl}&page=${page}` : categoryUrl;
+    } else {
+      return page > 1 ? `${baseUrl}/shop?page=${page}` : `${baseUrl}/shop`;
+    }
+  };
+  const generateCanonicalUrl = () => {
+    const baseUrl = 'https://www.farmaciashila.com';
+    
+    if (subcategoryParam) {
+      // For subcategory pages, use clean URL format regardless of other parameters
+      // Include pagination if beyond page 1
+      const canonicalUrl = `${baseUrl}/category/${subcategoryParam}`;
+      return currentPage > 1 ? `${canonicalUrl}?page=${currentPage}` : canonicalUrl;
+    } else if (searchTerm) {
+      // For search pages, use search URL (unique content)
+      const searchUrl = `${baseUrl}/shop?search=${encodeURIComponent(searchTerm)}`;
+      return currentPage > 1 ? `${searchUrl}&page=${currentPage}` : searchUrl;
+    } else if (categoryParam) {
+      // For category pages, canonicalize to subcategory if present, otherwise category
+      const categoryUrl = `${baseUrl}/shop?category=${encodeURIComponent(categoryParam)}`;
+      return currentPage > 1 ? `${categoryUrl}&page=${currentPage}` : categoryUrl;
+    } else {
+      // For main shop page with no specific parameters
+      return currentPage > 1 ? `${baseUrl}/shop?page=${currentPage}` : `${baseUrl}/shop`;
+    }
+  };
+
+  // Determine if page should be noindexed (filter combinations create thin content)
+  const shouldNoindex = () => {
+    // Always noindex filter combinations (multiple active filters)
+    const activeFilters = [
+      selectedProblems.length,
+      selectedSkinTypes.length, 
+      selectedProductTypes.length,
+      selectedBodyHair.length,
+      selectedHygiene.length,
+      selectedMotherChild.length,
+      selectedSupplements.length,
+      selectedHealthMonitors.length,
+      selectedSets.length
+    ].reduce((sum, count) => sum + count, 0);
+
+    // Noindex if:
+    // 1. Multiple active filters (creates thin content)
+    // 2. Category + subcategory combinations (these should canonicalize to subcategory)
+    // 3. Any filters on search pages (search results are unique enough)
+    const hasCategoryAndSubcategory = categoryParam && subcategoryParam;
+    const hasFiltersOnSearch = searchTerm && activeFilters > 0;
+
+    return activeFilters > 1 || hasCategoryAndSubcategory || hasFiltersOnSearch;
+  };
+
+  // if (isLoading) return <DataLoading label="Medicines" />;
   if (error) {
     return (
       <div className="min-h-[80vh] pt-20 lg:pt-[84px] pb-4 sm:pt-24 sm:pb-8 bg-white relative overflow-x-hidden">
@@ -679,12 +839,30 @@ const Shop = () => {
           categoryName={subcategoryName}
           description={seoDetails.description}
           products={filteredAndSortedMedicines}
-          canonicalUrl={`https://www.farmaciashila.com/shop?subcategory=${subcategoryParam}`}
+          canonicalUrl={generateCanonicalUrl()}
+          noindex={shouldNoindex()}
+          currentPage={currentPage}
+          totalPages={Math.ceil(totalFilteredItems / itemsPerPage)}
         />
       ) : (
         <Helmet key={location.pathname}>
           <title>{seoDetails.title}</title>
           <meta name="description" content={seoDetails.description} />
+          <link rel="canonical" href={generateCanonicalUrl()} />
+          {shouldNoindex() && <meta name="robots" content="noindex, follow" />}
+          
+          {/* Pagination links to prevent alternate page issues */}
+          {currentPage > 1 && (
+            <link rel="prev" href={generatePaginationUrl(currentPage - 1)} />
+          )}
+          {currentPage < Math.ceil(totalFilteredItems / itemsPerPage) && (
+            <link rel="next" href={generatePaginationUrl(currentPage + 1)} />
+          )}
+          
+          {/* Additional meta tags to prevent alternate page issues */}
+          <meta name="googlebot" content={shouldNoindex() ? "noindex, follow" : "index, follow"} />
+          <meta httpEquiv="content-type" content="text/html; charset=utf-8" />
+          <meta httpEquiv="content-language" content="sq" />
         </Helmet>
       )}
       <section className="min-h-[80vh] pt-20 lg:pt-[84px] pb-4 sm:pt-24 sm:pb-8 bg-white relative overflow-x-hidden">
@@ -764,17 +942,17 @@ const Shop = () => {
                       <span>Problematika</span>
                       <ChevronDown
                         size={18}
-                        className={`text-[#A67856] transition-transform duration-300 ease-in-out ${expandedCategories.problematica ? 'rotate-180' : 'rotate-0'
+                        className={`text-[#A67856] transition-transform duration-100 ease-in-out ${expandedCategories.problematica ? 'rotate-180' : 'rotate-0'
                           }`}
                       />
                     </button>
-                    <div className={`overflow-hidden transition-all duration-300 ease-in-out ${expandedCategories.problematica ? 'max-h-[800px] opacity-100' : 'max-h-0 opacity-0'
+                    <div className={`overflow-hidden transition-all duration-100 ease-in-out ${expandedCategories.problematica ? 'max-h-[800px] opacity-100' : 'max-h-0 opacity-0'
                       }`}>
                       <div className="space-y-2 pt-1">
                         {filterOptions.problematica.map((option) => (
                           <label
                             key={option.id}
-                            className="flex items-center justify-between cursor-pointer hover:bg-[#EBD8C8] p-1"
+                            className="flex items-center justify-between cursor-pointer hover:bg-[#EBD8C8] p-1 transition-none"
                           >
                             <div className="flex items-center gap-2">
                               <input
@@ -811,7 +989,7 @@ const Shop = () => {
                         {filterOptions.skinTypes.map((option) => (
                           <label
                             key={option.id}
-                            className="flex items-center justify-between cursor-pointer hover:bg-[#EBD8C8] p-1"
+                            className="flex items-center justify-between cursor-pointer hover:bg-[#EBD8C8] p-1 transition-none"
                           >
                             <div className="flex items-center gap-2">
                               <input
@@ -848,7 +1026,7 @@ const Shop = () => {
                         {filterOptions.productTypes.map((option) => (
                           <label
                             key={option.id}
-                            className="flex items-center justify-between cursor-pointer hover:bg-[#EBD8C8] p-1"
+                            className="flex items-center justify-between cursor-pointer hover:bg-[#EBD8C8] p-1 transition-none"
                           >
                             <div className="flex items-center gap-2">
                               <input
@@ -885,7 +1063,7 @@ const Shop = () => {
                         {filterOptions.bodyHair.map((option) => (
                           <label
                             key={option.id}
-                            className="flex items-center justify-between cursor-pointer hover:bg-[#EBD8C8] p-1"
+                            className="flex items-center justify-between cursor-pointer hover:bg-[#EBD8C8] p-1 transition-none"
                           >
                             <div className="flex items-center gap-2">
                               <input
@@ -922,7 +1100,7 @@ const Shop = () => {
                         {filterOptions.hygiene.map((option) => (
                           <label
                             key={option.id}
-                            className="flex items-center justify-between cursor-pointer hover:bg-[#EBD8C8] p-1"
+                            className="flex items-center justify-between cursor-pointer hover:bg-[#EBD8C8] p-1 transition-none"
                           >
                             <div className="flex items-center gap-2">
                               <input
@@ -959,11 +1137,12 @@ const Shop = () => {
                         {filterOptions.motherChild.map((option) => (
                           <label
                             key={option.id}
-                            className="flex items-center justify-between cursor-pointer hover:bg-[#EBD8C8] p-1"
+                            className="flex items-center justify-between cursor-pointer hover:bg-[#EBD8C8] p-1 transition-none"
                           >
                             <div className="flex items-center gap-2">
                               <input
-                                type="checkbox"
+                                type={option.id === 'aksesore-nene' || option.id === 'aksesorefemije' ? 'radio' : 'checkbox'}
+                                name="aksesore-group"
                                 checked={selectedMotherChild.includes(option.id)}
                                 onChange={() => toggleFilter('motherChild', option.id)}
                                 className="w-4 h-4 text-[#A67856] border-2 border-[#A67856] focus:ring-[#A67856]"
@@ -998,7 +1177,7 @@ const Shop = () => {
                         {filterOptions.supplements.map((option) => (
                           <label
                             key={option.id}
-                            className="flex items-center justify-between cursor-pointer hover:bg-[#EBD8C8] p-1"
+                            className="flex items-center justify-between cursor-pointer hover:bg-[#EBD8C8] p-1 transition-none"
                           >
                             <div className="flex items-center gap-2">
                               <input
@@ -1035,13 +1214,50 @@ const Shop = () => {
                         {filterOptions.healthMonitors.map((option) => (
                           <label
                             key={option.id}
-                            className="flex items-center justify-between cursor-pointer hover:bg-[#EBD8C8] p-1"
+                            className="flex items-center justify-between cursor-pointer hover:bg-[#EBD8C8] p-1 transition-none"
                           >
                             <div className="flex items-center gap-2">
                               <input
                                 type="checkbox"
                                 checked={selectedHealthMonitors.includes(option.id)}
                                 onChange={() => toggleFilter('healthMonitors', option.id)}
+                                className="w-4 h-4 text-[#A67856] border-2 border-[#A67856] focus:ring-[#A67856]"
+                              />
+                              <span className="text-sm text-[#A67856]">{option.label}</span>
+                            </div>
+                            <span className="text-xs text-gray-500">{option.count}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Set */}
+                  <div className="mb-6">
+                    <button
+                      onClick={() => toggleCategory('sets')}
+                      className="w-full flex items-center justify-between text-sm font-semibold text-[#A67856] mb-3 uppercase tracking-wide hover:text-[#8B6345] transition-colors"
+                    >
+                      <span>Set</span>
+                      <ChevronDown
+                        size={18}
+                        className={`text-[#A67856] transition-transform duration-300 ease-in-out ${expandedCategories.sets ? 'rotate-180' : 'rotate-0'
+                          }`}
+                      />
+                    </button>
+                    <div className={`overflow-hidden transition-all duration-300 ease-in-out ${expandedCategories.sets ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+                      }`}>
+                      <div className="space-y-2 pt-1">
+                        {filterOptions.sets.map((option) => (
+                          <label
+                            key={option.id}
+                            className="flex items-center justify-between cursor-pointer hover:bg-[#EBD8C8] p-1 transition-none"
+                          >
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="checkbox"
+                                checked={selectedSets.includes(option.id)}
+                                onChange={() => toggleFilter('sets', option.id)}
                                 className="w-4 h-4 text-[#A67856] border-2 border-[#A67856] focus:ring-[#A67856]"
                               />
                               <span className="text-sm text-[#A67856]">{option.label}</span>
@@ -1074,7 +1290,17 @@ const Shop = () => {
               {/* Products */}
               <div className="flex justify-center lg:justify-start">
                 <div className="w-full max-w-full lg:max-w-none">
-                  {paginatedMedicines.length === 0 ? (
+                  {(isLoading) ? (
+                    <ShopGrid
+                      paginatedMedicines={[]}
+                      itemsPerPage={itemsPerPage}
+                      currentPage={currentPage}
+                      totalPages={totalPages}
+                      goToPage={goToPage}
+                      handleItemsPerPageChange={handleItemsPerPageChange}
+                      isLoading={true}
+                    />
+                  ) : paginatedMedicines.length === 0 ? (
                     <div className="text-center py-12 bg-[#EBD8C8] border-2 border-[#D9BFA9]">
                       <Search className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                       <h3 className="text-lg font-medium text-gray-900 mb-2">
@@ -1092,8 +1318,21 @@ const Shop = () => {
                       itemsPerPage={itemsPerPage}
                       currentPage={currentPage}
                       totalPages={totalPages}
-                      goToPage={goToPage}
+                      goToPage={(page) => {
+                        const params = new URLSearchParams(location.search);
+                        if (page > 1) {
+                          params.set('page', page);
+                        } else {
+                          params.delete('page');
+                        }
+                        // Use push to add to history
+                        window.history.pushState({}, '', `/shop?${params.toString()}`);
+                        // Update state and force re-render/fetch
+                        setCurrentPage(page);
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                      }}
                       handleItemsPerPageChange={handleItemsPerPageChange}
+                      isLoading={isLoading}
                       onOpenVariantSidebar={(product) => {
                         setSelectedProductForVariant(product);
                         // Pre-select first variant if available

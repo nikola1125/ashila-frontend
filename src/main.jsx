@@ -10,6 +10,16 @@ import CartProvider from './Context/Cart/CartProvider';
 import { HelmetProvider } from 'react-helmet-async';
 import { SmoothScrollProvider } from './Context/SmoothScroll/SmoothScrollProvider';
 
+// Polyfills for cross-browser compatibility
+import 'core-js/stable';
+import 'regenerator-runtime/runtime';
+
+// Initialize browser compatibility fixes
+import { initCompatibilityFixes } from './utils/browserCompatibility';
+
+// Initialize compatibility fixes before rendering
+initCompatibilityFixes();
+
 // Define default meta tags for mobile responsiveness
 const defaultMeta = {
   viewport: 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover',
@@ -19,24 +29,24 @@ const defaultMeta = {
 };
 
 // Register Service Worker for Background Notifications
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
-      .then((registration) => {
-        console.log('Service Worker registered with scope:', registration.scope);
+// if ('serviceWorker' in navigator) {
+//   window.addEventListener('load', () => {
+//     navigator.serviceWorker.register('/sw.js')
+//       .then((registration) => {
+//         console.log('Service Worker registered with scope:', registration.scope);
 
-        // Request notification permission
-        if ('Notification' in window && Notification.permission === 'default') {
-          Notification.requestPermission().then((permission) => {
-            console.log('Notification permission:', permission);
-          });
-        }
-      })
-      .catch((error) => {
-        console.log('Service Worker registration failed:', error);
-      });
-  });
-}
+//         // Request notification permission
+//         if ('Notification' in window && Notification.permission === 'default') {
+//           Notification.requestPermission().then((permission) => {
+//             console.log('Notification permission:', permission);
+//           });
+//         }
+//       })
+//       .catch((error) => {
+//         console.log('Service Worker registration failed:', error);
+//       });
+//   });
+// }
 
 const queryClient = new QueryClient({
   defaultOptions: {
