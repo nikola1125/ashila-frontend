@@ -57,5 +57,18 @@
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^16.2.0",
     "vite": "^7.0.0"
-  }
+  },
+  "browserslist": [
+    "> 0.5%",
+    "last 2 versions",
+    "Firefox ESR",
+    "not dead",
+    "not IE 11",
+    "iOS >= 12",
+    "Android >= 8",
+    "Chrome >= 70",
+    "Firefox >= 65",
+    "Safari >= 12",
+    "Edge >= 79"
+  ]
 }

@@ -4,6 +4,7 @@ import Footer from '../Components/Common/Footer';
 import Navbar from '../Components/Common/Navbar/Navbar';
 import ScrollToTop from '../Components/Common/ScrollToTop';
 import ScrollToTopButton from '../Components/Common/ScrollToTopButton';
+import ChatbotWidget from '../Components/Common/ChatbotWidget';
 import { initScrollAnimations } from '../utils/scrollAnimations';
 
 const RootLayout = () => {
@@ -35,6 +36,7 @@ const RootLayout = () => {
       </main>
       <Footer />
       <ScrollToTopButton />
+      <ChatbotWidget />
     </div>
   );
 };

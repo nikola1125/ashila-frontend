@@ -1,0 +1,13 @@
+# Cross-browser compatibility targets
+# Modern browsers with good ES6+ support
+> 0.5%
+last 2 versions
+Firefox ESR
+not dead
+not IE 11
+iOS >= 12
+Android >= 8
+Chrome >= 70
+Firefox >= 65
+Safari >= 12
+Edge >= 79

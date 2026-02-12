@@ -51,7 +51,7 @@ self.addEventListener('install', (event) => {
 // Fetch event - handle API calls with offline support
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
-  
+
   // Handle API calls
   if (url.pathname.startsWith('/api/')) {
     event.respondWith(
@@ -83,6 +83,15 @@ self.addEventListener('fetch', (event) => {
       caches.match(event.request)
         .then((response) => {
           return response || fetch(event.request);
+        })
+        .catch((error) => {
+          // Silently handle fetch errors for missing resources
+          console.log('Failed to fetch resource:', event.request.url);
+          // Return a basic response for failed fetches
+          return new Response('Resource not available', {
+            status: 404,
+            statusText: 'Not Found'
+          });
         })
     );
   }

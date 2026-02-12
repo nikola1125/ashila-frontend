@@ -39,7 +39,7 @@ const OrderManagement = () => {
                         notificationManager.playNotificationSound('order');
                     }, i * 500); // Stagger sounds for multiple orders
                 }
-                
+
                 // Show browser notification
                 if (newOrdersCount === 1) {
                     notificationManager.showNotification('New Order Received', 'A customer has placed a new order');
@@ -72,7 +72,9 @@ const OrderManagement = () => {
             toast.success('Order status updated');
         },
         onError: (err) => {
-            toast.error(err.message);
+            console.error('Order status update error:', err);
+            const errorMessage = err?.response?.data?.message || err?.message || 'Failed to update order status';
+            toast.error(errorMessage);
         }
     });
 
@@ -134,11 +136,10 @@ const OrderManagement = () => {
                                 notificationManager.enable();
                             }
                         }}
-                        className={`p-2 rounded-lg border transition-colors ${
-                            soundEnabled 
-                                ? 'bg-amber-100 border-amber-300 text-amber-700 hover:bg-amber-200' 
+                        className={`p-2 rounded-lg border transition-colors ${soundEnabled
+                                ? 'bg-amber-100 border-amber-300 text-amber-700 hover:bg-amber-200'
                                 : 'bg-gray-100 border-gray-300 text-gray-500 hover:bg-gray-200'
-                        }`}
+                            }`}
                         title={soundEnabled ? 'Disable notification sounds' : 'Enable notification sounds'}
                     >
                         {soundEnabled ? <Volume2 size={18} /> : <VolumeX size={18} />}
@@ -270,7 +271,7 @@ const OrderManagement = () => {
                     />
                 )
             }
-            
+
             {/* Sound Picker Modal */}
             <SoundPicker
                 isOpen={showSoundPicker}

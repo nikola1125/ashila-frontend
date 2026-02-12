@@ -22,7 +22,7 @@ const FluSection = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-10 lg:gap-12 items-start">
           {/* Left Side - Product Image with Simple Pharmacy Frame */}
-          <div className="order-1 lg:order-1 flex items-start justify-start slide-left">
+          <div className="order-1 lg:order-1 flex items-center justify-center lg:items-start lg:justify-start slide-left">
             <div className="relative w-full lg:w-4/5">
               {/* Simple Clean Frame - Fixed for mobile */}
               <div className="relative bg-white border border-[#D9BFA9] shadow-sm hover:shadow-md transition-shadow duration-300 w-full py-1 px-1 md:py-2 md:px-2 lg:py-3 lg:px-3">

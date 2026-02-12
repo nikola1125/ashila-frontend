@@ -92,7 +92,7 @@ const AdminLayout = () => {
       <ScrollToTop />
       <div className="drawer lg:drawer-open">
         <input id="admin-drawer" type="checkbox" className="drawer-toggle" />
-        <div className="drawer-content flex flex-col">
+        <div className="drawer-content flex flex-col h-screen overflow-y-auto">
           {/* Mobile Sidebar Toggle - Floating */}
           <label
             htmlFor="admin-drawer"

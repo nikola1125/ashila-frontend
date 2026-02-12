@@ -257,7 +257,43 @@ const Shop = () => {
     "Set per femije": "set-per-femije"
   };
 
-  // Calculate dynamic filter counts based on allMedicines
+  // Pre-compute normalized values for all medicines to avoid expensive regex during filtering
+  const normalizedMedicines = useMemo(() => {
+    return allMedicines.map(item => {
+      const itemOpts = item.options ? item.options.map(opt => normalizeText(opt)) : [];
+      // Use Set for faster lookups
+      const itemOptSlugs = new Set(item.options ? item.options.map(opt => normalizeText(optionToSlugMap[opt] || opt)) : []);
+      const itemPath = normalizeText(item.categoryName);
+
+      return {
+        ...item,
+        // Pre-normalized fields
+        norm: {
+          subcategory: normalizeText(item.subcategory),
+          option: normalizeText(item.option),
+          options: itemOpts,
+          optSlugs: itemOptSlugs,
+          productType: normalizeText(item.productType),
+          bestsellerCategory: normalizeText(item.bestsellerCategory),
+          categoryName: itemPath,
+          skinProblem: normalizeText(item.skinProblem),
+          itemName: normalizeText(item.itemName),
+          company: normalizeText(item.company),
+          genericName: normalizeText(item.genericName),
+
+          // Pre-calculated context checks
+          isAksesoreNene: (itemPath.includes('aksesore') && itemPath.includes('kujdesipernenena')) ||
+            itemOpts.some(opt => opt === 'aksesore' && itemPath.includes('kujdesipernenena')) ||
+            itemOptSlugs.has('aksesorenene'),
+          isAksesoreFemije: (itemPath.includes('aksesore') && itemPath.includes('kujdesiperfemije')) ||
+            itemOpts.some(opt => opt === 'aksesore' && itemPath.includes('kujdesiperfemije')) ||
+            itemOptSlugs.has('aksesorefemije')
+        }
+      };
+    });
+  }, [allMedicines, normalizeText, optionToSlugMap]);
+
+  // Calculate dynamic filter counts based on normalizedMedicines
   const filterOptions = useMemo(() => {
     // Initial counts object
     const counts = {};
@@ -275,43 +311,32 @@ const Shop = () => {
       sets: ['set-per-fytyren', 'set-per-trupin', 'set-per-floket', 'set-per-nena', 'set-per-femije']
     };
 
-    // Helper to check match (Synchronized with matchesFilter for 100% accuracy)
+    // Helper to check match (using pre-normalized data)
     const checkMatch = (item, filterId) => {
       const normalizedFilter = normalizeText(filterId);
-      const itemSub = normalizeText(item.subcategory);
-      const itemOpt = normalizeText(item.option);
-      const itemOpts = item.options ? item.options.map(opt => normalizeText(opt)) : [];
-      const itemOptSlugs = item.options ? item.options.map(opt => normalizeText(optionToSlugMap[opt] || opt)) : [];
-      const itemProdType = normalizeText(item.productType);
-      const itemType = normalizeText(item.bestsellerCategory);
-      const itemPath = normalizeText(item.categoryName);
-      const itemProblem = normalizeText(item.skinProblem);
 
       // Special handling for aksesore filters to handle context
       if (normalizedFilter === 'aksesorenene') {
-        return (itemPath.includes('aksesore') && itemPath.includes('kujdesipernenena')) ||
-               itemOpts.some(opt => opt === 'aksesore' && itemPath.includes('kujdesipernenena')) ||
-               itemOptSlugs.some(slug => slug === 'aksesorenene');
-      }
-      
-      if (normalizedFilter === 'aksesorefemije') {
-        return (itemPath.includes('aksesore') && itemPath.includes('kujdesiperfemije')) ||
-               itemOpts.some(opt => opt === 'aksesore' && itemPath.includes('kujdesiperfemije')) ||
-               itemOptSlugs.some(slug => slug === 'aksesorefemije');
+        return item.norm.isAksesoreNene;
       }
 
-      return itemSub.includes(normalizedFilter) ||
-        itemOpt.includes(normalizedFilter) ||
-        itemOpts.some(opt => opt.includes(normalizedFilter)) ||
-        itemOptSlugs.some(slug => slug.includes(normalizedFilter)) ||
-        itemProdType.includes(normalizedFilter) ||
-        itemPath.includes(normalizedFilter) ||
-        itemProblem.includes(normalizedFilter) ||
-        itemType.includes(normalizedFilter);
+      if (normalizedFilter === 'aksesorefemije') {
+        return item.norm.isAksesoreFemije;
+      }
+
+      return item.norm.subcategory.includes(normalizedFilter) ||
+        item.norm.option.includes(normalizedFilter) ||
+        item.norm.options.some(opt => opt.includes(normalizedFilter)) ||
+        item.norm.optSlugs.has(normalizedFilter) || // Exact slug match usually sufficient or partial check below
+        Array.from(item.norm.optSlugs).some(slug => slug.includes(normalizedFilter)) ||
+        item.norm.productType.includes(normalizedFilter) ||
+        item.norm.categoryName.includes(normalizedFilter) ||
+        item.norm.skinProblem.includes(normalizedFilter) ||
+        item.norm.bestsellerCategory.includes(normalizedFilter);
     };
 
-    // Calculate actual counts
-    allMedicines.forEach(item => {
+    // Calculate actual counts using optimized data
+    normalizedMedicines.forEach(item => {
       Object.values(filterGroups).flat().forEach(filterId => {
         if (checkMatch(item, filterId)) {
           counts[filterId] = (counts[filterId] || 0) + 1;
@@ -411,10 +436,11 @@ const Shop = () => {
         { id: 'set-per-femije', label: 'Set per femije' },
       ].map(opt => ({ ...opt, count: counts[opt.id] || 0 })),
     };
-  }, [allMedicines, normalizeText, optionToSlugMap]);
+  }, [normalizedMedicines, normalizeText]); // Depend on normalizedMedicines instead of allMedicines
 
   // Handle filter toggles
   const toggleFilter = useCallback((filterType, id) => {
+    // ... no changes to toggleFilter logic ...
     if (filterType === 'problem') {
       setSelectedProblems(prev =>
         prev.includes(id) ? prev.filter(f => f !== id) : [...prev, id]
@@ -465,7 +491,8 @@ const Shop = () => {
     setCurrentPage(1);
   }, []);
 
-  // Handle search
+  // ... (No changes to handlers) ...
+
   const handleSearchChange = useCallback((e) => {
     setSearchTerm(e.target.value);
     setCurrentPage(1);
@@ -491,6 +518,7 @@ const Shop = () => {
     // Scroll to top when sort changes
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
+
 
 
 
@@ -545,14 +573,14 @@ const Shop = () => {
 
   // Filter and sort medicines
   const filteredAndSortedMedicines = useMemo(() => {
-    let filtered = [...allMedicines];
+    let filtered = [...normalizedMedicines];
 
     // 0. Skin Problem Filter (Strict but with fallback for hyphenated URLs)
     if (skinProblemParam) {
       const normalizedParam = skinProblemParam.toLowerCase().replace(/-/g, '');
       filtered = filtered.filter(item => {
         const prob = item.skinProblem?.toLowerCase().replace(/-/g, '') || '';
-        return prob === normalizedParam;
+        return prob === normalizedParam; // Use original item.skinProblem as fallback, or rely on normalization if we want to be strict
       });
     }
 
@@ -561,9 +589,9 @@ const Shop = () => {
       // Handle slug-to-name matching safely
       const normalizedCatParam = categoryParam.toLowerCase().replace(/-/g, ' ');
       filtered = filtered.filter(item =>
-        item.categoryName?.toLowerCase().includes(normalizedCatParam) ||
+        item.norm.categoryName.includes(normalizedCatParam) ||
         // Fallback: check if the slug matches roughly
-        item.categoryName?.toLowerCase().replace(/\s+/g, '-').includes(categoryParam)
+        item.norm.categoryName.replace(/\s+/g, '-').includes(categoryParam)
       );
     }
 
@@ -572,39 +600,27 @@ const Shop = () => {
       const normalizedSubParam = normalizeText(subcategoryParam);
 
       filtered = filtered.filter(item => {
-        const sub = normalizeText(item.subcategory);
-        const opt = normalizeText(item.option);
-        const opts = item.options ? item.options.map(o => normalizeText(o)) : [];
-        const optSlugs = item.options ? item.options.map(o => normalizeText(optionToSlugMap[o] || o)) : [];
-        const prodType = normalizeText(item.productType);
-        const type = normalizeText(item.bestsellerCategory);
-        const path = normalizeText(item.categoryName);
-        const name = normalizeText(item.itemName);
-
         // Special handling for aksesore URL parameters to handle context
         if (normalizedSubParam === 'aksesorenene') {
-          return (path.includes('aksesore') && path.includes('kujdesipernenena')) ||
-                 opts.some(o => o === 'aksesore' && path.includes('kujdesipernenena')) ||
-                 optSlugs.some(slug => slug === 'aksesorenene');
+          return item.norm.isAksesoreNene;
         }
-        
+
         if (normalizedSubParam === 'aksesorefemije') {
-          return (path.includes('aksesore') && path.includes('kujdesiperfemije')) ||
-                 opts.some(o => o === 'aksesore' && path.includes('kujdesiperfemije')) ||
-                 optSlugs.some(slug => slug === 'aksesorefemije');
+          return item.norm.isAksesoreFemije;
         }
 
         // SYSTEMIC MATCHING:
         // We look for the parameter anywhere in the product's classification tree
         const matchesAnywhere =
-          sub.includes(normalizedSubParam) ||
-          opt.includes(normalizedSubParam) ||
-          opts.some(o => o.includes(normalizedSubParam)) ||
-          optSlugs.some(slug => slug.includes(normalizedSubParam)) ||
-          prodType.includes(normalizedSubParam) ||
-          path.includes(normalizedSubParam) ||
-          type.includes(normalizedSubParam) ||
-          name.includes(normalizedSubParam);
+          item.norm.subcategory.includes(normalizedSubParam) ||
+          item.norm.option.includes(normalizedSubParam) ||
+          item.norm.options.some(o => o.includes(normalizedSubParam)) ||
+          item.norm.optSlugs.has(normalizedSubParam) ||
+          Array.from(item.norm.optSlugs).some(slug => slug.includes(normalizedSubParam)) ||
+          item.norm.productType.includes(normalizedSubParam) ||
+          item.norm.categoryName.includes(normalizedSubParam) ||
+          item.norm.bestsellerCategory.includes(normalizedSubParam) ||
+          item.norm.itemName.includes(normalizedSubParam);
 
         return matchesAnywhere;
       });
@@ -614,10 +630,10 @@ const Shop = () => {
     if (searchTerm.trim()) {
       filtered = filtered.filter(
         (medicine) =>
-          medicine.itemName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          medicine.company?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          medicine.genericName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          medicine.categoryName?.toLowerCase().includes(searchTerm.toLowerCase())
+          medicine.norm.itemName.includes(searchTerm.toLowerCase()) ||
+          medicine.norm.company.includes(searchTerm.toLowerCase()) ||
+          medicine.norm.genericName.includes(searchTerm.toLowerCase()) ||
+          medicine.norm.categoryName.includes(searchTerm.toLowerCase())
       );
     }
 
@@ -626,39 +642,28 @@ const Shop = () => {
     const matchesFilter = (selectedFilters, item) => {
       if (selectedFilters.length === 0) return true;
 
-      const itemSub = normalizeText(item.subcategory);
-      const itemOpt = normalizeText(item.option);
-      const itemOpts = item.options ? item.options.map(opt => normalizeText(opt)) : [];
-      const itemOptSlugs = item.options ? item.options.map(opt => normalizeText(optionToSlugMap[opt] || opt)) : [];
-      const itemProdType = normalizeText(item.productType);
-      const itemType = normalizeText(item.bestsellerCategory);
-      const itemPath = normalizeText(item.categoryName);
-
       return selectedFilters.some(filterId => {
         const normalizedFilter = normalizeText(filterId);
 
         // Special handling for aksesore filters to handle context
         if (normalizedFilter === 'aksesorenene') {
-          return (itemPath.includes('aksesore') && itemPath.includes('kujdesipernenena')) ||
-                 itemOpts.some(opt => opt === 'aksesore' && itemPath.includes('kujdesipernenena')) ||
-                 itemOptSlugs.some(slug => slug === 'aksesorenene');
+          return item.norm.isAksesoreNene;
         }
-        
+
         if (normalizedFilter === 'aksesorefemije') {
-          return (itemPath.includes('aksesore') && itemPath.includes('kujdesiperfemije')) ||
-                 itemOpts.some(opt => opt === 'aksesore' && itemPath.includes('kujdesiperfemije')) ||
-                 itemOptSlugs.some(slug => slug === 'aksesorefemije');
+          return item.norm.isAksesoreFemije;
         }
 
         // We use .includes for maximum discovery cross-compatibility
         // but normalize both sides to ensure slugs like 'lekure-normale' match 'Lekure normale'
-        return itemSub.includes(normalizedFilter) ||
-          itemOpt.includes(normalizedFilter) ||
-          itemOpts.some(opt => opt.includes(normalizedFilter)) ||
-          itemOptSlugs.some(slug => slug.includes(normalizedFilter)) ||
-          itemProdType.includes(normalizedFilter) ||
-          itemPath.includes(normalizedFilter) ||
-          itemType.includes(normalizedFilter);
+        return item.norm.subcategory.includes(normalizedFilter) ||
+          item.norm.option.includes(normalizedFilter) ||
+          item.norm.options.some(opt => opt.includes(normalizedFilter)) ||
+          item.norm.optSlugs.has(normalizedFilter) ||
+          Array.from(item.norm.optSlugs).some(slug => slug.includes(normalizedFilter)) ||
+          item.norm.productType.includes(normalizedFilter) ||
+          item.norm.categoryName.includes(normalizedFilter) ||
+          item.norm.bestsellerCategory.includes(normalizedFilter);
       });
     };
 
@@ -707,7 +712,7 @@ const Shop = () => {
     }
 
     return filtered;
-  }, [allMedicines, searchTerm, sortBy, categoryParam, subcategoryParam, selectedProblems, selectedSkinTypes, selectedProductTypes, selectedBodyHair, selectedHygiene, selectedMotherChild, selectedSupplements, selectedHealthMonitors, selectedSets, normalizeText, optionToSlugMap]);
+  }, [normalizedMedicines, searchTerm, sortBy, categoryParam, subcategoryParam, selectedProblems, selectedSkinTypes, selectedProductTypes, selectedBodyHair, selectedHygiene, selectedMotherChild, selectedSupplements, selectedHealthMonitors, selectedSets, normalizeText, optionToSlugMap]);
 
   // Update pagination values with filtered data
   const totalFilteredItems = filteredAndSortedMedicines.length;
@@ -744,7 +749,7 @@ const Shop = () => {
   // Generate pagination URL helper
   const generatePaginationUrl = (page) => {
     const baseUrl = 'https://www.farmaciashila.com';
-    
+
     if (subcategoryParam) {
       const canonicalUrl = `${baseUrl}/category/${subcategoryParam}`;
       return page > 1 ? `${canonicalUrl}?page=${page}` : canonicalUrl;
@@ -760,7 +765,7 @@ const Shop = () => {
   };
   const generateCanonicalUrl = () => {
     const baseUrl = 'https://www.farmaciashila.com';
-    
+
     if (subcategoryParam) {
       // For subcategory pages, use clean URL format regardless of other parameters
       // Include pagination if beyond page 1
@@ -785,7 +790,7 @@ const Shop = () => {
     // Always noindex filter combinations (multiple active filters)
     const activeFilters = [
       selectedProblems.length,
-      selectedSkinTypes.length, 
+      selectedSkinTypes.length,
       selectedProductTypes.length,
       selectedBodyHair.length,
       selectedHygiene.length,
@@ -850,7 +855,7 @@ const Shop = () => {
           <meta name="description" content={seoDetails.description} />
           <link rel="canonical" href={generateCanonicalUrl()} />
           {shouldNoindex() && <meta name="robots" content="noindex, follow" />}
-          
+
           {/* Pagination links to prevent alternate page issues */}
           {currentPage > 1 && (
             <link rel="prev" href={generatePaginationUrl(currentPage - 1)} />
@@ -858,7 +863,7 @@ const Shop = () => {
           {currentPage < Math.ceil(totalFilteredItems / itemsPerPage) && (
             <link rel="next" href={generatePaginationUrl(currentPage + 1)} />
           )}
-          
+
           {/* Additional meta tags to prevent alternate page issues */}
           <meta name="googlebot" content={shouldNoindex() ? "noindex, follow" : "index, follow"} />
           <meta httpEquiv="content-type" content="text/html; charset=utf-8" />

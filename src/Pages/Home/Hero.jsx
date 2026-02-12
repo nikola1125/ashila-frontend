@@ -14,15 +14,15 @@ const Hero = () => {
     video.src = '/images/backg.mp4';
     video.muted = true;
     video.playsInline = true;
-    
+
     video.addEventListener('canplaythrough', () => {
       setVideoLoaded(true);
     });
-    
+
     video.addEventListener('error', () => {
       setVideoError(true);
     });
-    
+
     // Start loading
     video.load();
   }, []);
@@ -42,9 +42,6 @@ const Hero = () => {
         top: 0,
         left: 0,
         right: 0,
-        touchAction: 'pan-y',
-        WebkitOverflowScrolling: 'touch',
-        overscrollBehavior: 'contain',
         // Show background image immediately while video loads
         backgroundImage: videoLoaded ? 'none' : 'url(/images/background.png)',
         backgroundColor: videoError ? '#f3f4f6' : 'transparent'

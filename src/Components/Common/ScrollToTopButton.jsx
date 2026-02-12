@@ -44,34 +44,40 @@ const ScrollToTopButton = () => {
   }, [toggleVisibility, throttledToggleVisibility, lenis]);
 
   const handleScrollToTop = () => {
-    // 1. Try Lenis/SmoothScroll provider (primary)
-    if (scrollToTop) {
+    // 1. Try Lenis directly (most reliable if active)
+    if (lenis && typeof lenis.scrollTo === 'function') {
+      lenis.scrollTo(0, { immediate: false });
+      return;
+    }
+
+    // 2. Try the provider's scrollToTop
+    if (scrollToTop && typeof scrollToTop === 'function') {
       scrollToTop({ immediate: false });
     }
 
-    // 2. Hard native fallback (behavior: smooth for browser level)
-    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+    // 3. Robust Native Fallback (Smooth)
+    // We fire these anyway to ensure the browser captures the intent
+    try {
+      window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
 
-    // 3. Forced DOM manipulation (immediate jump for Safari/Android)
-    // We fire this with a tiny delay if the smooth scroll hangs
-    document.documentElement.scrollTop = 0;
-    document.body.scrollTop = 0;
-
-    // 4. Delayed backup to catch any layout shifts or engine locks
-    setTimeout(() => {
-      window.scrollTo(0, 0);
-    }, 150);
+      // Some browsers require targeting documentElement specifically
+      if (document.documentElement && document.documentElement.scrollTop > 0) {
+        document.documentElement.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    } catch (e) {
+      console.warn('Native smooth scroll failed:', e);
+    }
   };
 
   return (
     <button
       onClick={handleScrollToTop}
-      className={`fixed right-6 z-[2147483647] bg-transparent text-[#A67856] p-3.5 transition-all duration-500 flex items-center justify-center min-h-[48px] min-w-[48px] group ${isVisible
+      className={`fixed right-6 z-[1000] bg-transparent text-[#A67856] p-3.5 transition-all duration-500 flex items-center justify-center min-h-[48px] min-w-[48px] group ${isVisible
         ? 'opacity-100 translate-y-0 pointer-events-auto'
         : 'opacity-0 translate-y-10 pointer-events-none'
         }`}
       style={{
-        bottom: 'calc(2rem + env(safe-area-inset-bottom, 0px))',
+        bottom: 'calc(6rem + env(safe-area-inset-bottom, 0px))',
       }}
       aria-label="Scroll to top"
     >

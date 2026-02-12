@@ -14,6 +14,7 @@ const Breadcrumbs = ({ paths }) => {
             "item": `https://www.farmaciashila.com${path.url}`
         }))
     };
+    
 
     return (
         <nav className="w-full mb-6 overflow-hidden" aria-label="Breadcrumb">

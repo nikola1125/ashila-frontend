@@ -71,7 +71,7 @@ const HydrationSection = () => {
           </div>
 
           {/* Right Side - Product Image with Simple Pharmacy Frame */}
-          <div className="order-1 lg:order-2 flex items-start justify-start slide-right">
+          <div className="order-1 lg:order-2 flex items-center justify-center lg:items-start lg:justify-start slide-right">
             <div className="relative w-full lg:w-full">
               {/* Simple Clean Frame - Fixed for mobile */}
               <div className="relative bg-white border border-[#D9BFA9] shadow-sm hover:shadow-md transition-shadow duration-300 w-full p-2 md:p-3 lg:p-4">

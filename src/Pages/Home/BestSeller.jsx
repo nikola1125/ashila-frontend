@@ -195,24 +195,31 @@ const BestSeller = () => {
     if (!container) return;
 
     const { scrollLeft, scrollWidth, clientWidth } = container;
-    const isAtStart = scrollLeft <= 10; // Small threshold for floating point issues
-    const isAtEnd = scrollLeft + clientWidth >= scrollWidth - 10; // Small threshold
 
-    setShowLeftArrow(!isAtStart);
-    setShowRightArrow(!isAtEnd);
+    // Use a more generous threshold for boundary detection to handle rounding/sub-pixels
+    const isAtStart = scrollLeft <= 10;
+    const isAtEnd = Math.ceil(scrollLeft + clientWidth) >= scrollWidth - 10;
+
+    // Only show arrows if there's actually room to scroll
+    const isScrollable = scrollWidth > clientWidth + 10;
+
+    // Calculate current page for mobile
+    if (window.innerWidth < 768) {
+      const pageWidth = container.clientWidth || 1;
+      const currentPageNum = Math.round(container.scrollLeft / pageWidth) + 1;
+      const totalPagesNum = Math.ceil((products.length || 0) / 2);
+
+      const safeCurrentPage = Math.max(1, Math.min(currentPageNum, totalPagesNum));
+      setCurrentPage(safeCurrentPage);
+      setTotalPages(totalPagesNum || 1);
+    }
+
+    setShowLeftArrow(isScrollable && !isAtStart);
+    setShowRightArrow(isScrollable && !isAtEnd);
 
     // Hide scroll hint after user starts scrolling
     if (scrollLeft > 5 && showScrollHint) {
       setShowScrollHint(false);
-    }
-
-    // Calculate current page for mobile (2 items per full-width page)
-    if (window.innerWidth < 768) {
-      const pageWidth = clientWidth || 1;
-      const currentPageNum = Math.round(scrollLeft / pageWidth) + 1;
-      const totalPagesNum = Math.ceil((products.length || 0) / 2);
-      setCurrentPage(Math.max(1, Math.min(currentPageNum, totalPagesNum)));
-      setTotalPages(totalPagesNum || 1);
     }
   }, [products.length, showScrollHint]);
 
@@ -228,8 +235,8 @@ const BestSeller = () => {
       return;
     }
 
-    // Check initial position
-    checkScrollPosition();
+    // Check initial position with a small delay to ensure rendering is complete
+    const timeout = setTimeout(checkScrollPosition, 100);
 
     // Listen to scroll events with throttling
     container.addEventListener('scroll', throttledCheckScrollPosition, { passive: true });
@@ -253,8 +260,10 @@ const BestSeller = () => {
     let scrollAmount;
 
     if (window.innerWidth < 768) {
-      // Mobile: scroll by one full page (the visible width that contains 2 products)
-      scrollAmount = container.clientWidth || 1;
+      // Mobile: Synchronized with finger swiping
+      // Each "page" is 2 products. We scroll exactly the width of 2 products + the gap between them.
+      // This matches the snap point behavior exactly.
+      scrollAmount = container.clientWidth + 16;
     } else {
       // Desktop: scroll by two products (2 * 227px + 1 * 20px gap = 474px)
       scrollAmount = 474;
@@ -264,7 +273,10 @@ const BestSeller = () => {
       left: direction === 'left' ? -scrollAmount : scrollAmount,
       behavior: 'smooth'
     });
-  }, []);
+
+    // Re-check visibility after the smooth scroll completes
+    setTimeout(checkScrollPosition, 500);
+  }, [checkScrollPosition]);
 
   const calculatePrice = useCallback((product) => {
     // Handle grouped products with variants - find smallest variant by price
@@ -373,7 +385,7 @@ const BestSeller = () => {
 
   return (
     <>
-      <section className="mt-0 bg-white lux-section pt-4 md:pt-[5.5rem] -mt-4 md:mt-0">
+      <section className="bg-white lux-section pt-4 md:pt-[5.5rem] -mt-4 md:mt-0">
         <div className="lux-section-inner">
           {/* Centered Title */}
           <div className="text-center mb-10 md:mb-12 space-y-3 fade-in">
@@ -404,90 +416,90 @@ const BestSeller = () => {
               <>
                 <div className="relative flex items-center justify-center">
                   {/* Scrollable Container - Show 4 products on desktop, centered */}
-                  <div
-                    className="relative overflow-hidden px-0 -mx-4 md:mx-auto md:px-0"
-                    style={{
-                      // On desktop, limit visible width to show exactly 4 products
-                      // 4 products * 224px (w-56) + 3 gaps * 24px (gap-6) = 896 + 72 = 968px
-                      maxWidth: '968px'
-                    }}
-                  >
-                    {/* Mobile Arrows - show on mobile when scrollable */}
+                  {/* Wrapper for positioning arrows outside overflow */}
+                  <div className="relative w-full md:w-auto md:mx-auto" style={{ maxWidth: '968px' }}>
+                    {/* Left Arrow - Desktop */}
                     {showLeftArrow && (
                       <button
                         onClick={() => scroll('left')}
-                        className="absolute left-1 top-[40%] -translate-y-1/2 z-10 carousel-arrow p-1.5 shadow-md border border-[#E0CBB5] md:hidden"
+                        className="hidden md:block absolute left-0 top-1/2 -translate-y-1/2 -translate-x-14 z-10 carousel-arrow px-5 py-3 shadow-md border border-[#E0CBB5] text-[#A67856] transition-all duration-200"
                         aria-label="Scroll left"
                       >
-                        <ChevronLeft size={18} className="text-[#A67856]" />
+                        <ChevronLeft size={24} />
                       </button>
                     )}
 
-                    {showRightArrow && (
-                      <button
-                        onClick={() => scroll('right')}
-                        className="absolute right-1 top-[40%] -translate-y-1/2 z-10 carousel-arrow p-1.5 shadow-md border border-[#E0CBB5] md:hidden"
-                        aria-label="Scroll right"
+                    {/* Scrollable Container - Show 4 products on desktop */}
+                    <div className="relative overflow-hidden px-0 mx-0 md:px-0 w-full">
+                      {/* Mobile Arrows - show on mobile when scrollable */}
+                      {showLeftArrow && (
+                        <button
+                          onClick={() => scroll('left')}
+                          className="absolute left-1 top-[40%] -translate-y-1/2 z-10 carousel-arrow p-1.5 shadow-md border border-[#E0CBB5] md:hidden"
+                          aria-label="Scroll left"
+                        >
+                          <ChevronLeft size={18} className="text-[#A67856]" />
+                        </button>
+                      )}
+
+                      {showRightArrow && (
+                        <button
+                          onClick={() => scroll('right')}
+                          className="absolute right-1 top-[40%] -translate-y-1/2 z-10 carousel-arrow p-1.5 shadow-md border border-[#E0CBB5] md:hidden"
+                          aria-label="Scroll right"
+                        >
+                          <ChevronRight size={18} className="text-[#A67856]" />
+                        </button>
+                      )}
+
+                      <div
+                        ref={scrollContainerRef}
+                        className={`flex gap-4 md:gap-5 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${products.length === 1 ? 'justify-center' : ''} ${products.length < 4 ? 'md:justify-center' : 'md:justify-start'
+                          } ${showScrollHint ? 'scroll-hint-right' : ''} relative px-6 md:px-0`}
+                        style={{
+                          scrollBehavior: 'smooth',
+                          WebkitOverflowScrolling: 'touch',
+                          overscrollBehavior: 'contain',
+                        }}
                       >
-                        <ChevronRight size={18} className="text-[#A67856]" />
-                      </button>
-                    )}
+                        {products.map((p, index) => {
+                          if (!p || !p._id) return null;
+                          const pricing = calculatePrice(p);
 
-                    {/* Left Arrow - Only show when scrolled, hidden on mobile */}
-                    {showLeftArrow && (
-                      <button
-                        onClick={() => scroll('left')}
-                        className="hidden md:block absolute left-0 top-1/2 -translate-y-1/2 -translate-x-12 z-10 carousel-arrow p-2 shadow-lg border border-[#E0CBB5]"
-                        aria-label="Scroll left"
-                      >
-                        <ChevronLeft size={24} className="text-[#A67856]" />
-                      </button>
-                    )}
+                          // Add delay class based on index for staggered animation
+                          const delayClass = index < 4
+                            ? `swipe-hint-animation-delay-${Math.min(index, 3)}`
+                            : '';
 
-                    <div
-                      ref={scrollContainerRef}
-                      className={`flex gap-0 md:gap-5 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${products.length === 1 ? 'justify-center' : ''} ${products.length < 4 ? 'md:justify-center' : 'md:justify-start'
-                        } ${showScrollHint ? 'scroll-hint-right' : ''} relative`}
-                      style={{
-                        scrollBehavior: 'smooth',
-                        WebkitOverflowScrolling: 'touch',
-                        overscrollBehavior: 'contain',
-                      }}
-                    >
-                      {products.map((p, index) => {
-                        if (!p || !p._id) return null;
-                        const pricing = calculatePrice(p);
-
-                        // Add delay class based on index for staggered animation
-                        const delayClass = index < 4
-                          ? `swipe-hint-animation-delay-${Math.min(index, 3)}`
-                          : '';
-
-                        return (
-                          <div
-                            key={p._id}
-                            className={`swipe-hint-animation ${delayClass} snap-start w-1/2 flex-shrink-0 px-1 md:w-[227px] md:px-0`}
-                          >
-                            <ProductCard
-                              product={p}
-                              pricing={pricing}
-                              index={index}
-                              onProductClick={() => handleProductClick(p)}
-                              onAddToCart={handleAddToCart}
-                            />
-                          </div>
-                        );
-                      })}
+                          return (
+                            <div
+                              key={p._id}
+                              className={`swipe-hint-animation ${delayClass} flex-shrink-0 md:w-[227px] md:px-0 ${window.innerWidth < 768
+                                ? `w-[calc(50vw-32px)] ${index % 2 === 0 ? 'snap-start' : 'snap-none'} ${index === products.length - 1 && index % 2 === 0 ? 'snap-center' : ''}`
+                                : ''
+                                }`}
+                            >
+                              <ProductCard
+                                product={p}
+                                pricing={pricing}
+                                index={index}
+                                onProductClick={() => handleProductClick(p)}
+                                onAddToCart={handleAddToCart}
+                              />
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
 
-                    {/* Right Arrow - Only show when there are more products, hidden on mobile */}
+                    {/* Right Arrow - Desktop */}
                     {showRightArrow && (
                       <button
                         onClick={() => scroll('right')}
-                        className="hidden md:block absolute right-0 top-1/2 -translate-y-1/2 translate-x-12 z-10 carousel-arrow p-2 shadow-lg border border-[#E0CBB5]"
+                        className="hidden md:block absolute right-0 top-1/2 -translate-y-1/2 translate-x-14 z-10 carousel-arrow px-5 py-3 shadow-md border border-[#E0CBB5] text-[#A67856] transition-all duration-200"
                         aria-label="Scroll right"
                       >
-                        <ChevronRight size={24} className="text-[#A67856]" />
+                        <ChevronRight size={24} />
                       </button>
                     )}
                   </div>
